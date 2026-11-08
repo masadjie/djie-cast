@@ -31,6 +31,7 @@
 <meta name="twitter:title" content="Djie Cast — Layar HP-mu, langsung di Mac">
 <meta name="twitter:description" content="Mirror &amp; kontrol HP Android dan iPhone dari Mac. Gratis &amp; open source.">
 <meta name="twitter:image" content="https://masadjie.github.io/djie-cast/assets/og.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoObject", "name": "Djie Cast 1.0 — mirror Android & iPhone di Mac", "description": "Video 30 detik: mirror dan kontrol Android, iPhone, file manager, emulator Android, dan remote desktop Mac ke Mac dengan Djie Cast.", "thumbnailUrl": "https://masadjie.github.io/djie-cast/assets/promo-poster.jpg", "uploadDate": "2026-11-09", "duration": "PT30S", "contentUrl": "https://masadjie.github.io/djie-cast/assets/promo.mp4", "inLanguage": "id"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Djie Cast", "alternateName": ["Djie Cast scrcpy GUI", "Djie Cast Mac"], "description": "Aplikasi macOS gratis & open source untuk mirror dan mengontrol HP Android dan iPhone dari Mac, mengelola file HP, menjalankan emulator Android, dan remote desktop antar Mac.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 14 Sonoma atau lebih baru", "softwareVersion": "1.0", "url": "https://masadjie.github.io/djie-cast/", "downloadUrl": "https://github.com/masadjie/djie-cast/releases", "image": "https://masadjie.github.io/djie-cast/assets/og.jpg", "screenshot": ["https://masadjie.github.io/djie-cast/assets/home-light.jpg", "https://masadjie.github.io/djie-cast/assets/android-light.jpg", "https://masadjie.github.io/djie-cast/assets/files-light.jpg"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "IDR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "author": {"@type": "Person", "name": "Adjie Kurniawan", "url": "https://github.com/masadjie"}, "sameAs": ["https://github.com/masadjie/djie-cast"], "inLanguage": ["id", "en"], "featureList": ["Mirror dan kontrol HP Android lewat USB atau Wi-Fi (scrcpy)", "Tampilkan layar iPhone/iPad lewat USB, iPhone Mirroring, AirPlay", "File manager Android dan galeri foto iPhone", "Emulator Android bawaan", "Remote Desktop Mac ke Mac dengan Tailscale bawaan", "Bisa dipakai untuk live streaming di OBS", "Info perangkat Android & iPhone: spesifikasi, baterai, penyimpanan", "Daftar aplikasi terinstal dan uninstall (Android & iPhone)"]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Apakah Djie Cast gratis?", "acceptedAnswer": {"@type": "Answer", "text": "Ya. Djie Cast gratis selamanya dan open source dengan lisensi MIT, tanpa iklan dan tanpa langganan."}}, {"@type": "Question", "name": "Bagaimana cara mirror HP Android ke Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Aktifkan USB Debugging di HP, colok kabel ke Mac, buka Djie Cast lalu klik Mulai Cast. Layar HP tampil di Mac dan bisa dikontrol dengan mouse dan keyboard."}}, {"@type": "Question", "name": "Apakah iPhone bisa ditampilkan di Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Bisa. Colok iPhone lewat kabel dan ketuk Percayai untuk menampilkan layar dan audio, atau gunakan iPhone Mirroring untuk kontrol penuh."}}, {"@type": "Question", "name": "Apakah perlu install scrcpy atau Android Studio?", "acceptedAnswer": {"@type": "Answer", "text": "Tidak. scrcpy dan adb sudah dibundel di dalam aplikasi."}}, {"@type": "Question", "name": "Mac apa saja yang didukung?", "acceptedAnswer": {"@type": "Answer", "text": "macOS 14 Sonoma atau lebih baru, Apple Silicon (M1–M4) dan Intel."}}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -241,6 +242,10 @@ section { padding-block: clamp(80px, 10vw, 130px) 0; }
 .shot { border-radius: 12px; overflow: hidden; background: var(--panel); aspect-ratio: 16 / 10; max-width: 100%;
   box-shadow: 0 34px 70px -32px rgba(18,20,43,.45), 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent); }
 .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.film { margin: 0; border-radius: 14px; overflow: hidden; background: #0b0c18; aspect-ratio: 16 / 9; max-width: 100%;
+  box-shadow: 0 34px 70px -32px rgba(18,20,43,.45), 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent); }
+.film video { display: block; width: 100%; height: 100%; object-fit: cover; background: #0b0c18; }
+@media (max-width: 640px) { .film { aspect-ratio: 9 / 16; max-width: 420px; margin-inline: auto; } }
 .wide-shot { margin-top: clamp(64px, 8vw, 110px); display: grid; gap: 18px; }
 .wide-shot figcaption { color: var(--ink-3); }
 .points { list-style: none; display: grid; gap: 0; margin-top: 26px; border-top: 1px solid var(--line); }
@@ -513,6 +518,22 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
         <div class="spec"><strong>2<small>platform</small></strong><span data-i18n="spec.plat">Android dan iPhone/iPad dalam satu app</span></div>
         <div class="spec"><strong>1<small data-i18n="spec.clickUnit">klik</small></strong><span data-i18n="spec.click">scrcpy &amp; adb sudah ada di dalam app</span></div>
       </div>
+    </div>
+  </section>
+
+  <section id="video">
+    <div class="wrap">
+      <div class="head">
+        <span class="label"><i class="dot"></i><span data-i18n="vid.label">Video 30 detik</span></span>
+        <h2 data-i18n="vid.title">Lihat Djie Cast bekerja.</h2>
+        <p data-i18n="vid.lead">Android, iPhone, file manager, emulator, dan remote desktop dalam setengah menit.</p>
+      </div>
+      <figure class="film">
+        <video controls playsinline preload="none" poster="assets/promo-poster.jpg" width="1920" height="1080" aria-label="Video promosi Djie Cast" data-i18n-aria="vid.aria">
+          <source src="assets/promo-9x16.mp4" type="video/mp4" media="(max-width: 640px)">
+          <source src="assets/promo.mp4" type="video/mp4">
+        </video>
+      </figure>
     </div>
   </section>
 
@@ -869,6 +890,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
 <script>
   // ---------- Language: Indonesian is written in the HTML; English lives here. ----------
   const EN = {
+    "vid.label": "30-second video", "vid.title": "See Djie Cast at work.", "vid.lead": "Android, iPhone, file manager, emulator and remote desktop in half a minute.", "vid.aria": "Djie Cast promo video",
     "nav.install": "Install", "nav.donate": "Donate",
     "and.k9": "Phone info", "and.v9": "Full specs, battery (health, temperature, cycles), storage, RAM, plus Restart & Power off.",
     "and.k10": "Apps", "and.v10": "See every installed app, uninstall in one click, or install an APK from your Mac.",
@@ -1088,6 +1110,10 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
   }
   copyFrom(document.getElementById("copy-cmd"), "cmd", null, "btn.copy");
   copyFrom(document.getElementById("copy-phone"), "phone", "081269494591", "btn.copyPhone");
+</script>
+<script>
+(() => { const v = document.querySelector('#video video');
+  if (v && matchMedia('(max-width: 640px)').matches) v.poster = 'assets/promo-poster-9x16.jpg'; })();
 </script>
 </body>
 </html>
