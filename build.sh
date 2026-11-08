@@ -11,13 +11,16 @@ APP="build/Djie Cast.app"
 
 # scrcpy tidak disimpan di git — unduh otomatis bila belum ada.
 [ -x vendor/scrcpy/scrcpy ] || ./scripts/fetch-scrcpy.sh
+# Tailscale bawaan (libtailscale) — butuh Go untuk build pertama kali.
+[ -f vendor/tailscale/libtailscale.a ] || ./scripts/build-tailscale.sh
+TS_FLAGS="-import-objc-header vendor/tailscale/tailscale.h -Lvendor/tailscale -ltailscale -framework CoreFoundation -framework Security -lresolv -Xlinker -dead_strip"
 rm -rf build
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" build/icon.iconset build/obj
 
 echo "→ Compile Apple Silicon (arm64)..."
-swiftc -O -parse-as-library -target arm64-apple-macos14 -o build/obj/DjieCast-arm64 Sources/*.swift
+swiftc -O -parse-as-library -target arm64-apple-macos14 $TS_FLAGS -o build/obj/DjieCast-arm64 Sources/*.swift
 echo "→ Compile Intel (x86_64)..."
-swiftc -O -parse-as-library -target x86_64-apple-macos14 -o build/obj/DjieCast-x86_64 Sources/*.swift
+swiftc -O -parse-as-library -target x86_64-apple-macos14 $TS_FLAGS -o build/obj/DjieCast-x86_64 Sources/*.swift
 lipo -create build/obj/DjieCast-arm64 build/obj/DjieCast-x86_64 -output "$APP/Contents/MacOS/DjieCast"
 
 echo "→ Icon..."
@@ -58,6 +61,7 @@ cp vendor/scrcpy/scrcpy vendor/scrcpy/adb "$APP/Contents/MacOS/"
 mkdir -p "$APP/Contents/Resources/scrcpy"
 cp vendor/scrcpy/scrcpy-server vendor/scrcpy/scrcpy.png vendor/scrcpy/disconnected.png \
    vendor/scrcpy/LICENSE vendor/scrcpy/VERSION "$APP/Contents/Resources/scrcpy/"
+cp vendor/tailscale/LICENSE "$APP/Contents/Resources/tailscale-LICENSE"
 
 cp Resources/qris.png "$APP/Contents/Resources/"
 

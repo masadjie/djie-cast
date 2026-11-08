@@ -25,3 +25,6 @@ SOFTWARE.
 Djie Cast bundles scrcpy (https://github.com/Genymobile/scrcpy) and adb,
 which are distributed under the Apache License 2.0. Their license text is
 included in the app at Contents/Resources/scrcpy/LICENSE.
+
+Djie Cast also links libtailscale (https://github.com/tailscale/libtailscale),
+distributed under the BSD 3-Clause License.

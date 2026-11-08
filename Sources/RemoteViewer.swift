@@ -54,6 +54,14 @@ final class RemoteViewerModel: ObservableObject {
 
     func connect(to found: Found, code: String) { connect(endpoint: found.endpoint, label: found.name, code: code) }
 
+    /// Connects to a Djie Cast Mac on the user's tailnet through the built-in Tailscale node.
+    func connect(tailnetPeer peer: TailnetModel.Peer, code: String) {
+        guard let port = TailnetModel.shared.openTunnel(to: peer.ip) else {
+            status = .failed("Tailscale belum siap. Aktifkan dan masuk dulu di panel Remote lewat internet."); return
+        }
+        connect(endpoint: .hostPort(host: "127.0.0.1", port: NWEndpoint.Port(rawValue: port)!), label: peer.name, code: code)
+    }
+
     func connect(address: String, code: String) {
         let trimmed = address.trimmingCharacters(in: .whitespaces)
         let parts = trimmed.split(separator: ":")

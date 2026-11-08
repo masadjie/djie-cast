@@ -30,11 +30,17 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 - **Preset kualitas** — Hemat / Seimbang / Maksimal / Kustom, plus audio, rekam layar, selalu di atas, dll.
 - **Tanpa install apa pun** — scrcpy & adb sudah dibundel di dalam app.
 
+### 📱 Emulator Android
+- **Pilih sendiri bahan yang diunduh**: mesin emulator dan versi Android (Google Play / Google APIs), langsung dari server resmi Google, dicek SHA-1.
+- **Buat emulator** (ponsel, ponsel kecil, tablet) dengan RAM, core, dan penyimpanan sesuai kebutuhan.
+- **Jalan cepat**: `-gpu host -accel on -cores N -no-boot-anim -qemu -m RAM`, Quick Boot, atau tanpa jendela.
+- Memakai lokasi SDK yang sama dengan Android Studio (`~/Library/Android/sdk`).
+
 ### 🖥️ Remote Desktop (Mac ke Mac)
 - **Kendalikan Mac lain** seperti AnyDesk: lihat layarnya, gerakkan mouse, ketik, scroll, dan pakai shortcut ⌘.
 - **Kode akses 6 angka** + koneksi **terenkripsi TLS**. Kode salah langsung ditolak.
 - **Mac terdeteksi otomatis** di jaringan yang sama, atau ketik alamat IP-nya.
-- **Beda jaringan**: pakai [Tailscale](https://tailscale.com) (gratis) dan ketik alamat 100.x.x.x.
+- **Lewat internet dengan Tailscale bawaan**: tidak perlu pasang app lain, cukup masuk akun Tailscale (gratis) yang sama di kedua Mac.
 - Mac yang dikontrol menampilkan panel merah **"Mac ini sedang dikontrol"** dengan tombol Putuskan.
 - Butuh izin **Perekaman Layar** dan **Aksesibilitas** di Mac yang dikontrol (ada panduannya di app).
 
@@ -73,7 +79,7 @@ cd djie-cast
 ```
 
 Hasil: `build/Djie Cast.app` dan file DMG di folder `build/`.
-Saat build pertama, `scripts/fetch-scrcpy.sh` otomatis mengunduh scrcpy resmi dan memverifikasi checksum SHA-256-nya.
+Saat build pertama, `scripts/fetch-scrcpy.sh` otomatis mengunduh scrcpy resmi (dicek SHA-256) dan `scripts/build-tailscale.sh` membangun libtailscale (butuh Go: `brew install go`).
 
 ### Struktur
 | File | Isi |
@@ -83,6 +89,9 @@ Saat build pertama, `scripts/fetch-scrcpy.sh` otomatis mengunduh scrcpy resmi da
 | `Sources/AndroidFiles.swift` | File manager Android |
 | `Sources/IOSCast.swift` | Cast iPhone/iPad |
 | `Sources/Remote*.swift` | Remote Desktop: protokol, host, viewer, halaman |
+| `Sources/Tailnet.swift` | Tailscale bawaan (libtailscale) |
+| `Sources/Emulator*.swift` | Emulator Android: katalog, unduh, AVD, jalankan |
+| `Sources/IOSFiles.swift` | File iPhone (ImageCaptureCore) |
 | `Sources/Donate.swift` | Halaman donasi |
 | `Sources/About.swift` | Halaman Tentang |
 | `Sources/UI.swift` | Komponen UI bersama |

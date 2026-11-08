@@ -3,18 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Djie Cast</title>
-<meta name="description" content="Djie Cast: aplikasi macOS gratis & open source untuk mirror, mengontrol, dan mengelola file HP Android & iPhone dari Mac. Tanpa terminal.">
+<title>Djie Cast — Mirror &amp; Kontrol HP Android dan iPhone dari Mac (Gratis)</title>
+<meta name="description" content="Aplikasi Mac gratis untuk mirror &amp; kontrol HP Android dan iPhone, kelola file HP, emulator Android, dan remote desktop. Berbasis scrcpy, tanpa terminal.">
+<meta name="keywords" content="scrcpy mac, scrcpy gui, mirror android ke mac, screen mirroring android mac, cast hp ke laptop, kontrol hp dari mac, iphone mirroring mac, emulator android mac, remote desktop mac, obs android, djie cast">
+<meta name="author" content="Adjie Kurniawan">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://masadjie.github.io/djie-cast/">
+<link rel="alternate" hreflang="id" href="https://masadjie.github.io/djie-cast/">
+<link rel="alternate" hreflang="en" href="https://masadjie.github.io/djie-cast/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://masadjie.github.io/djie-cast/">
 <meta name="theme-color" content="#4f45e6">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <link rel="alternate icon" type="image/png" href="assets/icon.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Djie Cast">
-<meta property="og:description" content="Mirror & kontrol HP Android dan iPhone dari Mac. Gratis & open source.">
+<meta property="og:site_name" content="Djie Cast">
+<meta property="og:locale" content="id_ID">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="Djie Cast — Layar HP-mu, langsung di Mac">
+<meta property="og:description" content="Mirror &amp; kontrol HP Android dan iPhone dari Mac. Gratis &amp; open source, tanpa terminal.">
 <meta property="og:url" content="https://masadjie.github.io/djie-cast/">
-<meta property="og:image" content="https://masadjie.github.io/djie-cast/assets/home-dark.jpg">
+<meta property="og:image" content="https://masadjie.github.io/djie-cast/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Djie Cast: aplikasi Mac untuk mirror dan kontrol HP Android dan iPhone">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Djie Cast — Layar HP-mu, langsung di Mac">
+<meta name="twitter:description" content="Mirror &amp; kontrol HP Android dan iPhone dari Mac. Gratis &amp; open source.">
+<meta name="twitter:image" content="https://masadjie.github.io/djie-cast/assets/og.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Djie Cast", "alternateName": ["Djie Cast scrcpy GUI", "Djie Cast Mac"], "description": "Aplikasi macOS gratis & open source untuk mirror dan mengontrol HP Android dan iPhone dari Mac, mengelola file HP, menjalankan emulator Android, dan remote desktop antar Mac.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 14 Sonoma atau lebih baru", "softwareVersion": "1.0 Beta 2", "url": "https://masadjie.github.io/djie-cast/", "downloadUrl": "https://github.com/masadjie/djie-cast/releases", "image": "https://masadjie.github.io/djie-cast/assets/og.jpg", "screenshot": ["https://masadjie.github.io/djie-cast/assets/home-light.jpg", "https://masadjie.github.io/djie-cast/assets/android-light.jpg", "https://masadjie.github.io/djie-cast/assets/files-light.jpg"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "IDR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "author": {"@type": "Person", "name": "Adjie Kurniawan", "url": "https://github.com/masadjie"}, "sameAs": ["https://github.com/masadjie/djie-cast"], "inLanguage": ["id", "en"], "featureList": ["Mirror dan kontrol HP Android lewat USB atau Wi-Fi (scrcpy)", "Tampilkan layar iPhone/iPad lewat USB, iPhone Mirroring, AirPlay", "File manager Android dan galeri foto iPhone", "Emulator Android bawaan", "Remote Desktop Mac ke Mac dengan Tailscale bawaan", "Bisa dipakai untuk live streaming di OBS"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Apakah Djie Cast gratis?", "acceptedAnswer": {"@type": "Answer", "text": "Ya. Djie Cast gratis selamanya dan open source dengan lisensi MIT, tanpa iklan dan tanpa langganan."}}, {"@type": "Question", "name": "Bagaimana cara mirror HP Android ke Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Aktifkan USB Debugging di HP, colok kabel ke Mac, buka Djie Cast lalu klik Mulai Cast. Layar HP tampil di Mac dan bisa dikontrol dengan mouse dan keyboard."}}, {"@type": "Question", "name": "Apakah iPhone bisa ditampilkan di Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Bisa. Colok iPhone lewat kabel dan ketuk Percayai untuk menampilkan layar dan audio, atau gunakan iPhone Mirroring untuk kontrol penuh."}}, {"@type": "Question", "name": "Apakah perlu install scrcpy atau Android Studio?", "acceptedAnswer": {"@type": "Answer", "text": "Tidak. scrcpy dan adb sudah dibundel di dalam aplikasi."}}, {"@type": "Question", "name": "Mac apa saja yang didukung?", "acceptedAnswer": {"@type": "Answer", "text": "macOS 14 Sonoma atau lebih baru, Apple Silicon (M1–M4) dan Intel."}}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400..700&family=Martian+Mono:wght@400..600&display=swap">
@@ -360,6 +378,16 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
 .chip { font: 500 12.5px/1 var(--f-mono); padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
 .chip.soft { color: var(--ink-3); border-style: dashed; }
 @media (max-width: 920px) { .live { grid-template-columns: minmax(0, 1fr); } }
+
+/* More tools */
+.tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.tool { padding: 24px 22px 6px 0; display: grid; gap: 8px; align-content: start; }
+.tool + .tool { border-left: 1px solid var(--line); padding-left: 22px; }
+.tool .ico { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; background: color-mix(in srgb, var(--signal) 12%, transparent); color: var(--signal); }
+.tool .ico svg { width: 19px; height: 19px; }
+.tool p { color: var(--ink-2); font-size: 15.5px; }
+@media (max-width: 920px) { .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tool:nth-child(3) { border-left: 0; padding-left: 0; } .tool:nth-child(n+3) { border-top: 1px solid var(--line); } }
+@media (max-width: 520px) { .tools { grid-template-columns: minmax(0, 1fr); } .tool + .tool { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); } }
 </style>
 </head>
 <body>
@@ -573,6 +601,37 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
     </div>
   </section>
 
+  <section id="lainnya">
+    <div class="wrap">
+      <div class="head">
+        <span class="label" data-i18n="more.label">Lebih dari sekadar cast</span>
+        <h2 data-i18n="more.title">Satu app untuk HP, emulator, dan Mac lain.</h2>
+      </div>
+      <div class="tools">
+        <div class="tool">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></span>
+          <h3 data-i18n="more.t1">File iPhone</h3>
+          <p data-i18n="more.p1">Buka galeri foto &amp; video iPhone/iPad lewat kabel, lalu unduh ke Mac satu per satu atau sekaligus.</p>
+        </div>
+        <div class="tool">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 6h4M9 18h6"/></svg></span>
+          <h3 data-i18n="more.t2">Emulator Android</h3>
+          <p data-i18n="more.p2">Pilih versi Android yang mau diunduh, buat emulator, lalu jalankan dengan GPU Mac dan akselerasi hardware.</p>
+        </div>
+        <div class="tool">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="13" height="10" rx="1.5"/><rect x="9" y="9" width="13" height="10" rx="1.5"/></svg></span>
+          <h3 data-i18n="more.t3">Remote Desktop</h3>
+          <p data-i18n="more.p3">Kendalikan Mac lain dengan kode akses 6 angka. Koneksi terenkripsi, bisa diputus kapan saja dari Mac tujuan.</p>
+        </div>
+        <div class="tool">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
+          <h3 data-i18n="more.t4">Lewat internet</h3>
+          <p data-i18n="more.p4">Tailscale sudah ada di dalam app. Masuk dengan akun gratis, lalu remote Mac dari jaringan mana pun.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="live">
     <div class="wrap live">
       <div class="copy-col">
@@ -712,6 +771,12 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
   // ---------- Language: Indonesian is written in the HTML; English lives here. ----------
   const EN = {
     "nav.install": "Install", "nav.donate": "Donate",
+    "more.label": "More than casting", "more.title": "One app for your phone, emulators, and other Macs.",
+    "more.t1": "iPhone files", "more.p1": "Open your iPhone/iPad photo & video library over a cable and download items to your Mac, one by one or all at once.",
+    "more.t2": "Android emulator", "more.p2": "Pick the Android versions you want to download, create emulators, and run them on your Mac's GPU with hardware acceleration.",
+    "more.t3": "Remote Desktop", "more.p3": "Control another Mac with a 6-digit access code. Encrypted, and the other Mac can end the session any time.",
+    "more.t4": "Over the internet", "more.p4": "Tailscale is built in. Sign in with a free account and reach your Macs from any network.",
+
     "live.label": "For live streaming", "live.title": "Put your phone screen on stream.",
     "live.lead": "Live streaming software on your Mac can capture the Djie Cast window. Great for live selling, app tutorials, or mobile gaming on stream.",
     "live.other": "+ any app with Window Capture",
@@ -786,8 +851,8 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
     "end.title": "Plug in. Click. Done.", "end.sub": "Free forever, no account and no ads. Found a problem or have a feature idea? Tell us on GitHub.",
     "rel.label": "Latest release", "rel.file": "File", "rel.sys": "System", "rel.sysv": "macOS 14 Sonoma or later", "rel.chip": "Chip", "rel.lic": "License", "rel.notes": "Release notes",
     "foot.license": "MIT License", "foot.releases": "All releases", "foot.bug": "Report a bug", "foot.scrcpy": "Built with scrcpy",
-    "_title": "Djie Cast",
-    "_desc": "Djie Cast: a free, open-source macOS app to mirror, control, and manage files on Android phones and iPhones from your Mac. No terminal needed."
+    "_title": "Djie Cast — Mirror & Control Android and iPhone from your Mac (Free)",
+    "_desc": "Djie Cast: a free, open-source Mac app to mirror, control, and manage files on Android phones and iPhones from your Mac. No terminal needed."
   };
   const ID = { "btn.copied": "Tersalin" };
   document.querySelectorAll("[data-i18n]").forEach(el => ID[el.dataset.i18n] = el.innerHTML);
@@ -812,6 +877,8 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
   }
 
   function detectLang() {
+    const q = new URLSearchParams(location.search).get("lang");
+    if (q === "en" || q === "id") return q;
     try { const saved = localStorage.getItem("djiecast-lang"); if (saved) return saved; } catch (e) {}
     const prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""];
     return prefs.some(l => /^(id|ms)\b/i.test(l)) ? "id" : "en";

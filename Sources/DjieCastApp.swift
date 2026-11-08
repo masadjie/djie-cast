@@ -36,7 +36,7 @@ enum Appearance: String, CaseIterable, Identifiable {
     }
 }
 
-enum Page: String, Hashable { case home, android, ios, files, iosFiles, remote, donate, about }
+enum Page: String, Hashable { case home, android, ios, files, iosFiles, emulator, remote, donate, about }
 
 /// Shared navigation so any view can jump to another page.
 @MainActor
@@ -76,6 +76,7 @@ struct MainView: View {
     @ObservedObject private var nav = Nav.shared
     @ObservedObject private var android = LauncherModel.shared
     @ObservedObject private var ios = IOSCastModel.shared
+    @ObservedObject private var emulator = EmulatorModel.shared
 
     var body: some View {
         NavigationSplitView {
@@ -90,6 +91,7 @@ struct MainView: View {
                 Section("Alat") {
                     sidebarRow(.files, "File Android", "folder.fill", Theme.files)
                     sidebarRow(.iosFiles, "File iPhone", "photo.on.rectangle.angled", Theme.ios)
+                    sidebarRow(.emulator, "Emulator Android", "apps.iphone", Theme.emulator, badge: emulator.running.count)
                     sidebarRow(.remote, "Remote Desktop", "display.2", Theme.remote)
                 }
                 Section("Komunitas") {
@@ -108,6 +110,7 @@ struct MainView: View {
                 case .ios: IOSCastView()
                 case .files: AndroidFilesView()
                 case .iosFiles: IOSFilesView()
+                case .emulator: EmulatorView()
                 case .remote: RemoteDesktopView()
                 case .donate: DonateView()
                 case .about: AboutView()
@@ -138,6 +141,7 @@ struct MainView: View {
         case .ios: return "iPhone & iPad"
         case .files: return "File Android"
         case .iosFiles: return "File iPhone"
+        case .emulator: return "Emulator Android"
         case .remote: return "Remote Desktop"
         case .donate: return "Donasi"
         case .about: return "Tentang"
@@ -454,7 +458,13 @@ struct DjieCastApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        MainActor.assumeIsolated { RemoteSelfTest.runIfRequested() }
+        MainActor.assumeIsolated {
+            RemoteSelfTest.runIfRequested(); EmulatorSelfTest.runIfRequested(); RemoteSelfTest.runTailnetIfRequested()
+            let env = ProcessInfo.processInfo.environment
+            if env["DJIE_REMOTE_SELFTEST"] == nil && env["DJIE_EMU_SELFTEST"] == nil && env["DJIE_TAILNET_SELFTEST"] == nil {
+                TailnetModel.shared.autoStart()
+            }
+        }
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationWillTerminate(_ notification: Notification) {

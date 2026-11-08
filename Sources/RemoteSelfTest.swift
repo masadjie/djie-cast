@@ -5,6 +5,24 @@ import AppKit
 /// synthetic screen (no permissions, no input injection), prints results and quits.
 @MainActor
 enum RemoteSelfTest {
+    static func runTailnetIfRequested() {
+        guard ProcessInfo.processInfo.environment["DJIE_TAILNET_SELFTEST"] != nil else { return }
+        Task {
+            let t = TailnetModel.shared
+            print("hostname:", TailnetModel.hostname)
+            t.start()
+            for i in 0..<30 {
+                try? await Task.sleep(for: .seconds(1))
+                if case .needsLogin(let url) = t.state { print("STATE needsLogin after \(i + 1)s, url host:", url.host ?? "?"); break }
+                if case .failed(let m) = t.state { print("STATE failed:", m); break }
+            }
+            print("final state:", t.state)
+            t.stop(forget: true)
+            print("stopped, state dir empty:", ((try? FileManager.default.contentsOfDirectory(atPath: TailnetModel.stateDir.path)) ?? []).isEmpty)
+            exit(0)
+        }
+    }
+
     static func runIfRequested() {
         guard ProcessInfo.processInfo.environment["DJIE_REMOTE_SELFTEST"] != nil else { return }
         Task { await run(); exit(0) }

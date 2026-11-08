@@ -8,6 +8,8 @@ extension Theme {
 struct RemoteDesktopView: View {
     @ObservedObject var host = RemoteHostModel.shared
     @ObservedObject var viewer = RemoteViewerModel.shared
+    @ObservedObject var tailnet = TailnetModel.shared
+    @State private var tailPeer: TailnetModel.Peer?
     @AppStorage("remoteLastAddress") private var address = ""
     @State private var code = ""
     @State private var selected: RemoteViewerModel.Found?
@@ -29,7 +31,7 @@ struct RemoteDesktopView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .appearIn(0.08)
 
-                tips.appearIn(0.16)
+                internetPanel.appearIn(0.16)
             }
             .padding(28)
         }
@@ -186,7 +188,7 @@ struct RemoteDesktopView: View {
                     } else {
                         ForEach(viewer.found) { f in
                             Button {
-                                selected = f; address = ""
+                                selected = f; address = ""; tailPeer = nil
                             } label: {
                                 HStack(spacing: 10) {
                                     Image(systemName: "desktopcomputer").foregroundStyle(Theme.remote[1])
@@ -206,9 +208,37 @@ struct RemoteDesktopView: View {
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.85), value: viewer.found)
 
+                if tailnet.ip != nil {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("LEWAT INTERNET · TAILSCALE").font(.system(size: 10.5, weight: .medium, design: .monospaced)).kerning(1).foregroundStyle(.secondary)
+                        if tailnet.peers.isEmpty {
+                            Text("Belum ada Mac lain dengan Djie Cast di akun Tailscale ini.").font(.callout).foregroundStyle(.secondary)
+                        }
+                        ForEach(tailnet.peers) { p in
+                            Button { tailPeer = p; selected = nil; address = "" } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "globe").foregroundStyle(Theme.remote[1])
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        Text(p.name).font(.callout.weight(.medium))
+                                        Text(p.ip).font(.caption.monospaced()).foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Text(p.online ? "online" : "offline").font(.caption).foregroundStyle(p.online ? Theme.live : .secondary)
+                                    if tailPeer == p { Image(systemName: "checkmark").foregroundStyle(Theme.remote[1]) }
+                                }
+                                .padding(.horizontal, 10).padding(.vertical, 8)
+                                .background(tailPeer == p ? Theme.remote[0].opacity(0.1) : Color.primary.opacity(0.03), in: RoundedRectangle(cornerRadius: 8))
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(!p.online)
+                        }
+                    }
+                }
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("ATAU KETIK ALAMAT").font(.system(size: 10.5, weight: .medium, design: .monospaced)).kerning(1).foregroundStyle(.secondary)
-                    field("network", "192.168.1.20 atau 100.x.x.x", text: Binding(get: { address }, set: { address = $0; if !$0.isEmpty { selected = nil } }))
+                    field("network", "192.168.1.20 atau 100.x.x.x", text: Binding(get: { address }, set: { address = $0; if !$0.isEmpty { selected = nil; tailPeer = nil } }))
                     field("key", "Kode 6 angka dari Mac tujuan", text: $code)
                 }
 
@@ -220,7 +250,7 @@ struct RemoteDesktopView: View {
                     }
                 }
                 .buttonStyle(GradientButtonStyle(colors: Theme.remote))
-                .disabled((selected == nil && address.isEmpty) || code.filter(\.isNumber).count != 6)
+                .disabled((selected == nil && tailPeer == nil && address.isEmpty) || code.filter(\.isNumber).count != 6)
                 .keyboardShortcut(.defaultAction)
 
                 switch viewer.status {
@@ -251,31 +281,65 @@ struct RemoteDesktopView: View {
 
     private func connect() {
         if let selected { viewer.connect(to: selected, code: code) }
+        else if let tailPeer { viewer.connect(tailnetPeer: tailPeer, code: code) }
         else { viewer.connect(address: address, code: code) }
     }
 
-    // MARK: Tips
+    // MARK: Internet (built-in Tailscale)
 
-    private var tips: some View {
+    private var internetPanel: some View {
         Panel(padding: 20) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Beda jaringan? Pakai Tailscale (gratis)").font(.headline)
-                Text("Pasang Tailscale di kedua Mac dan masuk dengan akun yang sama. Mac tujuan akan punya alamat 100.x.x.x yang bisa diketik di kolom alamat, dari mana pun.")
-                    .font(.callout).foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: 18) {
-                    Label("Koneksi terenkripsi TLS dengan kode akses", systemImage: "lock.fill")
-                    Label("Satu pengontrol dalam satu waktu", systemImage: "person.fill")
-                    Label("Bisa diputus kapan saja dari Mac tujuan", systemImage: "xmark.circle")
+            HStack(alignment: .top, spacing: 16) {
+                IconBadge(icon: "globe", colors: Theme.remote, size: 40)
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("Remote lewat internet").font(.headline)
+                        Pill(text: "Tailscale bawaan", color: Theme.remote[1])
+                        Spacer()
+                    }
+                    switch tailnet.state {
+                    case .off:
+                        Text("Kendalikan Mac dari mana saja tanpa memasang aplikasi lain. Masuk dengan akun Tailscale (gratis) yang sama di kedua Mac.")
+                            .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                        Button { tailnet.start() } label: { Label("Aktifkan & masuk", systemImage: "person.badge.key") }
+                            .buttonStyle(GradientButtonStyle(colors: Theme.remote)).fixedSize()
+                    case .starting:
+                        HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Menghubungkan ke Tailscale…").font(.callout).foregroundStyle(.secondary) }
+                    case .needsLogin(let url):
+                        Text("Selesaikan login di browser. Pakai akun yang sama di semua Mac yang ingin saling terhubung.")
+                            .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                        HStack(spacing: 10) {
+                            Button { NSWorkspace.shared.open(url) } label: { Label("Buka halaman login", systemImage: "arrow.up.forward.square") }
+                                .buttonStyle(GradientButtonStyle(colors: Theme.remote)).fixedSize()
+                            Button("Batal") { tailnet.stop() }.buttonStyle(.borderless)
+                        }
+                    case .connected(let ip):
+                        HStack(spacing: 8) {
+                            PulseDot()
+                            Text("Terhubung\(tailnet.account.map { " sebagai \($0)" } ?? "")").font(.callout.weight(.medium))
+                        }
+                        LabeledContent("IP internet Mac ini") {
+                            Text(ip).font(.callout.monospaced()).textSelection(.enabled)
+                        }
+                        .font(.callout)
+                        Text("Mac lain cukup pilih “\(NetInfo.macName)” di daftar Lewat Internet, lalu masukkan kode akses.")
+                            .font(.caption).foregroundStyle(.secondary)
+                        HStack(spacing: 14) {
+                            Button("Matikan") { tailnet.stop() }.buttonStyle(.borderless)
+                            Button("Keluar akun") { tailnet.stop(forget: true) }.buttonStyle(.borderless).foregroundStyle(.red)
+                        }
+                    case .failed(let msg):
+                        Label(msg, systemImage: "exclamationmark.triangle.fill").font(.callout).foregroundStyle(.orange)
+                        Button("Coba lagi") { tailnet.stop(); tailnet.start() }.buttonStyle(SoftButtonStyle(tint: Theme.remote[1])).fixedSize()
+                    }
+                    HStack(spacing: 18) {
+                        Label("Sesi tetap terenkripsi TLS + kode akses", systemImage: "lock.fill")
+                        Label("Tanpa server pihak Djie Cast", systemImage: "server.rack")
+                    }
+                    .font(.caption).foregroundStyle(.tertiary)
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                Button { NSWorkspace.shared.open(URL(string: "https://tailscale.com/download/mac")!) } label: {
-                    Label("Unduh Tailscale", systemImage: "arrow.up.forward.square")
-                }
-                .buttonStyle(SoftButtonStyle(tint: Theme.remote[1]))
-                .fixedSize()
             }
         }
+        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: tailnet.state)
     }
 }
