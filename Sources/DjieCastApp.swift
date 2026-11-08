@@ -36,7 +36,7 @@ enum Appearance: String, CaseIterable, Identifiable {
     }
 }
 
-enum Page: String, Hashable { case home, android, ios, files, remote, donate, about }
+enum Page: String, Hashable { case home, android, ios, files, iosFiles, remote, donate, about }
 
 /// Shared navigation so any view can jump to another page.
 @MainActor
@@ -89,6 +89,7 @@ struct MainView: View {
                 }
                 Section("Alat") {
                     sidebarRow(.files, "File Android", "folder.fill", Theme.files)
+                    sidebarRow(.iosFiles, "File iPhone", "photo.on.rectangle.angled", Theme.ios)
                     sidebarRow(.remote, "Remote Desktop", "display.2", Theme.remote)
                 }
                 Section("Komunitas") {
@@ -106,6 +107,7 @@ struct MainView: View {
                 case .android: AndroidCastView()
                 case .ios: IOSCastView()
                 case .files: AndroidFilesView()
+                case .iosFiles: IOSFilesView()
                 case .remote: RemoteDesktopView()
                 case .donate: DonateView()
                 case .about: AboutView()
@@ -135,6 +137,7 @@ struct MainView: View {
         case .android: return "Android"
         case .ios: return "iPhone & iPad"
         case .files: return "File Android"
+        case .iosFiles: return "File iPhone"
         case .remote: return "Remote Desktop"
         case .donate: return "Donasi"
         case .about: return "Tentang"
