@@ -122,6 +122,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .lang button { font: 500 11.5px/1 var(--f-mono); letter-spacing: .06em; border: 0; background: none; color: var(--ink-3); padding: 7px 9px; border-radius: 5px; cursor: pointer; }
 .lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .nav-end { display: flex; align-items: center; gap: 10px; }
+.theme-btn { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); cursor: pointer; }
+.theme-btn:hover { color: var(--ink); border-color: var(--ink-3); }
+.theme-btn svg { width: 18px; height: 18px; }
 
 /* Hero */
 .hero { padding-block: clamp(48px, 8vw, 96px) 40px; position: relative; }
@@ -398,6 +401,13 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
         <button type="button" data-lang="id" aria-pressed="true">ID</button>
         <button type="button" data-lang="en" aria-pressed="false">EN</button>
       </div>
+      <button class="theme-btn" type="button" id="theme-btn" aria-label="Tema: ikuti sistem" title="Tema: ikuti sistem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <g class="ic-system"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor"/></g>
+          <g class="ic-light" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g>
+          <g class="ic-dark" hidden><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></g>
+        </svg>
+      </button>
       <a class="btn btn-line btn-sm" href="https://github.com/masadjie/djie-cast" target="_blank" rel="noopener" aria-label="GitHub">
         <svg><use href="#i-gh"/></svg><span>GitHub</span>
       </a>
@@ -808,6 +818,39 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
   }
   applyLang(detectLang(), false);
   document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => applyLang(b.dataset.lang, true)));
+
+  // ---------- Theme: system → light → dark, remembered per visitor ----------
+  const THEMES = ["system", "light", "dark"];
+  const themeLabel = { id: { system: "ikuti sistem", light: "terang", dark: "gelap" }, en: { system: "follow system", light: "light", dark: "dark" } };
+  const darkMQ = matchMedia("(prefers-color-scheme: dark)");
+  let theme = "system";
+  try { theme = localStorage.getItem("djiecast-theme") || "system"; } catch (e) {}
+
+  function applyTheme() {
+    const root = document.documentElement;
+    if (theme === "system") root.removeAttribute("data-theme"); else root.dataset.theme = theme;
+    const dark = theme === "dark" || (theme === "system" && darkMQ.matches);
+    // Screenshots follow the chosen theme, not only the OS setting.
+    document.querySelectorAll("picture").forEach(pic => {
+      const src = pic.querySelector("source"), img = pic.querySelector("img");
+      if (!src || !img) return;
+      img.dataset.light ||= img.getAttribute("src");
+      src.media = "not all";
+      img.src = dark ? src.srcset : img.dataset.light;
+    });
+    const btn = document.getElementById("theme-btn");
+    btn.querySelectorAll("g").forEach(g => g.hidden = !g.classList.contains("ic-" + theme));
+    const label = (lang === "en" ? "Theme: " : "Tema: ") + themeLabel[lang][theme];
+    btn.setAttribute("aria-label", label); btn.title = label;
+  }
+  document.getElementById("theme-btn").addEventListener("click", () => {
+    theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+    try { localStorage.setItem("djiecast-theme", theme); } catch (e) {}
+    applyTheme();
+  });
+  darkMQ.addEventListener("change", applyTheme);
+  applyTheme();
+  document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", applyTheme));
 
   // ---------- Newest release (betas included) for the download buttons ----------
   fetch("https://api.github.com/repos/masadjie/djie-cast/releases?per_page=1")
