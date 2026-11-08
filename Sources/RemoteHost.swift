@@ -242,13 +242,32 @@ final class RemoteHostModel: ObservableObject {
     private var lastConfig: Data?
     private var hud: ControlledHUD?
 
+    /// Set after the user asks for Screen Recording; macOS only applies it after a relaunch.
+    @Published var screenRequested = false
+
     func refreshPermissions() {
-        screenAllowed = CGPreflightScreenCaptureAccess()
         inputAllowed = InputInjector.trusted
         addresses = NetInfo.ipv4Addresses()
+        if CGPreflightScreenCaptureAccess() { screenAllowed = true; return }
+        // The preflight value is cached per launch; asking ScreenCaptureKit reflects the live setting.
+        Task {
+            let ok = (try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)) != nil
+            await MainActor.run { self.screenAllowed = ok }
+        }
+    }
+
+    /// Relaunch so a freshly granted Screen Recording permission takes effect.
+    func relaunch() {
+        let path = Bundle.main.bundlePath
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/bin/sh")
+        p.arguments = ["-c", "sleep 1; /usr/bin/open -n \"\(path)\""]
+        try? p.run()
+        NSApp.terminate(nil)
     }
 
     func requestScreenPermission() {
+        screenRequested = true
         if !CGRequestScreenCaptureAccess() {
             NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!)
         }

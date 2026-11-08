@@ -35,9 +35,13 @@ struct RemoteDesktopView: View {
             }
             .padding(28)
         }
-        .onAppear {
-            host.refreshPermissions()
-            viewer.startBrowsing()
+        .onAppear { viewer.startBrowsing() }
+        .task {
+            // Keep the permission marks live while this page is open.
+            while !Task.isCancelled {
+                host.refreshPermissions()
+                try? await Task.sleep(for: .seconds(1.5))
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             host.refreshPermissions()
@@ -124,6 +128,17 @@ struct RemoteDesktopView: View {
                     Text("IZIN MACOS").font(.system(size: 10.5, weight: .medium, design: .monospaced)).kerning(1).foregroundStyle(.secondary)
                     permissionRow("Perekaman Layar", detail: "Agar layar Mac ini bisa dikirim", ok: host.screenAllowed,
                                   action: host.requestScreenPermission)
+                    if host.screenRequested && !host.screenAllowed {
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.clockwise.circle").foregroundStyle(.secondary)
+                            Text("Sudah dinyalakan di Pengaturan Sistem? macOS butuh Djie Cast dibuka ulang.")
+                                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                            Spacer()
+                            Button("Buka ulang Djie Cast") { host.relaunch() }
+                                .buttonStyle(SoftButtonStyle(tint: Theme.remote[1])).fixedSize()
+                        }
+                        .padding(.leading, 28)
+                    }
                     permissionRow("Aksesibilitas", detail: "Agar mouse & keyboard dari jauh bisa dipakai", ok: host.inputAllowed,
                                   action: host.requestInputPermission)
                 }
@@ -160,10 +175,21 @@ struct RemoteDesktopView: View {
                 Text(detail).font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            if !ok {
+            if ok {
+                Label("Diizinkan", systemImage: "checkmark")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.live)
+                    .padding(.horizontal, 10).padding(.vertical, 5)
+                    .background(Theme.live.opacity(0.12), in: Capsule())
+                    .transition(.scale.combined(with: .opacity))
+            } else {
+                Text("Belum").font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(Color.orange.opacity(0.12), in: Capsule())
                 Button("Beri izin", action: action).buttonStyle(SoftButtonStyle(tint: Theme.remote[1])).fixedSize()
             }
         }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: ok)
     }
 
     // MARK: Viewer side
