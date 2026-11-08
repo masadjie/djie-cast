@@ -280,9 +280,12 @@ details p { color: var(--ink-2); padding-bottom: 22px; max-width: 62ch; }
 
 /* Donate */
 .donate { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
-.standee { position: relative; max-width: 360px; justify-self: center; }
-.standee img { border-radius: 10px; box-shadow: 0 40px 80px -30px rgba(18,20,43,.5), 0 0 0 1px rgba(18,20,43,.08); transform: rotate(-2.5deg); background: #fff; }
-.standee figcaption { margin-top: 22px; color: var(--ink-3); text-align: center; }
+.standee { justify-self: center; width: min(100%, 340px); display: grid; gap: 14px; }
+.qris-card { background: #fff; border-radius: 18px; padding: 14px; border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: 0 24px 50px -28px rgba(18,20,43,.45); }
+.qris-card img { width: 100%; height: auto; border-radius: 8px; }
+.standee figcaption { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--ink-3); padding-inline: 4px; }
+.standee figcaption b { color: var(--ink-2); font-weight: 500; }
 .donate .copy-col { gap: 20px; }
 .donate ol { list-style: none; counter-reset: d; display: grid; gap: 10px; }
 .donate ol li { counter-increment: d; display: grid; grid-template-columns: 28px minmax(0, 1fr); color: var(--ink-2); }
@@ -294,8 +297,18 @@ details p { color: var(--ink-2); padding-bottom: 22px; max-width: 62ch; }
 
 /* Closing + footer */
 .closing { padding-block: clamp(90px, 12vw, 150px); }
-.closing .wrap { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 32px; align-items: center; }
-.closing svg { width: 96px; height: 96px; filter: drop-shadow(0 18px 30px rgba(79,69,230,.35)); }
+.closing .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+.closing-main { display: grid; gap: 18px; justify-items: start; }
+.closing-main .mark { width: 72px; height: 72px; filter: drop-shadow(0 14px 24px rgba(79,69,230,.35)); }
+.closing-main p { color: var(--ink-2); max-width: 40ch; }
+.release { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.release-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 20px 22px 16px; border-bottom: 1px solid var(--line); }
+.release-head strong { font: 800 26px/1 var(--f-display); font-stretch: 112%; letter-spacing: -.01em; }
+.release dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 18px; padding: 18px 22px; margin: 0; font-size: 15px; }
+.release dt { font: 500 11px/1.9 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.release dd { margin: 0; color: var(--ink); }
+.release-actions { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 22px 22px; }
+.release-actions .btn { flex: 1 1 auto; justify-content: center; }
 footer { border-top: 1px solid var(--line); padding-block: 28px 40px; color: var(--ink-3); font-size: 14px; }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 14px 28px; justify-content: space-between; }
 footer nav { display: flex; flex-wrap: wrap; gap: 22px; }
@@ -620,8 +633,10 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
   <section id="donasi">
     <div class="wrap donate">
       <figure class="standee">
-        <img src="assets/qris.png" alt="Kode QRIS untuk donasi Djie Cast atas nama Ruang Kiitaa" data-i18n-alt="alt.qris" width="874" height="1240" loading="lazy">
-        <figcaption class="mono">Ruang Kiitaa · NMID ID1026525837765</figcaption>
+        <div class="qris-card">
+          <img src="assets/qris.png" alt="Kode QRIS untuk donasi Djie Cast atas nama Ruang Kiitaa" data-i18n-alt="alt.qris" width="874" height="1240" loading="lazy">
+        </div>
+        <figcaption class="mono"><b>Ruang Kiitaa</b><span>NMID ID1026525837765</span></figcaption>
       </figure>
       <div class="copy-col">
         <span class="label" data-i18n="don.label">Donasi</span>
@@ -646,14 +661,27 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
 
   <section class="closing">
     <div class="wrap">
-      <svg aria-hidden="true"><use href="#logo"/></svg>
-      <div>
+      <div class="closing-main">
+        <svg class="mark" aria-hidden="true"><use href="#logo"/></svg>
         <h2 data-i18n="end.title">Colok. Klik. Selesai.</h2>
-        <p class="muted" style="margin-top:10px"><span data-i18n="end.sub">Djie Cast untuk macOS 14 ke atas.</span> <span class="js-ver2">1.0 Beta</span></p>
+        <p data-i18n="end.sub">Gratis selamanya, tanpa akun dan tanpa iklan. Kalau ada masalah atau ide fitur, ceritakan lewat GitHub.</p>
       </div>
-      <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.0-beta/DjieCast-1.0-beta.dmg">
-        <svg><use href="#i-apple"/></svg>Download
-      </a>
+      <div class="release">
+        <div class="release-head">
+          <span class="label" data-i18n="rel.label">Rilis terbaru</span>
+          <strong class="js-ver2">1.0 Beta</strong>
+        </div>
+        <dl>
+          <dt data-i18n="rel.file">File</dt><dd class="js-size">DMG 20 MB</dd>
+          <dt data-i18n="rel.sys">Sistem</dt><dd data-i18n="rel.sysv">macOS 14 Sonoma atau lebih baru</dd>
+          <dt data-i18n="rel.chip">Chip</dt><dd>Apple Silicon &amp; Intel</dd>
+          <dt data-i18n="rel.lic">Lisensi</dt><dd>MIT · open source</dd>
+        </dl>
+        <div class="release-actions">
+          <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.0-beta/DjieCast-1.0-beta.dmg"><svg><use href="#i-apple"/></svg><span data-i18n="cta.download">Download untuk Mac</span></a>
+          <a class="btn btn-line" href="https://github.com/masadjie/djie-cast/releases" target="_blank" rel="noopener" data-i18n="rel.notes">Catatan rilis</a>
+        </div>
+      </div>
     </div>
   </section>
 </main>
@@ -745,7 +773,8 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
     "don.s2": "Scan the QRIS code and enter any amount.",
     "don.s3": "Send your transfer receipt to the number below.",
     "don.confirm": "Confirm your donation",
-    "end.title": "Plug in. Click. Done.", "end.sub": "Djie Cast for macOS 14 and later.",
+    "end.title": "Plug in. Click. Done.", "end.sub": "Free forever, no account and no ads. Found a problem or have a feature idea? Tell us on GitHub.",
+    "rel.label": "Latest release", "rel.file": "File", "rel.sys": "System", "rel.sysv": "macOS 14 Sonoma or later", "rel.chip": "Chip", "rel.lic": "License", "rel.notes": "Release notes",
     "foot.license": "MIT License", "foot.releases": "All releases", "foot.bug": "Report a bug", "foot.scrcpy": "Built with scrcpy",
     "_title": "Djie Cast",
     "_desc": "Djie Cast: a free, open-source macOS app to mirror, control, and manage files on Android phones and iPhones from your Mac. No terminal needed."
