@@ -225,6 +225,25 @@ final class LauncherModel: ObservableObject {
         }
     }
 
+    enum Orientation { case portrait, landscape, auto }
+
+    /// Rotates the phone itself (the cast window follows automatically).
+    /// Apps that force an orientation (e.g. some games) may ignore this.
+    func setOrientation(_ serial: String, _ o: Orientation) {
+        guard let adb = adbPath, !Demo.enabled else { return }
+        let cmd: String
+        switch o {
+        case .portrait:
+            cmd = "settings put system accelerometer_rotation 0; settings put system user_rotation 0; cmd window user-rotation lock 0 >/dev/null 2>&1"
+        case .landscape:
+            cmd = "settings put system accelerometer_rotation 0; settings put system user_rotation 1; cmd window user-rotation lock 1 >/dev/null 2>&1"
+        case .auto:
+            cmd = "cmd window user-rotation free >/dev/null 2>&1; settings put system accelerometer_rotation 1"
+        }
+        Task { _ = await Tools.run(adb, ["-s", serial, "shell", cmd]) }
+        append("↻ Orientasi \(serial): \(o)\n")
+    }
+
     func stop(_ serial: String) {
         running[serial]?.terminate()
     }
@@ -272,6 +291,7 @@ struct AndroidCastView: View {
     @AppStorage("fullscreen") var fullscreen = false
     @AppStorage("showTouches") var showTouches = false
     @AppStorage("borderless") var borderless = false
+    @AppStorage("displayOrientation") var displayOrientation = 0
     @AppStorage("noControl") var noControl = false
     @AppStorage("record") var record = false
     @AppStorage("extraArgs") var extraArgs = ""
@@ -290,6 +310,7 @@ struct AndroidCastView: View {
         if fullscreen { a.append("--fullscreen") }
         if showTouches { a.append("--show-touches") }
         if borderless { a.append("--window-borderless") }
+        if displayOrientation != 0 { a.append("--display-orientation=\(displayOrientation)") }
         if noControl { a.append("--no-control") }
         if record {
             let df = DateFormatter()
@@ -384,6 +405,7 @@ struct AndroidCastView: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), alignment: .leading)], alignment: .leading, spacing: 8) {
                     ForEach([("⌘ B", "Kembali"), ("⌘ H", "Home"), ("⌘ S", "Aplikasi terbaru"),
                              ("⌘ ↑ / ↓", "Volume"), ("⌘ P", "Power"), ("⌘ F", "Fullscreen"),
+                             ("⌘ R", "Putar layar HP"), ("⌘ ← / →", "Putar jendela"),
                              ("⌘ V", "Tempel teks ke HP"), ("Klik kanan", "Kembali")], id: \.0) { k, v in
                         HStack(spacing: 8) {
                             Text(k)
@@ -513,6 +535,12 @@ struct AndroidCastView: View {
                 Toggle("Selalu di atas", isOn: $alwaysOnTop)
                 Toggle("Fullscreen", isOn: $fullscreen)
                 Toggle("Tanpa bingkai jendela", isOn: $borderless)
+                Picker("Putar tampilan", selection: $displayOrientation) {
+                    Text("Normal").tag(0)
+                    Text("90° kanan").tag(90)
+                    Text("180°").tag(180)
+                    Text("90° kiri").tag(270)
+                }
             } header: { Label("Jendela", systemImage: "macwindow") }
 
             Section {
@@ -646,6 +674,20 @@ struct ControlBar: View {
                 .help(k.help)
             }
             Divider().frame(height: 16)
+            Menu {
+                Button("Portrait", systemImage: "rectangle.portrait") { model.setOrientation(serial, .portrait) }
+                Button("Landscape", systemImage: "rectangle") { model.setOrientation(serial, .landscape) }
+                Divider()
+                Button("Putar otomatis", systemImage: "arrow.triangle.2.circlepath") { model.setOrientation(serial, .auto) }
+            } label: {
+                Image(systemName: "rectangle.portrait.rotate")
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(maxWidth: .infinity, minHeight: 28)
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .help("Putar layar: portrait / landscape")
+            .tint(.secondary)
             Button { model.screenshot(serial) } label: {
                 Image(systemName: "camera.fill")
                     .font(.system(size: 12, weight: .semibold))

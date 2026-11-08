@@ -20,12 +20,13 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 - **Mirror + kontrol penuh** — klik, scroll, drag & ketik langsung dari Mac, tanpa menyentuh HP.
 - **USB atau Wi-Fi** — aktifkan mode wireless dengan satu klik.
 - **Kontrol cepat** — Back, Home, Recent, volume, power & screenshot.
+- **Rotasi layar** — paksa HP ke portrait / landscape / otomatis, atau putar tampilan jendela (⌘R, ⌘← / ⌘→).
 - **File Android** — jelajahi, unduh, unggah (drag & drop), ganti nama & hapus file di HP.
 - **Preset kualitas** — Hemat / Seimbang / Maksimal / Kustom, plus audio, rekam layar, selalu di atas, dll.
 - **Tanpa install apa pun** — scrcpy & adb sudah dibundel di dalam app.
 
 ### iPhone & iPad
-- **USB** — tampilkan layar + audio langsung di Mac (hanya lihat).
+- **USB** — tampilkan layar + audio langsung di Mac (hanya lihat). Jendela mengikuti rotasi iPhone otomatis, bisa diputar manual (⌘← / ⌘→).
 - **iPhone Mirroring** — kontrol penuh lewat fitur resmi Apple (macOS Sequoia + iOS 18).
 - **AirPlay** — mirror wireless.
 

@@ -62,6 +62,10 @@ final class IOSCastModel: ObservableObject {
         mirroring.insert(device.uniqueID)
     }
 
+    func rotate(_ device: AVCaptureDevice, by degrees: Int) {
+        windows[device.uniqueID]?.rotate(by: degrees)
+    }
+
     func stop(_ device: AVCaptureDevice) {
         windows[device.uniqueID]?.window.close()
     }
@@ -77,13 +81,62 @@ final class IOSCastModel: ObservableObject {
     }
 }
 
-/// A plain window that shows the iPhone screen (and plays its audio).
+/// Hosts the preview layer and rotates it in 90° steps.
+final class RotatingPreviewView: NSView {
+    let preview: AVCaptureVideoPreviewLayer
+    var angle = 0 { didSet { needsLayout = true } }   // clockwise degrees: 0, 90, 180, 270
+
+    init(session: AVCaptureSession) {
+        preview = AVCaptureVideoPreviewLayer(session: session)
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.black.cgColor
+        preview.videoGravity = .resizeAspect
+        layer?.addSublayer(preview)
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func layout() {
+        super.layout()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        let sideways = angle % 180 != 0
+        preview.bounds = CGRect(x: 0, y: 0,
+                                width: sideways ? bounds.height : bounds.width,
+                                height: sideways ? bounds.width : bounds.height)
+        preview.position = CGPoint(x: bounds.midX, y: bounds.midY)
+        // Layer space is flipped vs. user expectation: negative = clockwise on screen.
+        preview.setAffineTransform(CGAffineTransform(rotationAngle: -CGFloat(angle) * .pi / 180))
+        CATransaction.commit()
+    }
+}
+
+/// Window that forwards ⌘← / ⌘→ to rotate.
+final class MirrorNSWindow: NSWindow {
+    var onRotate: ((Int) -> Void)?
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.modifierFlags.contains(.command) {
+            switch event.keyCode {
+            case 123: onRotate?(-90); return true   // ←
+            case 124: onRotate?(90); return true    // →
+            default: break
+            }
+        }
+        return super.performKeyEquivalent(with: event)
+    }
+}
+
+/// A window that shows the iPhone screen (and plays its audio), with rotation.
 final class MirrorWindow: NSObject, NSWindowDelegate {
-    let window: NSWindow
+    let window: MirrorNSWindow
     private let session = AVCaptureSession()
+    private let device: AVCaptureDevice
+    private let previewView: RotatingPreviewView
     private let onClose: () -> Void
+    private var formatObserver: NSObjectProtocol?
 
     init?(device: AVCaptureDevice, onClose: @escaping () -> Void) {
+        self.device = device
         self.onClose = onClose
         guard let input = try? AVCaptureDeviceInput(device: device), session.canAddInput(input) else { return nil }
         session.addInput(input)
@@ -91,31 +144,88 @@ final class MirrorWindow: NSObject, NSWindowDelegate {
         audio.volume = 1
         if session.canAddOutput(audio) { session.addOutput(audio) }
 
-        // Size the window from the device's screen ratio, ~800pt tall.
-        let dims = CMVideoFormatDescriptionGetDimensions(device.activeFormat.formatDescription)
-        let ratio = dims.width > 0 && dims.height > 0 ? CGFloat(dims.width) / CGFloat(dims.height) : 9.0 / 19.5
-        let h: CGFloat = min(800, (NSScreen.main?.visibleFrame.height ?? 900) - 60)
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: h * ratio, height: h),
-                          styleMask: [.titled, .closable, .miniaturizable, .resizable],
-                          backing: .buffered, defer: false)
+        previewView = RotatingPreviewView(session: session)
+        window = MirrorNSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 800),
+                                styleMask: [.titled, .closable, .miniaturizable, .resizable],
+                                backing: .buffered, defer: false)
         super.init()
 
-        let view = NSView()
-        view.wantsLayer = true
-        let layer = AVCaptureVideoPreviewLayer(session: session)
-        layer.videoGravity = .resizeAspect
-        layer.backgroundColor = NSColor.black.cgColor
-        view.layer = layer
-        window.contentView = view
+        window.contentView = previewView
         window.title = "Djie Cast — \(device.localizedName)"
         window.isReleasedWhenClosed = false
         window.delegate = self
+        window.onRotate = { [weak self] d in self?.rotate(by: d) }
+        window.backgroundColor = .black
+        addRotateButtons()
+        fitWindow(animated: false)
         window.center()
         window.makeKeyAndOrderFront(nil)
+
+        // When the iPhone itself turns (portrait ↔ landscape) the stream size changes.
+        formatObserver = NotificationCenter.default.addObserver(
+            forName: .AVCaptureInputPortFormatDescriptionDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.fitWindow(animated: true)
+        }
         DispatchQueue.global(qos: .userInitiated).async { [session] in session.startRunning() }
     }
 
+    /// Source aspect ratio (width / height) after applying the manual rotation.
+    private var aspect: CGFloat {
+        let d = CMVideoFormatDescriptionGetDimensions(device.activeFormat.formatDescription)
+        var w = CGFloat(d.width), h = CGFloat(d.height)
+        if w <= 0 || h <= 0 { w = 9; h = 19.5 }
+        if previewView.angle % 180 != 0 { swap(&w, &h) }
+        return w / h
+    }
+
+    /// Resizes the window to the stream's shape, keeping it on screen.
+    private func fitWindow(animated: Bool) {
+        let visible = (window.screen ?? NSScreen.main)?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+        let maxH = min(820, visible.height - 60), maxW = visible.width - 80
+        var h = maxH, w = h * aspect
+        if w > maxW { w = maxW; h = w / aspect }
+        let content = NSSize(width: w.rounded(), height: h.rounded())
+        window.contentAspectRatio = content
+        var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: content))
+        let old = window.frame
+        frame.origin = NSPoint(x: old.midX - frame.width / 2, y: old.maxY - frame.height)
+        frame.origin.x = min(max(frame.origin.x, visible.minX), visible.maxX - frame.width)
+        frame.origin.y = min(max(frame.origin.y, visible.minY), visible.maxY - frame.height)
+        window.setFrame(frame, display: true, animate: animated)
+    }
+
+    func rotate(by degrees: Int) {
+        previewView.angle = ((previewView.angle + degrees) % 360 + 360) % 360
+        fitWindow(animated: true)
+    }
+
+    private func addRotateButtons() {
+        func button(_ symbol: String, _ tip: String, _ action: Selector) -> NSButton {
+            let b = NSButton(image: NSImage(systemSymbolName: symbol, accessibilityDescription: tip)!, target: self, action: action)
+            b.bezelStyle = .texturedRounded
+            b.isBordered = false
+            b.toolTip = tip
+            b.contentTintColor = .secondaryLabelColor
+            return b
+        }
+        let stack = NSStackView(views: [
+            button("rotate.left", "Putar kiri (⌘←)", #selector(rotateLeft)),
+            button("rotate.right", "Putar kanan (⌘→)", #selector(rotateRight)),
+        ])
+        stack.spacing = 2
+        stack.edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 8)
+        stack.frame = NSRect(x: 0, y: 0, width: 64, height: 28)
+        let accessory = NSTitlebarAccessoryViewController()
+        accessory.view = stack
+        accessory.layoutAttribute = .trailing
+        window.addTitlebarAccessoryViewController(accessory)
+    }
+
+    @objc private func rotateLeft() { rotate(by: -90) }
+    @objc private func rotateRight() { rotate(by: 90) }
+
     func windowWillClose(_ notification: Notification) {
+        if let formatObserver { NotificationCenter.default.removeObserver(formatObserver) }
         let s = session
         DispatchQueue.global().async { s.stopRunning() }
         onClose()
@@ -161,7 +271,8 @@ struct IOSCastView: View {
                                 IOSDeviceCard(name: d.localizedName,
                                               running: model.mirroring.contains(d.uniqueID),
                                               onStart: { Task { await model.start(d) } },
-                                              onStop: { model.stop(d) })
+                                              onStop: { model.stop(d) },
+                                              onRotate: { model.rotate(d, by: $0) })
                             }
                         }
                     }
@@ -215,6 +326,7 @@ struct IOSDeviceCard: View {
     let running: Bool
     let onStart: () -> Void
     let onStop: () -> Void
+    let onRotate: (Int) -> Void
     private var isPad: Bool { name.lowercased().contains("ipad") }
 
     var body: some View {
@@ -231,11 +343,20 @@ struct IOSDeviceCard: View {
                     Text(isPad ? "iPad" : "iPhone").font(.caption).foregroundStyle(.secondary)
                 }
                 if running {
+                    HStack(spacing: 8) {
+                        Button { onRotate(-90) } label: { Label("Putar kiri", systemImage: "rotate.left") }
+                            .buttonStyle(SoftButtonStyle(tint: Theme.ios[0]))
+                        Button { onRotate(90) } label: { Label("Putar kanan", systemImage: "rotate.right") }
+                            .buttonStyle(SoftButtonStyle(tint: Theme.ios[0]))
+                    }
                     Button(action: onStop) { Label("Hentikan", systemImage: "stop.fill") }
                         .buttonStyle(SoftButtonStyle(tint: .red))
                 } else {
                     Button(action: onStart) { Label("Mulai Cast", systemImage: "play.fill") }
                         .buttonStyle(GradientButtonStyle(colors: Theme.ios))
+                    Text("Jendela cast mengikuti rotasi iPhone otomatis · ⌘← / ⌘→ untuk memutar manual")
+                        .font(.caption2).foregroundStyle(.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
