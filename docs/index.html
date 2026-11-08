@@ -31,7 +31,7 @@
 <meta name="twitter:title" content="Djie Cast — Layar HP-mu, langsung di Mac">
 <meta name="twitter:description" content="Mirror &amp; kontrol HP Android dan iPhone dari Mac. Gratis &amp; open source.">
 <meta name="twitter:image" content="https://masadjie.github.io/djie-cast/assets/og.jpg">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Djie Cast", "alternateName": ["Djie Cast scrcpy GUI", "Djie Cast Mac"], "description": "Aplikasi macOS gratis & open source untuk mirror dan mengontrol HP Android dan iPhone dari Mac, mengelola file HP, menjalankan emulator Android, dan remote desktop antar Mac.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 14 Sonoma atau lebih baru", "softwareVersion": "1.0", "url": "https://masadjie.github.io/djie-cast/", "downloadUrl": "https://github.com/masadjie/djie-cast/releases", "image": "https://masadjie.github.io/djie-cast/assets/og.jpg", "screenshot": ["https://masadjie.github.io/djie-cast/assets/home-light.jpg", "https://masadjie.github.io/djie-cast/assets/android-light.jpg", "https://masadjie.github.io/djie-cast/assets/files-light.jpg"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "IDR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "author": {"@type": "Person", "name": "Adjie Kurniawan", "url": "https://github.com/masadjie"}, "sameAs": ["https://github.com/masadjie/djie-cast"], "inLanguage": ["id", "en"], "featureList": ["Mirror dan kontrol HP Android lewat USB atau Wi-Fi (scrcpy)", "Tampilkan layar iPhone/iPad lewat USB, iPhone Mirroring, AirPlay", "File manager Android dan galeri foto iPhone", "Emulator Android bawaan", "Remote Desktop Mac ke Mac dengan Tailscale bawaan", "Bisa dipakai untuk live streaming di OBS"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Djie Cast", "alternateName": ["Djie Cast scrcpy GUI", "Djie Cast Mac"], "description": "Aplikasi macOS gratis & open source untuk mirror dan mengontrol HP Android dan iPhone dari Mac, mengelola file HP, menjalankan emulator Android, dan remote desktop antar Mac.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 14 Sonoma atau lebih baru", "softwareVersion": "1.0", "url": "https://masadjie.github.io/djie-cast/", "downloadUrl": "https://github.com/masadjie/djie-cast/releases", "image": "https://masadjie.github.io/djie-cast/assets/og.jpg", "screenshot": ["https://masadjie.github.io/djie-cast/assets/home-light.jpg", "https://masadjie.github.io/djie-cast/assets/android-light.jpg", "https://masadjie.github.io/djie-cast/assets/files-light.jpg"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "IDR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "author": {"@type": "Person", "name": "Adjie Kurniawan", "url": "https://github.com/masadjie"}, "sameAs": ["https://github.com/masadjie/djie-cast"], "inLanguage": ["id", "en"], "featureList": ["Mirror dan kontrol HP Android lewat USB atau Wi-Fi (scrcpy)", "Tampilkan layar iPhone/iPad lewat USB, iPhone Mirroring, AirPlay", "File manager Android dan galeri foto iPhone", "Emulator Android bawaan", "Remote Desktop Mac ke Mac dengan Tailscale bawaan", "Bisa dipakai untuk live streaming di OBS", "Info perangkat Android & iPhone: spesifikasi, baterai, penyimpanan", "Daftar aplikasi terinstal dan uninstall (Android & iPhone)"]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Apakah Djie Cast gratis?", "acceptedAnswer": {"@type": "Answer", "text": "Ya. Djie Cast gratis selamanya dan open source dengan lisensi MIT, tanpa iklan dan tanpa langganan."}}, {"@type": "Question", "name": "Bagaimana cara mirror HP Android ke Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Aktifkan USB Debugging di HP, colok kabel ke Mac, buka Djie Cast lalu klik Mulai Cast. Layar HP tampil di Mac dan bisa dikontrol dengan mouse dan keyboard."}}, {"@type": "Question", "name": "Apakah iPhone bisa ditampilkan di Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Bisa. Colok iPhone lewat kabel dan ketuk Percayai untuk menampilkan layar dan audio, atau gunakan iPhone Mirroring untuk kontrol penuh."}}, {"@type": "Question", "name": "Apakah perlu install scrcpy atau Android Studio?", "acceptedAnswer": {"@type": "Answer", "text": "Tidak. scrcpy dan adb sudah dibundel di dalam aplikasi."}}, {"@type": "Question", "name": "Mac apa saja yang didukung?", "acceptedAnswer": {"@type": "Answer", "text": "macOS 14 Sonoma atau lebih baru, Apple Silicon (M1–M4) dan Intel."}}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -534,6 +534,8 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
             <li><b data-i18n="and.k3">Rotasi</b><span data-i18n="and.v3">Paksa portrait, landscape, atau kembali ke putar otomatis.</span></li>
             <li><b data-i18n="and.k4">Kualitas</b><span data-i18n="and.v4">Hemat 1024p, Seimbang 1600p, Maksimal resolusi asli 120 fps.</span></li>
             <li><b data-i18n="and.k5">Rekam</b><span data-i18n="and.v5">Simpan rekaman layar HP ke folder Movies.</span></li>
+            <li><b data-i18n="and.k9">Info HP</b><span data-i18n="and.v9">Spesifikasi lengkap, baterai (kondisi, suhu, siklus), penyimpanan, RAM, plus Restart &amp; Matikan.</span></li>
+            <li><b data-i18n="and.k10">Aplikasi</b><span data-i18n="and.v10">Lihat semua aplikasi terinstal, uninstall dengan satu klik, atau pasang APK dari Mac.</span></li>
           </ul>
         </div>
         <figure class="shot">
@@ -620,6 +622,8 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
             <li><b data-i18n="iosf.k1">Filter</b><span data-i18n="iosf.v1">Semua, Foto, atau Video, diurutkan dari yang terbaru.</span></li>
             <li><b data-i18n="iosf.k2">Unduh</b><span data-i18n="iosf.v2">Pilih beberapa atau unduh semua ke Downloads/Djie Cast/iPhone.</span></li>
             <li><b data-i18n="iosf.k3">Buka cepat</b><span data-i18n="iosf.v3">Klik dua kali untuk membuka foto atau video di Mac.</span></li>
+            <li><b data-i18n="iosf.k4">Info iPhone</b><span data-i18n="iosf.v4">Model, versi iOS, serial, IMEI, kesehatan &amp; siklus baterai, kapasitas penyimpanan.</span></li>
+            <li><b data-i18n="iosf.k5">Aplikasi</b><span data-i18n="iosf.v5">Daftar aplikasi terinstal di iPhone dan uninstall langsung dari Mac.</span></li>
           </ul>
         </div>
         <figure class="shot">
@@ -700,18 +704,20 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
           <li data-i18n="all.a1">Mirror &amp; kontrol lewat USB atau Wi-Fi</li><li data-i18n="all.a2">Hingga 120 fps, audio ikut terdengar</li>
           <li data-i18n="all.a3">Back, Home, Recent, volume, power</li><li data-i18n="all.a4">Screenshot &amp; rekam layar</li>
           <li data-i18n="all.a5">Rotasi portrait / landscape</li><li data-i18n="all.a6">File manager: unduh, unggah, ganti nama, hapus</li>
-          <li data-i18n="all.a7">Panduan USB Debugging bawaan</li></ul></div>
+          <li data-i18n="all.a7">Panduan USB Debugging bawaan</li>
+          <li data-i18n="all.a8">Info HP: spesifikasi, baterai, penyimpanan</li><li data-i18n="all.a9">Daftar aplikasi, uninstall, pasang APK</li></ul></div>
         <div><h3>iPhone &amp; iPad</h3><ul>
           <li data-i18n="all.i1">Layar + audio lewat kabel USB</li><li data-i18n="all.i2">iPhone Mirroring untuk kontrol penuh</li>
           <li data-i18n="all.i3">AirPlay wireless</li><li data-i18n="all.i4">Jendela ikut berputar, bisa diputar manual</li>
-          <li data-i18n="all.i5">Galeri foto &amp; video, unduh ke Mac</li><li data-i18n="all.i6">Panduan “Percayai Komputer Ini”</li></ul></div>
+          <li data-i18n="all.i5">Galeri foto &amp; video, unduh ke Mac</li><li data-i18n="all.i6">Panduan “Percayai Komputer Ini”</li>
+          <li data-i18n="all.i7">Info iPhone: serial, IMEI, kesehatan baterai</li><li data-i18n="all.i8">Daftar &amp; uninstall aplikasi iPhone</li></ul></div>
         <div><h3 data-i18n="all.eh">Emulator</h3><ul>
           <li data-i18n="all.e1">Unduh versi Android pilihanmu</li><li data-i18n="all.e2">Checksum &amp; lisensi resmi Google</li>
           <li data-i18n="all.e3">Ponsel, ponsel kecil, tablet</li><li data-i18n="all.e4">GPU Mac + akselerasi hardware</li>
           <li data-i18n="all.e5">Bisa langsung di-cast di Djie Cast</li></ul></div>
         <div><h3>Remote Desktop</h3><ul>
           <li data-i18n="all.r1">Mac ke Mac dengan kode 6 angka</li><li data-i18n="all.r2">Terenkripsi TLS</li>
-          <li data-i18n="all.r3">Deteksi otomatis di jaringan yang sama</li><li data-i18n="all.r4">Tailscale bawaan untuk internet</li>
+          <li data-i18n="all.r3">Deteksi otomatis di jaringan yang sama</li><li data-i18n="all.r4">Tailscale bawaan, login sekali tersimpan</li>
           <li data-i18n="all.r5">Satu pengontrol, bisa diputus kapan saja</li></ul></div>
         <div><h3 data-i18n="all.oh">Lainnya</h3><ul>
           <li data-i18n="all.o1">Mode terang / gelap / ikuti sistem</li><li data-i18n="all.o2">Siap untuk OBS &amp; live streaming</li>
@@ -864,6 +870,13 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
   // ---------- Language: Indonesian is written in the HTML; English lives here. ----------
   const EN = {
     "nav.install": "Install", "nav.donate": "Donate",
+    "and.k9": "Phone info", "and.v9": "Full specs, battery (health, temperature, cycles), storage, RAM, plus Restart & Power off.",
+    "and.k10": "Apps", "and.v10": "See every installed app, uninstall in one click, or install an APK from your Mac.",
+    "iosf.k4": "iPhone info", "iosf.v4": "Model, iOS version, serial, IMEI, battery health & cycles, storage capacity.",
+    "iosf.k5": "Apps", "iosf.v5": "List the apps installed on your iPhone and uninstall them from your Mac.",
+    "all.a8": "Phone info: specs, battery, storage", "all.a9": "App list, uninstall, install APK",
+    "all.i7": "iPhone info: serial, IMEI, battery health", "all.i8": "List & uninstall iPhone apps",
+
     "iosf.h": "Your iPhone gallery, right on your Mac", "iosf.p": "Plug in, unlock, and every photo & video on your iPhone/iPad appears as a gallery with thumbnails.",
     "iosf.k1": "Filter", "iosf.v1": "All, Photos, or Videos, newest first.",
     "iosf.k2": "Download", "iosf.v2": "Pick a few or download everything to Downloads/Djie Cast/iPhone.",
@@ -890,7 +903,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
     "all.eh": "Emulator", "all.e1": "Download the Android versions you pick", "all.e2": "Google checksums & licenses", "all.e3": "Phone, small phone, tablet",
     "all.e4": "Mac GPU + hardware acceleration", "all.e5": "Cast it in Djie Cast right away",
     "all.r1": "Mac to Mac with a 6-digit code", "all.r2": "TLS encrypted", "all.r3": "Auto-discovery on the same network",
-    "all.r4": "Built-in Tailscale for the internet", "all.r5": "One controller, disconnect any time",
+    "all.r4": "Built-in Tailscale, sign in once", "all.r5": "One controller, disconnect any time",
     "all.oh": "More", "all.o1": "Light / dark / system appearance", "all.o2": "Ready for OBS & live streaming", "all.o3": "Universal: Apple Silicon & Intel",
     "all.o4": "100% local, no account, no ads", "all.o5": "Open source, MIT license",
     "faq.q7": "Does Remote Desktop work with Windows?", "faq.a7": "For now Remote Desktop works between Macs. Djie Cast is a macOS app, so both computers need Djie Cast installed.",
