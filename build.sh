@@ -46,6 +46,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSHumanReadableCopyright</key><string>© 2026 Adjie Kurniawan · Open source (MIT)</string>
   <key>NSHighResolutionCapable</key><true/>
   <key>NSCameraUsageDescription</key><string>Djie Cast perlu akses ini untuk menampilkan layar iPhone/iPad yang dicolok lewat USB.</string>
+  <key>NSLocalNetworkUsageDescription</key><string>Djie Cast mencari dan menghubungkan Mac lain di jaringan untuk Remote Desktop.</string>
+  <key>NSBonjourServices</key><array><string>_djiecast._tcp</string></array>
   <key>NSMicrophoneUsageDescription</key><string>Djie Cast perlu akses ini untuk memutar audio dari iPhone/iPad yang dicolok lewat USB.</string>
 </dict>
 </plist>

@@ -30,6 +30,14 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 - **Preset kualitas** — Hemat / Seimbang / Maksimal / Kustom, plus audio, rekam layar, selalu di atas, dll.
 - **Tanpa install apa pun** — scrcpy & adb sudah dibundel di dalam app.
 
+### 🖥️ Remote Desktop (Mac ke Mac)
+- **Kendalikan Mac lain** seperti AnyDesk: lihat layarnya, gerakkan mouse, ketik, scroll, dan pakai shortcut ⌘.
+- **Kode akses 6 angka** + koneksi **terenkripsi TLS**. Kode salah langsung ditolak.
+- **Mac terdeteksi otomatis** di jaringan yang sama, atau ketik alamat IP-nya.
+- **Beda jaringan**: pakai [Tailscale](https://tailscale.com) (gratis) dan ketik alamat 100.x.x.x.
+- Mac yang dikontrol menampilkan panel merah **"Mac ini sedang dikontrol"** dengan tombol Putuskan.
+- Butuh izin **Perekaman Layar** dan **Aksesibilitas** di Mac yang dikontrol (ada panduannya di app).
+
 ### 🎥 Untuk live streaming
 Jendela cast bisa ditangkap software live di Mac seperti **OBS Studio**, **Streamlabs**, **Ecamm Live**, dan **TikTok LIVE Studio** (bila versi Mac tersedia) lewat *Window Capture*. Nyalakan "Tanpa bingkai jendela" untuk gambar yang bersih. HP tetap bisa dikontrol dari Mac selama siaran.
 
@@ -73,6 +81,7 @@ Saat build pertama, `scripts/fetch-scrcpy.sh` otomatis mengunduh scrcpy resmi da
 | `Sources/AndroidCast.swift` | Cast Android, kontrol, pengaturan |
 | `Sources/AndroidFiles.swift` | File manager Android |
 | `Sources/IOSCast.swift` | Cast iPhone/iPad |
+| `Sources/Remote*.swift` | Remote Desktop: protokol, host, viewer, halaman |
 | `Sources/Donate.swift` | Halaman donasi |
 | `Sources/About.swift` | Halaman Tentang |
 | `Sources/UI.swift` | Komponen UI bersama |

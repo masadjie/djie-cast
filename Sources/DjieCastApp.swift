@@ -36,7 +36,7 @@ enum Appearance: String, CaseIterable, Identifiable {
     }
 }
 
-enum Page: String, Hashable { case home, android, ios, files, donate, about }
+enum Page: String, Hashable { case home, android, ios, files, remote, donate, about }
 
 /// Shared navigation so any view can jump to another page.
 @MainActor
@@ -89,6 +89,7 @@ struct MainView: View {
                 }
                 Section("Alat") {
                     sidebarRow(.files, "File Android", "folder.fill", Theme.files)
+                    sidebarRow(.remote, "Remote Desktop", "display.2", Theme.remote)
                 }
                 Section("Komunitas") {
                     sidebarRow(.donate, "Donasi", "heart.fill", Theme.donate)
@@ -105,6 +106,7 @@ struct MainView: View {
                 case .android: AndroidCastView()
                 case .ios: IOSCastView()
                 case .files: AndroidFilesView()
+                case .remote: RemoteDesktopView()
                 case .donate: DonateView()
                 case .about: AboutView()
                 }
@@ -133,6 +135,7 @@ struct MainView: View {
         case .android: return "Android"
         case .ios: return "iPhone & iPad"
         case .files: return "File Android"
+        case .remote: return "Remote Desktop"
         case .donate: return "Donasi"
         case .about: return "Tentang"
         }
@@ -447,6 +450,9 @@ struct DjieCastApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        MainActor.assumeIsolated { RemoteSelfTest.runIfRequested() }
+    }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationWillTerminate(_ notification: Notification) {
         MainActor.assumeIsolated { LauncherModel.shared.stopAll() }

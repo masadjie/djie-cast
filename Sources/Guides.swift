@@ -10,13 +10,14 @@ struct GuideStep: Identifiable {
 }
 
 enum SetupGuide: Identifiable {
-    case android, ios
+    case android, ios, remoteHost
     var id: Self { self }
 
     var requirement: String {
         switch self {
         case .android: return "Wajib aktifkan USB Debugging"
         case .ios: return "Wajib ketuk “Percayai Komputer Ini”"
+        case .remoteHost: return "Wajib beri izin Perekaman Layar & Aksesibilitas"
         }
     }
 
@@ -24,6 +25,7 @@ enum SetupGuide: Identifiable {
         switch self {
         case .android: return "Tanpa USB Debugging, Mac tidak bisa membaca layar HP Android. Cukup diatur sekali per HP."
         case .ios: return "iPhone/iPad hanya mau mengirim layarnya ke Mac yang sudah dipercaya. Cukup sekali per Mac."
+        case .remoteHost: return "Di Mac yang akan dikontrol, macOS perlu mengizinkan Djie Cast merekam layar dan menggerakkan mouse/keyboard."
         }
     }
 
@@ -31,10 +33,19 @@ enum SetupGuide: Identifiable {
         switch self {
         case .android: return "Cara mengaktifkan USB Debugging"
         case .ios: return "Cara mempercayai Mac ini di iPhone/iPad"
+        case .remoteHost: return "Cara memberi izin Remote Desktop"
         }
     }
 
-    var tint: Color { self == .android ? Theme.android[1] : Theme.ios[1] }
+    var tint: Color { self == .android ? Theme.android[1] : self == .ios ? Theme.ios[1] : Theme.remote[1] }
+
+    var eyebrow: String {
+        switch self {
+        case .android: return "ANDROID · USB"
+        case .ios: return "IPHONE & IPAD · USB"
+        case .remoteHost: return "REMOTE DESKTOP · MAC YANG DIKONTROL"
+        }
+    }
 
     var steps: [GuideStep] {
         switch self {
@@ -66,6 +77,19 @@ enum SetupGuide: Identifiable {
                 GuideStep(icon: "video", title: "Izinkan akses Kamera untuk Djie Cast",
                           detail: "Saat Mulai Cast pertama kali, macOS meminta izin Kamera karena layar iPhone dibaca sebagai sumber video. Klik OK."),
             ]
+        case .remoteHost:
+            return [
+                GuideStep(icon: "rectangle.dashed.badge.record", title: "Izinkan Perekaman Layar",
+                          detail: "Di halaman Remote Desktop klik “Beri izin” pada Perekaman Layar, atau buka Pengaturan Sistem → Privasi & Keamanan → Perekaman Layar & Audio Sistem, lalu nyalakan Djie Cast."),
+                GuideStep(icon: "accessibility", title: "Izinkan Aksesibilitas",
+                          detail: "Klik “Beri izin” pada Aksesibilitas, atau buka Pengaturan Sistem → Privasi & Keamanan → Aksesibilitas, lalu nyalakan Djie Cast. Ini yang membuat klik dan ketikan dari Mac lain berfungsi."),
+                GuideStep(icon: "arrow.clockwise", title: "Buka ulang Djie Cast",
+                          detail: "macOS biasanya meminta app dibuka ulang setelah izin Perekaman Layar diberikan."),
+                GuideStep(icon: "network", title: "Izinkan Jaringan Lokal",
+                          detail: "Bila macOS bertanya “Izinkan Djie Cast menemukan perangkat di jaringan lokal?”, pilih Izinkan agar Mac saling terdeteksi."),
+                GuideStep(icon: "key", title: "Nyalakan “Izinkan Mac ini diakses”",
+                          detail: "Bagikan kode 6 angka ke pengontrol. Kode bisa diganti kapan saja, dan sesi bisa diputus dari panel merah di atas layar."),
+            ]
         }
     }
 
@@ -82,6 +106,12 @@ enum SetupGuide: Identifiable {
                 "Pernah menekan “Jangan Percayai”? Di iPhone buka Pengaturan → Umum → Transfer atau Atur Ulang iPhone → Atur Ulang → Atur Ulang Lokasi & Privasi, lalu colok lagi.",
                 "Izin Kamera tertolak? Buka Pengaturan Sistem → Privasi & Keamanan → Kamera, lalu nyalakan Djie Cast.",
                 "iPhone belum muncul? Tunggu beberapa detik, atau cabut-colok kabel sambil layar iPhone terbuka.",
+            ]
+        case .remoteHost:
+            return [
+                "Setelah memperbarui Djie Cast, izin kadang perlu dimatikan lalu dinyalakan lagi di Pengaturan Sistem karena app belum ditandatangani Apple.",
+                "Mac tidak terdeteksi? Pastikan kedua Mac di Wi-Fi yang sama, atau ketik alamat IP-nya. Beda jaringan: pakai Tailscale.",
+                "Firewall macOS menyala? Izinkan koneksi masuk untuk Djie Cast saat diminta.",
             ]
         }
     }
@@ -163,7 +193,7 @@ struct SetupGuideSheet: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(guide == .android ? "ANDROID · USB" : "IPHONE & IPAD · USB")
+                    Text(guide.eyebrow)
                         .font(.system(size: 10.5, weight: .medium, design: .monospaced))
                         .kerning(1.2)
                         .foregroundStyle(.secondary)
