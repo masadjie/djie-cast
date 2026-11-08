@@ -14,7 +14,7 @@ struct AboutView: View {
                                 IconBadge(icon: "person.fill", colors: Brand.colors, size: 36)
                                 Text("Pembuat").font(.headline)
                             }
-                            Text(Brand.author).font(.system(size: 22, weight: .bold, design: .rounded))
+                            Text(Brand.author).font(.system(size: 22, weight: .bold))
                             Text("Djie Cast dibuat untuk memudahkan siapa saja menampilkan & mengendalikan HP dari Mac — tanpa terminal, tanpa ribet.")
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -69,7 +69,7 @@ struct AboutView: View {
                 .resizable()
                 .frame(width: 112, height: 112)
                 .shadow(color: Brand.start.opacity(0.35), radius: 16, y: 8)
-            Text(Brand.name).font(.system(size: 34, weight: .heavy, design: .rounded))
+            Text(Brand.name).font(.system(size: 34, weight: .heavy))
             Text("Cast Android & iOS ke Mac").font(.title3).foregroundStyle(.secondary)
             HStack(spacing: 8) {
                 Pill(text: "v\(Brand.version)", color: Brand.start)
@@ -81,36 +81,21 @@ struct AboutView: View {
     }
 
     private var donateCard: some View {
-        ZStack {
-            Theme.gradient(Theme.donate)
-            HStack(spacing: 18) {
-                Image(systemName: "heart.fill")
-                    .font(.system(size: 30))
-                    .foregroundStyle(.white)
-                    .frame(width: 60, height: 60)
-                    .background(.white.opacity(0.2), in: Circle())
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Suka dengan Djie Cast?").font(.title3.weight(.bold))
+        Panel(highlight: Theme.donate[1].opacity(0.6), padding: 20) {
+            HStack(spacing: 16) {
+                IconBadge(icon: "heart.fill", colors: Theme.donate, size: 44)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Suka dengan Djie Cast?").font(.headline)
                     Text("Dukung pengembangannya lewat donasi QRIS, lalu konfirmasi ke \(Brand.donationPhoneDisplay).")
-                        .opacity(0.9)
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .foregroundStyle(.white)
                 Spacer(minLength: 12)
-                Button { Nav.shared.page = .donate } label: {
-                    Label("Donasi via QRIS", systemImage: "qrcode")
-                        .font(.callout.weight(.semibold))
-                        .foregroundStyle(Theme.donate[1])
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 9)
-                        .background(.white, in: Capsule())
-                }
-                .buttonStyle(.plain)
+                Button { Nav.shared.page = .donate } label: { Label("Donasi via QRIS", systemImage: "qrcode") }
+                    .buttonStyle(GradientButtonStyle(colors: Theme.donate))
+                    .fixedSize()
             }
-            .padding(22)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .shadow(color: Theme.donate[0].opacity(0.3), radius: 14, y: 6)
     }
 
     private func credit(_ name: String, _ detail: String, _ link: String?) -> some View {

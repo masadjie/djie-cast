@@ -298,6 +298,7 @@ struct AndroidCastView: View {
     @AppStorage("wirelessIP") private var wirelessIP = ""
     @AppStorage("androidInspector") private var showInspector = true
     @State private var showConsole = false
+    @State private var showGuide = false
 
     func scrcpyArgs() -> [String] {
         var a: [String] = []
@@ -342,14 +343,21 @@ struct AndroidCastView: View {
                     StatusPill(count: model.readyCount, noun: "perangkat")
                 }
 
+                if !model.devices.isEmpty {
+                    RequirementBanner(guide: .android) { showGuide = true }
+                }
+
                 VStack(alignment: .leading, spacing: 12) {
                     SectionTitle(title: "Perangkat", detail: "· diperbarui otomatis")
                     if model.devices.isEmpty {
-                        EmptyStateView(icon: "cable.connector", title: "Sambungkan HP Android kamu", steps: [
-                            "Buka Pengaturan → Tentang ponsel, ketuk \"Nomor bentukan\" 7× untuk membuka Opsi Developer.",
-                            "Aktifkan \"USB Debugging\" di Opsi Developer.",
-                            "Colok kabel USB, lalu ketuk \"Izinkan\" di HP.",
-                        ])
+                        Panel(padding: 20) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Belum ada HP Android tersambung").font(.headline)
+                                Text("Ikuti langkah ini sekali saja, lalu HP akan muncul di sini otomatis.")
+                                    .font(.callout).foregroundStyle(.secondary)
+                                GuideStepsList(guide: .android).padding(.top, 6)
+                            }
+                        }
                     } else {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
                             ForEach(model.devices) { d in
@@ -375,6 +383,7 @@ struct AndroidCastView: View {
             }
             .padding(28)
         }
+        .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .android) }
         .inspector(isPresented: $showInspector) {
             settingsForm
                 .inspectorColumnWidth(min: 260, ideal: 290, max: 360)
@@ -383,6 +392,8 @@ struct AndroidCastView: View {
             ToolbarItemGroup {
                 Button { Task { await model.refresh() } } label: { Label("Refresh", systemImage: "arrow.clockwise") }
                     .help("Cari ulang perangkat")
+                Button { showGuide = true } label: { Label("Panduan USB Debugging", systemImage: "questionmark.circle") }
+                    .help("Cara mengaktifkan USB Debugging")
                 Button { showInspector.toggle() } label: { Label("Pengaturan", systemImage: "sidebar.trailing") }
                     .help("Tampilkan/sembunyikan pengaturan")
             }
@@ -409,7 +420,7 @@ struct AndroidCastView: View {
                              ("⌘ V", "Tempel teks ke HP"), ("Klik kanan", "Kembali")], id: \.0) { k, v in
                         HStack(spacing: 8) {
                             Text(k)
-                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .font(.system(size: 11, weight: .semibold))
                                 .padding(.horizontal, 7).padding(.vertical, 3)
                                 .background(Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 5))
                                 .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.primary.opacity(0.12)))

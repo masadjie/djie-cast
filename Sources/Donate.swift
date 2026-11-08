@@ -128,7 +128,7 @@ struct ConfirmDonationPanel: View {
                     }
                 }
                 Text(Brand.donationPhoneDisplay)
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .font(.system(size: 26, weight: .bold))
                     .monospacedDigit()
                     .textSelection(.enabled)
                 HStack(spacing: 10) {

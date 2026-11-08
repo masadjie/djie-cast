@@ -20,6 +20,22 @@ enum Brand {
     }
 }
 
+/// Light / dark / follow-system, stored per user and applied app-wide.
+enum Appearance: String, CaseIterable, Identifiable {
+    case system, light, dark
+    var id: String { rawValue }
+    var label: String { ["system": "Ikuti sistem", "light": "Terang", "dark": "Gelap"][rawValue]! }
+    var icon: String { ["system": "circle.lefthalf.filled", "light": "sun.max", "dark": "moon"][rawValue]! }
+
+    @MainActor static func apply(_ raw: String) {
+        switch Appearance(rawValue: raw) ?? .system {
+        case .system: NSApp.appearance = nil
+        case .light: NSApp.appearance = NSAppearance(named: .aqua)
+        case .dark: NSApp.appearance = NSAppearance(named: .darkAqua)
+        }
+    }
+}
+
 enum Page: String, Hashable { case home, android, ios, files, donate, about }
 
 /// Shared navigation so any view can jump to another page.
@@ -33,6 +49,7 @@ final class Nav: ObservableObject {
 
 struct RootView: View {
     @State private var showSplash = Demo.startPage == nil
+    @AppStorage("appearance") private var appearance = Appearance.system.rawValue
 
     var body: some View {
         ZStack {
@@ -45,7 +62,11 @@ struct RootView: View {
         }
         .frame(minWidth: 1040, minHeight: 660)
         .tint(Brand.start)
-        .onAppear { Demo.snapshotIfRequested() }
+        .onAppear {
+            if Demo.env["DJIE_APPEARANCE"] == nil { Appearance.apply(appearance) }
+            Demo.snapshotIfRequested()
+        }
+        .onChange(of: appearance) { Appearance.apply(appearance) }
     }
 }
 
@@ -130,6 +151,8 @@ struct MainView: View {
         .tag(p)
     }
 
+    @AppStorage("appearance") private var appearance = Appearance.system.rawValue
+
     private var sidebarFooter: some View {
         HStack(spacing: 10) {
             Image(nsImage: NSApp.applicationIconImage)
@@ -137,9 +160,21 @@ struct MainView: View {
                 .frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 1) {
                 Text(Brand.name).font(.callout.weight(.semibold))
-                Text("v\(Brand.version)").font(.caption2).foregroundStyle(.secondary)
+                Text("v\(Brand.version)").font(.caption2.monospaced()).foregroundStyle(.secondary)
             }
             Spacer()
+            Menu {
+                Picker("Tampilan", selection: $appearance) {
+                    ForEach(Appearance.allCases) { a in Label(a.label, systemImage: a.icon).tag(a.rawValue) }
+                }
+                .pickerStyle(.inline)
+            } label: {
+                Image(systemName: (Appearance(rawValue: appearance) ?? .system).icon)
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("Tampilan: terang, gelap, atau ikuti sistem")
         }
         .padding(12)
     }
@@ -249,47 +284,32 @@ struct HomeView: View {
     }
 
     private var hero: some View {
-        ZStack(alignment: .leading) {
-            Brand.gradient
-            // Decorative cast waves
-            GeometryReader { geo in
-                ForEach(1..<5) { i in
-                    Circle()
-                        .strokeBorder(.white.opacity(0.10), lineWidth: 18)
-                        .frame(width: CGFloat(i) * 140, height: CGFloat(i) * 140)
-                        .position(x: geo.size.width - 90, y: geo.size.height / 2)
-                }
+        HStack(alignment: .center, spacing: 18) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 64, height: 64)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Selamat datang di \(Brand.name)")
+                    .font(.system(size: 30, weight: .bold))
+                    .kerning(-0.5)
+                Text("Tampilkan dan kendalikan layar HP langsung di Mac.")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
             }
-            HStack(spacing: 22) {
-                Image(nsImage: NSApp.applicationIconImage)
-                    .resizable()
-                    .frame(width: 92, height: 92)
-                    .shadow(color: .black.opacity(0.25), radius: 12, y: 6)
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Selamat datang di \(Brand.name)")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-                    Text("Tampilkan & kendalikan layar HP kamu langsung di Mac — cepat, jernih, tanpa ribet.")
-                        .font(.body)
-                        .opacity(0.88)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text("v\(Brand.version)".uppercased())
-                        .font(.caption2.weight(.bold))
-                        .kerning(1.2)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(.white.opacity(0.2), in: Capsule())
-                        .padding(.top, 4)
-                }
-                .foregroundStyle(.white)
-                Spacer(minLength: 40)
+            Spacer(minLength: 16)
+            VStack(alignment: .trailing, spacing: 6) {
+                Text("v\(Brand.version)".uppercased())
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .kerning(1)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.primary.opacity(0.15)))
+                Text("\(android.readyCount + ios.devices.count) perangkat tersambung")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(.tertiary)
             }
-            .padding(28)
         }
-        .frame(height: 180)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Brand.start.opacity(0.3), radius: 16, y: 8)
+        .padding(.bottom, 6)
     }
 }
 
@@ -316,7 +336,7 @@ struct PlatformCard: View {
                     }
                     .frame(height: 52, alignment: .top)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(title).font(.system(size: 20, weight: .bold, design: .rounded))
+                        Text(title).font(.system(size: 20, weight: .bold))
                         Text(description).font(.callout).foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -389,6 +409,9 @@ struct DjieCastApp: App {
             CommandGroup(replacing: .appInfo) {
                 Button("Tentang \(Brand.name)") { Nav.shared.page = .about }
             }
+            CommandMenu("Tampilan") {
+                AppearanceMenu()
+            }
             CommandGroup(replacing: .help) {
                 Button("Donasi untuk \(Brand.name)") { Nav.shared.page = .donate }
             }
@@ -400,5 +423,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationWillTerminate(_ notification: Notification) {
         MainActor.assumeIsolated { LauncherModel.shared.stopAll() }
+    }
+}
+
+/// Menu-bar version of the appearance picker (Tampilan menu, ⌘⇧L / ⌘⇧D / ⌘⇧S).
+struct AppearanceMenu: View {
+    @AppStorage("appearance") private var appearance = Appearance.system.rawValue
+    var body: some View {
+        Button("Mode Terang") { appearance = Appearance.light.rawValue }.keyboardShortcut("l", modifiers: [.command, .shift])
+        Button("Mode Gelap") { appearance = Appearance.dark.rawValue }.keyboardShortcut("d", modifiers: [.command, .shift])
+        Button("Ikuti Sistem") { appearance = Appearance.system.rawValue }.keyboardShortcut("s", modifiers: [.command, .shift])
     }
 }

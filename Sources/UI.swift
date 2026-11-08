@@ -49,13 +49,16 @@ struct IconBadge: View {
     var size: CGFloat = 40
 
     var body: some View {
+        // Small (sidebar) badges follow macOS Settings: solid tile, white glyph.
+        // Larger badges are tinted so content, not chrome, carries the colour.
+        let solid = size <= 28
+        let tone = colors.count > 1 ? colors[1] : colors[0]
         Image(systemName: icon)
-            .font(.system(size: size * 0.46, weight: .semibold))
-            .foregroundStyle(.white)
+            .font(.system(size: size * (solid ? 0.5 : 0.44), weight: .semibold))
+            .foregroundStyle(solid ? Color.white : tone)
             .frame(width: size, height: size)
-            .background(Theme.gradient(colors), in: RoundedRectangle(cornerRadius: size * 0.26, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: size * 0.26, style: .continuous).strokeBorder(.white.opacity(0.18)))
-            .shadow(color: colors.first!.opacity(0.35), radius: 6, y: 3)
+            .background(solid ? AnyShapeStyle(tone) : AnyShapeStyle(tone.opacity(0.13)),
+                        in: RoundedRectangle(cornerRadius: size * 0.24, style: .continuous))
     }
 }
 
@@ -70,7 +73,7 @@ struct PageHeader<Trailing: View>: View {
         HStack(alignment: .center, spacing: 14) {
             IconBadge(icon: icon, colors: colors, size: 48)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.system(size: 26, weight: .bold, design: .rounded))
+                Text(title).font(.system(size: 26, weight: .bold)).kerning(-0.3)
                 Text(subtitle).font(.callout).foregroundStyle(.secondary)
             }
             Spacer()
@@ -115,9 +118,8 @@ struct Panel<Content: View>: View {
             .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(highlight?.opacity(0.7) ?? Color.primary.opacity(0.08), lineWidth: highlight == nil ? 1 : 1.5)
+                    .strokeBorder(highlight?.opacity(0.7) ?? Color.primary.opacity(0.09), lineWidth: highlight == nil ? 1 : 1.5)
             )
-            .shadow(color: .black.opacity(0.05), radius: 3, y: 1)
     }
 }
 
@@ -221,7 +223,7 @@ struct GradientButtonStyle: ButtonStyle {
             .padding(.vertical, 8)
             .padding(.horizontal, 14)
             .frame(maxWidth: .infinity)
-            .background(Theme.gradient(colors), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .background(colors.count > 1 ? colors[1] : colors[0], in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .opacity(enabled ? (configuration.isPressed ? 0.8 : 1) : 0.4)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .contentShape(Rectangle())
@@ -240,7 +242,7 @@ struct SoftButtonStyle: ButtonStyle {
             .padding(.vertical, 8)
             .padding(.horizontal, 14)
             .frame(maxWidth: .infinity)
-            .background(tint.opacity(configuration.isPressed ? 0.18 : 0.1), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .background(tint.opacity(configuration.isPressed ? 0.18 : 0.1), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .opacity(enabled ? 1 : 0.4)
             .contentShape(Rectangle())
     }

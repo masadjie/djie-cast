@@ -236,6 +236,7 @@ final class MirrorWindow: NSObject, NSWindowDelegate {
 
 struct IOSCastView: View {
     @ObservedObject var model = IOSCastModel.shared
+    @State private var showGuide = false
 
     var body: some View {
         ScrollView {
@@ -243,6 +244,10 @@ struct IOSCastView: View {
                 PageHeader(icon: "iphone", colors: Theme.ios, title: "iPhone & iPad",
                            subtitle: "Tampilkan layar iOS lewat kabel USB atau wireless") {
                     StatusPill(count: model.devices.count, noun: "perangkat")
+                }
+
+                if !model.devices.isEmpty {
+                    RequirementBanner(guide: .ios) { showGuide = true }
                 }
 
                 Panel {
@@ -260,11 +265,14 @@ struct IOSCastView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     SectionTitle(title: "Lewat kabel USB", detail: "· hanya lihat + audio")
                     if model.devices.isEmpty {
-                        EmptyStateView(icon: "iphone.gen3.radiowaves.left.and.right", title: "Colok iPhone atau iPad kamu", steps: [
-                            "Sambungkan iPhone/iPad ke Mac dengan kabel.",
-                            "Buka kunci layar, lalu ketuk \"Percayai\" (Trust) bila diminta.",
-                            "Perangkat akan muncul di sini dalam beberapa detik.",
-                        ])
+                        Panel(padding: 20) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Belum ada iPhone/iPad tersambung").font(.headline)
+                                Text("Ikuti langkah ini sekali saja, lalu perangkat akan muncul di sini dalam beberapa detik.")
+                                    .font(.callout).foregroundStyle(.secondary)
+                                GuideStepsList(guide: .ios).padding(.top, 6)
+                            }
+                        }
                     } else {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
                             ForEach(model.devices, id: \.uniqueID) { d in
@@ -312,7 +320,12 @@ struct IOSCastView: View {
             }
             .padding(28)
         }
+        .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .ios) }
         .toolbar {
+            ToolbarItem {
+                Button { showGuide = true } label: { Label("Panduan Trust", systemImage: "questionmark.circle") }
+                    .help("Cara mempercayai Mac ini di iPhone/iPad")
+            }
             ToolbarItem {
                 Button { model.refresh() } label: { Label("Refresh", systemImage: "arrow.clockwise") }
                     .help("Cari ulang perangkat")
@@ -384,7 +397,7 @@ struct WirelessCard: View {
                     Pill(text: tag, color: colors[0])
                 }
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title).font(.system(size: 18, weight: .bold, design: .rounded))
+                    Text(title).font(.system(size: 18, weight: .bold))
                     Text(description).font(.callout).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
