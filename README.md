@@ -11,7 +11,7 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 </p>
 
 <p align="center">
-  <img alt="Versi" src="https://img.shields.io/badge/versi-1.0%20Beta-6366f1">
+  <img alt="Versi" src="https://img.shields.io/badge/versi-1.0%20Beta%202-6366f1">
   <img alt="macOS" src="https://img.shields.io/badge/macOS-14%2B-black">
   <img alt="Lisensi" src="https://img.shields.io/badge/lisensi-MIT-green">
 </p>
@@ -23,6 +23,7 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 ### Android
 - **Mirror + kontrol penuh** — klik, scroll, drag & ketik langsung dari Mac, tanpa menyentuh HP.
 - **USB atau Wi-Fi** — aktifkan mode wireless dengan satu klik.
+- **Panduan bawaan** — langkah mengaktifkan USB Debugging langsung di aplikasi.
 - **Kontrol cepat** — Back, Home, Recent, volume, power & screenshot.
 - **Rotasi layar** — paksa HP ke portrait / landscape / otomatis, atau putar tampilan jendela (⌘R, ⌘← / ⌘→).
 - **File Android** — jelajahi, unduh, unggah (drag & drop), ganti nama & hapus file di HP.
@@ -33,6 +34,7 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 Jendela cast bisa ditangkap software live di Mac seperti **OBS Studio**, **Streamlabs**, **Ecamm Live**, dan **TikTok LIVE Studio** (bila versi Mac tersedia) lewat *Window Capture*. Nyalakan "Tanpa bingkai jendela" untuk gambar yang bersih. HP tetap bisa dikontrol dari Mac selama siaran.
 
 ### iPhone & iPad
+- **Panduan Trust** — langkah “Percayai Komputer Ini” langsung di aplikasi.
 - **USB** — tampilkan layar + audio langsung di Mac (hanya lihat). Jendela mengikuti rotasi iPhone otomatis, bisa diputar manual (⌘← / ⌘→).
 - **iPhone Mirroring** — kontrol penuh lewat fitur resmi Apple (macOS Sequoia + iOS 18).
 - **AirPlay** — mirror wireless.
@@ -41,7 +43,7 @@ Jendela cast bisa ditangkap software live di Mac seperti **OBS Studio**, **Strea
 
 ## 📥 Install
 
-1. Unduh `DjieCast-1.0-beta.dmg` dari halaman [**Releases**](https://github.com/masadjie/djie-cast/releases).
+1. Unduh file DMG terbaru dari halaman [**Releases**](https://github.com/masadjie/djie-cast/releases).
 2. Seret **Djie Cast** ke folder **Applications**.
 3. Pembukaan pertama: **klik kanan → Open → Open** (app belum dinotarisasi Apple).
    Jika muncul pesan *"damaged"*:
@@ -61,7 +63,7 @@ cd djie-cast
 ./build.sh
 ```
 
-Hasil: `build/Djie Cast.app` dan `build/DjieCast-1.0-beta.dmg`.
+Hasil: `build/Djie Cast.app` dan file DMG di folder `build/`.
 Saat build pertama, `scripts/fetch-scrcpy.sh` otomatis mengunduh scrcpy resmi dan memverifikasi checksum SHA-256-nya.
 
 ### Struktur

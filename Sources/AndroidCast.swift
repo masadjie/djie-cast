@@ -367,6 +367,7 @@ struct AndroidCastView: View {
                                                   onStop: { model.stop(d.serial) },
                                                   onWifi: { Task { await model.enableTcpip(d.serial) } },
                                                   onDisconnect: { Task { await model.disconnect(d.serial) } })
+                                .transition(.scale(scale: 0.92).combined(with: .opacity))
                             }
                         }
                     }
@@ -383,6 +384,8 @@ struct AndroidCastView: View {
             }
             .padding(28)
         }
+        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: model.devices.map(\.serial))
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: Array(model.running.keys))
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .android) }
         .inspector(isPresented: $showInspector) {
             settingsForm

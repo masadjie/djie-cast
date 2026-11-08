@@ -252,12 +252,16 @@ struct AndroidFilesView: View {
             }
 
             if readyDevices.isEmpty {
-                EmptyStateView(icon: "folder.badge.questionmark", title: "Belum ada HP Android tersambung", steps: [
-                    "Sambungkan HP Android lewat USB atau Wi-Fi di halaman Android.",
-                    "Pastikan USB Debugging aktif dan sudah diizinkan.",
-                    "File HP akan tampil di sini.",
-                ])
-                Spacer()
+                ScrollView {
+                    Panel(padding: 20) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Belum ada HP Android tersambung").font(.headline)
+                            Text("Sambungkan HP lewat USB dengan USB Debugging aktif. Setelah itu isi HP langsung tampil di sini.")
+                                .font(.callout).foregroundStyle(.secondary)
+                            GuideStepsList(guide: .android).padding(.top, 6)
+                        }
+                    }
+                }
             } else {
                 HStack(alignment: .top, spacing: 16) {
                     placesPanel
@@ -299,7 +303,7 @@ struct AndroidFilesView: View {
     // MARK: Places
 
     private var placesPanel: some View {
-        Panel(padding: 8) {
+        Panel(padding: 8, fill: true) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("LOKASI").font(.caption2.weight(.semibold)).kerning(0.8).foregroundStyle(.secondary)
                     .padding(.horizontal, 8).padding(.vertical, 6)
@@ -331,7 +335,7 @@ struct AndroidFilesView: View {
     // MARK: Browser
 
     private var browser: some View {
-        Panel(highlight: dropTargeted ? Theme.files[0] : nil, padding: 0) {
+        Panel(highlight: dropTargeted ? Theme.files[0] : nil, padding: 0, fill: true) {
             VStack(spacing: 0) {
                 toolbar
                 Divider()

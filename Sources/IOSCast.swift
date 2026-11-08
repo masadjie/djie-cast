@@ -281,6 +281,7 @@ struct IOSCastView: View {
                                               onStart: { Task { await model.start(d) } },
                                               onStop: { model.stop(d) },
                                               onRotate: { model.rotate(d, by: $0) })
+                                .transition(.scale(scale: 0.92).combined(with: .opacity))
                             }
                         }
                     }
@@ -320,6 +321,7 @@ struct IOSCastView: View {
             }
             .padding(28)
         }
+        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: model.devices.map(\.uniqueID))
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .ios) }
         .toolbar {
             ToolbarItem {
@@ -389,7 +391,7 @@ struct WirelessCard: View {
     let action: () -> Void
 
     var body: some View {
-        Panel(padding: 20) {
+        Panel(padding: 20, fill: true) {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top) {
                     IconBadge(icon: icon, colors: colors, size: 48)

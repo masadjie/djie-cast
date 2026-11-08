@@ -49,7 +49,7 @@ final class Nav: ObservableObject {
 
 struct RootView: View {
     @State private var showSplash = Demo.startPage == nil
-    @AppStorage("appearance") private var appearance = Appearance.system.rawValue
+    @AppStorage("appearance") private var appearance = Appearance.light.rawValue
 
     var body: some View {
         ZStack {
@@ -109,8 +109,11 @@ struct MainView: View {
                 case .about: AboutView()
                 }
             }
+            .id(nav.page)
+            .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 10)), removal: .opacity))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(nsColor: .windowBackgroundColor))
+            .background(Theme.canvas)
+            .animation(.spring(response: 0.38, dampingFraction: 0.9), value: nav.page)
         }
         .navigationTitle(title)
         .task {
@@ -151,7 +154,7 @@ struct MainView: View {
         .tag(p)
     }
 
-    @AppStorage("appearance") private var appearance = Appearance.system.rawValue
+    @AppStorage("appearance") private var appearance = Appearance.light.rawValue
 
     private var sidebarFooter: some View {
         HStack(spacing: 10) {
@@ -242,16 +245,18 @@ struct HomeView: View {
     @ObservedObject private var android = LauncherModel.shared
     @ObservedObject private var ios = IOSCastModel.shared
 
+    private var connected: Int { android.readyCount + ios.devices.count }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 26) {
+            VStack(alignment: .leading, spacing: 34) {
                 hero
                 VStack(alignment: .leading, spacing: 12) {
                     SectionTitle(title: "Mulai cast")
                     HStack(spacing: 16) {
                         PlatformCard(icon: "smartphone", title: "Android", colors: Theme.android,
                                      description: "Mirror dan kontrol penuh HP Android dari Mac.",
-                                     features: ["USB & Wi-Fi", "Kontrol mouse & keyboard", "Audio & rekam layar"],
+                                     features: ["USB & Wi-Fi", "Kontrol mouse & keyboard", "Audio, rekam & file manager"],
                                      status: android.readyCount > 0 ? "\(android.readyCount) perangkat siap" : nil,
                                      live: !android.running.isEmpty) { page = .android }
                         PlatformCard(icon: "iphone", title: "iPhone & iPad", colors: Theme.ios,
@@ -262,54 +267,75 @@ struct HomeView: View {
                     }
                     .fixedSize(horizontal: false, vertical: true)
                 }
-                VStack(alignment: .leading, spacing: 12) {
-                    SectionTitle(title: "Tentang aplikasi")
-                    HStack(spacing: 16) {
-                        InfoTile(icon: "shippingbox.fill", title: "scrcpy \(Tools.scrcpyVersion)",
-                                 detail: "Sudah dibundel, tanpa install")
-                        InfoTile(icon: "cpu", title: "Universal",
-                                 detail: "Apple Silicon & Intel")
-                        InfoTile(icon: "lock.shield.fill", title: "100% lokal",
-                                 detail: "Tidak ada data dikirim ke internet")
-                        InfoTile(icon: "chevron.left.forwardslash.chevron.right", title: "Open source",
-                                 detail: "Lisensi \(Brand.license), gratis selamanya")
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-                }
+                .appearIn(0.15)
+                readout.appearIn(0.25)
             }
-            .padding(28)
-            .frame(maxWidth: 980)
+            .padding(.horizontal, 36)
+            .padding(.vertical, 30)
+            .frame(maxWidth: 1060)
             .frame(maxWidth: .infinity)
         }
     }
 
     private var hero: some View {
-        HStack(alignment: .center, spacing: 18) {
-            Image(nsImage: NSApp.applicationIconImage)
-                .resizable()
-                .frame(width: 64, height: 64)
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Selamat datang di \(Brand.name)")
-                    .font(.system(size: 30, weight: .bold))
-                    .kerning(-0.5)
-                Text("Tampilkan dan kendalikan layar HP langsung di Mac.")
+        HStack(alignment: .center, spacing: 40) {
+            VStack(alignment: .leading, spacing: 18) {
+                HStack(spacing: 6) {
+                    PulseDot(active: connected > 0)
+                    Text(connected > 0 ? "\(connected) PERANGKAT TERSAMBUNG" : "MENUNGGU PERANGKAT")
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .kerning(1.2)
+                        .foregroundStyle(.secondary)
+                        .contentTransition(.numericText())
+                        .animation(.spring, value: connected)
+                }
+                (Text("Layar HP-mu,\n") + Text("langsung di Mac.").foregroundColor(Brand.start))
+                    .font(.system(size: 40, weight: .heavy))
+                    .kerning(-1.2)
+                    .lineSpacing(-4)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Colok kabel atau sambungkan lewat Wi-Fi, lalu kendalikan HP dengan mouse dan keyboard Mac.")
                     .font(.title3)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: 420, alignment: .leading)
+                HStack(spacing: 10) {
+                    Button { page = .android } label: { Label("Cast Android", systemImage: "smartphone") }
+                        .buttonStyle(InkButtonStyle())
+                    Button { page = .ios } label: { Label("Cast iPhone", systemImage: "iphone") }
+                        .buttonStyle(OutlineButtonStyle())
+                }
+                .padding(.top, 4)
             }
-            Spacer(minLength: 16)
-            VStack(alignment: .trailing, spacing: 6) {
-                Text("v\(Brand.version)".uppercased())
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .kerning(1)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8).padding(.vertical, 4)
-                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.primary.opacity(0.15)))
-                Text("\(android.readyCount + ios.devices.count) perangkat tersambung")
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .appearIn(0)
+
+            CastIllustration(deviceName: android.devices.first(where: { $0.state == "device" })?.displayName ?? "Galaxy S24 Ultra")
+                .frame(maxWidth: 420)
+                .appearIn(0.08)
+        }
+    }
+
+    /// Quiet one-line facts instead of a row of tiles.
+    private var readout: some View {
+        HStack(spacing: 0) {
+            ForEach(Array([("Mesin", "scrcpy \(Tools.scrcpyVersion)"), ("Chip", "Apple Silicon & Intel"),
+                           ("Privasi", "100% lokal"), ("Lisensi", "\(Brand.license) · open source")].enumerated()), id: \.offset) { i, item in
+                if i > 0 { Divider().frame(height: 30) }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.0.uppercased())
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .kerning(1)
+                        .foregroundStyle(.tertiary)
+                    Text(item.1).font(.callout.weight(.medium))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, i == 0 ? 0 : 18)
             }
         }
-        .padding(.bottom, 6)
+        .padding(.vertical, 16)
+        .overlay(alignment: .top) { Divider() }
+        .overlay(alignment: .bottom) { Divider() }
     }
 }
 
@@ -326,7 +352,7 @@ struct PlatformCard: View {
 
     var body: some View {
         Button(action: action) {
-            Panel(highlight: hover ? colors[0] : nil, padding: 20) {
+            Panel(highlight: hover ? colors[0] : nil, padding: 20, fill: true) {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(alignment: .top) {
                         IconBadge(icon: icon, colors: colors, size: 52)
@@ -361,10 +387,11 @@ struct PlatformCard: View {
                 .frame(maxHeight: .infinity, alignment: .top)
             }
             .frame(maxHeight: .infinity)
-            .scaleEffect(hover ? 1.01 : 1)
+            .shadow(color: colors[1].opacity(hover ? 0.18 : 0), radius: 18, y: 10)
+            .offset(y: hover ? -3 : 0)
         }
         .buttonStyle(.plain)
-        .onHover { h in withAnimation(.easeOut(duration: 0.15)) { hover = h } }
+        .onHover { h in withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { hover = h } }
     }
 }
 
@@ -374,7 +401,7 @@ struct InfoTile: View {
     let detail: String
 
     var body: some View {
-        Panel(padding: 14) {
+        Panel(padding: 14, fill: true) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
@@ -428,7 +455,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 /// Menu-bar version of the appearance picker (Tampilan menu, ⌘⇧L / ⌘⇧D / ⌘⇧S).
 struct AppearanceMenu: View {
-    @AppStorage("appearance") private var appearance = Appearance.system.rawValue
+    @AppStorage("appearance") private var appearance = Appearance.light.rawValue
     var body: some View {
         Button("Mode Terang") { appearance = Appearance.light.rawValue }.keyboardShortcut("l", modifiers: [.command, .shift])
         Button("Mode Gelap") { appearance = Appearance.dark.rawValue }.keyboardShortcut("d", modifiers: [.command, .shift])

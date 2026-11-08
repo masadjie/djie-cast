@@ -8,7 +8,7 @@ struct AboutView: View {
                 hero
 
                 HStack(alignment: .top, spacing: 16) {
-                    Panel(padding: 20) {
+                    Panel(padding: 20, fill: true) {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack(spacing: 10) {
                                 IconBadge(icon: "person.fill", colors: Brand.colors, size: 36)
@@ -20,7 +20,7 @@ struct AboutView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
-                    Panel(padding: 20) {
+                    Panel(padding: 20, fill: true) {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack(spacing: 10) {
                                 IconBadge(icon: "chevron.left.forwardslash.chevron.right", colors: Theme.android, size: 36)

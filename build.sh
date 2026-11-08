@@ -3,9 +3,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VERSION="1.0 Beta"
-BUILD_NUMBER="1"
-DMG_NAME="DjieCast-1.0-beta"
+VERSION="1.0 Beta 2"
+BUILD_NUMBER="2"
+DMG_NAME="DjieCast-1.0-beta.2"
 
 APP="build/Djie Cast.app"
 
@@ -69,8 +69,8 @@ mkdir -p "$STAGE"
 cp -R "$APP" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 cat > "$STAGE/BACA DULU.txt" <<'TXT'
-Djie Cast 1.0 Beta
-==================
+Djie Cast 1.0 Beta 2
+====================
 
 INSTALL
 1. Seret "Djie Cast" ke folder Applications.

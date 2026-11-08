@@ -109,12 +109,15 @@ struct SectionTitle: View {
 struct Panel<Content: View>: View {
     var highlight: Color? = nil
     var padding: CGFloat = 16
+    /// Stretch to the row's height. Only for cards side by side in an HStack/grid —
+    /// in a non-scrolling stack this would ask for infinite height and blank the window.
+    var fill = false
     @ViewBuilder var content: Content
 
     var body: some View {
         content
             .padding(padding)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, maxHeight: fill ? .infinity : nil, alignment: .topLeading)
             .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -225,7 +228,8 @@ struct GradientButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .background(colors.count > 1 ? colors[1] : colors[0], in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .opacity(enabled ? (configuration.isPressed ? 0.8 : 1) : 0.4)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
             .contentShape(Rectangle())
     }
 }
@@ -245,5 +249,33 @@ struct SoftButtonStyle: ButtonStyle {
             .background(tint.opacity(configuration.isPressed ? 0.18 : 0.1), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .opacity(enabled ? 1 : 0.4)
             .contentShape(Rectangle())
+    }
+}
+
+/// Primary action: solid ink (black in light, white in dark) — calm and confident.
+struct InkButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var enabled
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.callout.weight(.semibold))
+            .foregroundStyle(Color(nsColor: .windowBackgroundColor))
+            .padding(.vertical, 10).padding(.horizontal, 16)
+            .background(Color.primary, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .opacity(enabled ? (configuration.isPressed ? 0.8 : 1) : 0.4)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
+    }
+}
+
+struct OutlineButtonStyle: ButtonStyle {
+    @State private var hover = false
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.callout.weight(.semibold))
+            .padding(.vertical, 10).padding(.horizontal, 16)
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).strokeBorder(Color.primary.opacity(configuration.isPressed ? 0.3 : 0.14)))
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
