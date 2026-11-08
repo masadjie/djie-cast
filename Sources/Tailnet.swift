@@ -48,10 +48,24 @@ final class TailnetModel: ObservableObject {
 
     var ip: String? { if case .connected(let ip) = state { return ip }; return nil }
 
-    func autoStart() { if enabled && state == .off { start() } }
+    /// True once a login has been saved in the state dir (tsnet writes tailscaled.state after login).
+    static var hasSavedLogin: Bool {
+        let f = stateDir.appendingPathComponent("tailscaled.state")
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: f.path), let size = attrs[.size] as? Int else { return false }
+        return size > 200 && UserDefaults.standard.bool(forKey: "tailnetLoggedIn")
+    }
 
-    func start() {
+    /// On launch: reconnect silently with the saved login. Never opens a login page by itself.
+    func autoStart() {
+        if enabled && state == .off && Self.hasSavedLogin { start(userInitiated: false) }
+    }
+
+    /// Set while a login was requested by the user; only then may a browser page open.
+    private var userInitiated = false
+
+    func start(userInitiated: Bool = true) {
         guard sd < 0 else { return }
+        self.userInitiated = userInitiated
         enabled = true
         signal(SIGPIPE, SIG_IGN)
         state = .starting
@@ -80,7 +94,7 @@ final class TailnetModel: ObservableObject {
     }
 
     /// Stops the node. With `forget`, the login is removed so another account can be used.
-    func stop(forget: Bool = false) {
+    func stop(forget: Bool = false, keepEnabled: Bool = false) {
         poll?.cancel(); poll = nil
         if sd >= 0 { tailscale_close(sd) }
         sd = -1; hostListener = -1
@@ -89,10 +103,15 @@ final class TailnetModel: ObservableObject {
         if forget {
             try? FileManager.default.removeItem(at: Self.stateDir)
             try? FileManager.default.createDirectory(at: Self.stateDir, withIntermediateDirectories: true)
-            enabled = false
-        } else {
-            enabled = false
+            UserDefaults.standard.set(false, forKey: "tailnetLoggedIn")
         }
+        if !keepEnabled { enabled = false }
+    }
+
+    func shutdownForQuit() {
+        poll?.cancel(); poll = nil
+        if sd >= 0 { tailscale_close(sd) }
+        sd = -1
     }
 
     private func onUp() {
@@ -124,6 +143,13 @@ final class TailnetModel: ObservableObject {
         guard sd == s, let json, let obj = try? JSONSerialization.jsonObject(with: json) as? [String: Any] else { return }
 
         let backend = obj["BackendState"] as? String ?? ""
+        if backend == "Running" { UserDefaults.standard.set(true, forKey: "tailnetLoggedIn") }
+        if backend == "NeedsLogin" && !userInitiated {
+            // Saved login expired: stop quietly and let the user press "Aktifkan & masuk".
+            UserDefaults.standard.set(false, forKey: "tailnetLoggedIn")
+            stop(keepEnabled: false)
+            return
+        }
         if backend == "NeedsLogin", let auth = obj["AuthURL"] as? String, !auth.isEmpty, let url = URL(string: auth) {
             if state != .needsLogin(url) {
                 state = .needsLogin(url)

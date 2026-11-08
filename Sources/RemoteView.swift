@@ -325,9 +325,11 @@ struct RemoteDesktopView: View {
                     }
                     switch tailnet.state {
                     case .off:
-                        Text("Kendalikan Mac dari mana saja tanpa memasang aplikasi lain. Masuk dengan akun Tailscale (gratis) yang sama di kedua Mac.")
+                        Text("Kendalikan Mac dari mana saja tanpa memasang aplikasi lain. Masuk sekali dengan akun Tailscale (gratis) yang sama di kedua Mac; login tersimpan untuk berikutnya.")
                             .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                        Button { tailnet.start() } label: { Label("Aktifkan & masuk", systemImage: "person.badge.key") }
+                        Button { tailnet.start(userInitiated: true) } label: {
+                            Label(TailnetModel.hasSavedLogin ? "Sambungkan" : "Aktifkan & masuk", systemImage: TailnetModel.hasSavedLogin ? "link" : "person.badge.key")
+                        }
                             .buttonStyle(GradientButtonStyle(colors: Theme.remote)).fixedSize()
                     case .starting:
                         HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Menghubungkan ke Tailscale…").font(.callout).foregroundStyle(.secondary) }
@@ -356,7 +358,7 @@ struct RemoteDesktopView: View {
                         }
                     case .failed(let msg):
                         Label(msg, systemImage: "exclamationmark.triangle.fill").font(.callout).foregroundStyle(.orange)
-                        Button("Coba lagi") { tailnet.stop(); tailnet.start() }.buttonStyle(SoftButtonStyle(tint: Theme.remote[1])).fixedSize()
+                        Button("Coba lagi") { tailnet.stop(); tailnet.start(userInitiated: true) }.buttonStyle(SoftButtonStyle(tint: Theme.remote[1])).fixedSize()
                     }
                     HStack(spacing: 18) {
                         Label("Sesi tetap terenkripsi TLS + kode akses", systemImage: "lock.fill")
