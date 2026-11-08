@@ -11,7 +11,7 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 </p>
 
 <p align="center">
-  <img alt="Versi" src="https://img.shields.io/badge/versi-1.0%20Beta%202-6366f1">
+  <img alt="Versi" src="https://img.shields.io/badge/versi-1.0-6366f1">
   <img alt="macOS" src="https://img.shields.io/badge/macOS-14%2B-black">
   <img alt="Lisensi" src="https://img.shields.io/badge/lisensi-MIT-green">
 </p>

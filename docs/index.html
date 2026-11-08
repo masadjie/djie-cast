@@ -31,7 +31,7 @@
 <meta name="twitter:title" content="Djie Cast — Layar HP-mu, langsung di Mac">
 <meta name="twitter:description" content="Mirror &amp; kontrol HP Android dan iPhone dari Mac. Gratis &amp; open source.">
 <meta name="twitter:image" content="https://masadjie.github.io/djie-cast/assets/og.jpg">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Djie Cast", "alternateName": ["Djie Cast scrcpy GUI", "Djie Cast Mac"], "description": "Aplikasi macOS gratis & open source untuk mirror dan mengontrol HP Android dan iPhone dari Mac, mengelola file HP, menjalankan emulator Android, dan remote desktop antar Mac.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 14 Sonoma atau lebih baru", "softwareVersion": "1.0 Beta 2", "url": "https://masadjie.github.io/djie-cast/", "downloadUrl": "https://github.com/masadjie/djie-cast/releases", "image": "https://masadjie.github.io/djie-cast/assets/og.jpg", "screenshot": ["https://masadjie.github.io/djie-cast/assets/home-light.jpg", "https://masadjie.github.io/djie-cast/assets/android-light.jpg", "https://masadjie.github.io/djie-cast/assets/files-light.jpg"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "IDR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "author": {"@type": "Person", "name": "Adjie Kurniawan", "url": "https://github.com/masadjie"}, "sameAs": ["https://github.com/masadjie/djie-cast"], "inLanguage": ["id", "en"], "featureList": ["Mirror dan kontrol HP Android lewat USB atau Wi-Fi (scrcpy)", "Tampilkan layar iPhone/iPad lewat USB, iPhone Mirroring, AirPlay", "File manager Android dan galeri foto iPhone", "Emulator Android bawaan", "Remote Desktop Mac ke Mac dengan Tailscale bawaan", "Bisa dipakai untuk live streaming di OBS"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Djie Cast", "alternateName": ["Djie Cast scrcpy GUI", "Djie Cast Mac"], "description": "Aplikasi macOS gratis & open source untuk mirror dan mengontrol HP Android dan iPhone dari Mac, mengelola file HP, menjalankan emulator Android, dan remote desktop antar Mac.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 14 Sonoma atau lebih baru", "softwareVersion": "1.0", "url": "https://masadjie.github.io/djie-cast/", "downloadUrl": "https://github.com/masadjie/djie-cast/releases", "image": "https://masadjie.github.io/djie-cast/assets/og.jpg", "screenshot": ["https://masadjie.github.io/djie-cast/assets/home-light.jpg", "https://masadjie.github.io/djie-cast/assets/android-light.jpg", "https://masadjie.github.io/djie-cast/assets/files-light.jpg"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "IDR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "author": {"@type": "Person", "name": "Adjie Kurniawan", "url": "https://github.com/masadjie"}, "sameAs": ["https://github.com/masadjie/djie-cast"], "inLanguage": ["id", "en"], "featureList": ["Mirror dan kontrol HP Android lewat USB atau Wi-Fi (scrcpy)", "Tampilkan layar iPhone/iPad lewat USB, iPhone Mirroring, AirPlay", "File manager Android dan galeri foto iPhone", "Emulator Android bawaan", "Remote Desktop Mac ke Mac dengan Tailscale bawaan", "Bisa dipakai untuk live streaming di OBS"]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Apakah Djie Cast gratis?", "acceptedAnswer": {"@type": "Answer", "text": "Ya. Djie Cast gratis selamanya dan open source dengan lisensi MIT, tanpa iklan dan tanpa langganan."}}, {"@type": "Question", "name": "Bagaimana cara mirror HP Android ke Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Aktifkan USB Debugging di HP, colok kabel ke Mac, buka Djie Cast lalu klik Mulai Cast. Layar HP tampil di Mac dan bisa dikontrol dengan mouse dan keyboard."}}, {"@type": "Question", "name": "Apakah iPhone bisa ditampilkan di Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Bisa. Colok iPhone lewat kabel dan ketuk Percayai untuk menampilkan layar dan audio, atau gunakan iPhone Mirroring untuk kontrol penuh."}}, {"@type": "Question", "name": "Apakah perlu install scrcpy atau Android Studio?", "acceptedAnswer": {"@type": "Answer", "text": "Tidak. scrcpy dan adb sudah dibundel di dalam aplikasi."}}, {"@type": "Question", "name": "Mac apa saja yang didukung?", "acceptedAnswer": {"@type": "Answer", "text": "macOS 14 Sonoma atau lebih baru, Apple Silicon (M1–M4) dan Intel."}}]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -414,7 +414,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
 <header class="nav">
   <div class="wrap">
     <a class="logo" href="#top" aria-label="Djie Cast">
-      <svg><use href="#logo"/></svg><b>Djie Cast</b><small class="js-ver">1.0 BETA</small>
+      <svg><use href="#logo"/></svg><b>Djie Cast</b><small class="js-ver">1.0</small>
     </a>
     <nav class="nav-links" aria-label="Menu">
       <a href="#android">Android</a>
@@ -451,7 +451,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
         <h1 data-i18n="hero.title">Layar HP-mu, <span class="tail">langsung di Mac.</span></h1>
         <p class="lead" data-i18n="hero.lead">Mirror, kendalikan, dan kelola file Android &amp; iPhone dari Mac. Satu klik, tanpa terminal.</p>
         <div class="hero-actions">
-          <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.0-beta.2/DjieCast-1.0-beta.2.dmg">
+          <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.0/DjieCast-1.0.dmg">
             <svg><use href="#i-apple"/></svg><span data-i18n="cta.download">Download untuk Mac</span>
           </a>
           <a class="btn btn-line" href="https://github.com/masadjie/djie-cast" target="_blank" rel="noopener" data-i18n="cta.source">Kode sumber</a>
@@ -738,7 +738,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
       <div class="release">
         <div class="release-head">
           <span class="label" data-i18n="rel.label">Rilis terbaru</span>
-          <strong class="js-ver2">1.0 Beta</strong>
+          <strong class="js-ver2">1.0</strong>
         </div>
         <dl>
           <dt data-i18n="rel.file">File</dt><dd class="js-size">DMG 20 MB</dd>
@@ -747,7 +747,7 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
           <dt data-i18n="rel.lic">Lisensi</dt><dd>MIT · open source</dd>
         </dl>
         <div class="release-actions">
-          <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.0-beta.2/DjieCast-1.0-beta.2.dmg"><svg><use href="#i-apple"/></svg><span data-i18n="cta.download">Download untuk Mac</span></a>
+          <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.0/DjieCast-1.0.dmg"><svg><use href="#i-apple"/></svg><span data-i18n="cta.download">Download untuk Mac</span></a>
           <a class="btn btn-line" href="https://github.com/masadjie/djie-cast/releases" target="_blank" rel="noopener" data-i18n="rel.notes">Catatan rilis</a>
         </div>
       </div>
