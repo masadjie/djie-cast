@@ -2,568 +2,814 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Djie Cast — Cast Android & iPhone ke Mac</title>
-<meta name="description" content="Djie Cast: aplikasi macOS gratis & open source untuk mirror, mengontrol, dan mengelola file HP Android & iPhone dari Mac. Tanpa terminal, tanpa ribet.">
-<meta name="theme-color" content="#4f46e5">
-<link rel="icon" type="image/png" href="assets/icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Djie Cast</title>
+<meta name="description" content="Djie Cast: aplikasi macOS gratis & open source untuk mirror, mengontrol, dan mengelola file HP Android & iPhone dari Mac. Tanpa terminal.">
+<meta name="theme-color" content="#4f45e6">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="alternate icon" type="image/png" href="assets/icon.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Djie Cast — Cast Android & iPhone ke Mac">
-<meta property="og:description" content="Mirror & kontrol HP dari Mac. Gratis & open source.">
+<meta property="og:title" content="Djie Cast">
+<meta property="og:description" content="Mirror & kontrol HP Android dan iPhone dari Mac. Gratis & open source.">
 <meta property="og:url" content="https://masadjie.github.io/djie-cast/">
-<meta property="og:image" content="https://masadjie.github.io/djie-cast/assets/shot-home-dark.jpg">
+<meta property="og:image" content="https://masadjie.github.io/djie-cast/assets/home-dark.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400..700&family=Martian+Mono:wght@400..600&display=swap">
 <style>
-  :root {
-    --bg: #07070d;
-    --bg-2: #0e0e18;
-    --surface: rgba(255,255,255,.04);
-    --surface-2: rgba(255,255,255,.07);
-    --border: rgba(255,255,255,.09);
-    --text: #f4f4f8;
-    --muted: #a1a1b5;
-    --dim: #6b6b80;
-    --indigo: #4f46e5;
-    --violet: #7c3aed;
-    --cyan: #06b6d4;
-    --green: #22c55e;
-    --android: #2fbf71;
-    --ios: #5b7cfa;
-    --pink: #ec4899;
-    --grad: linear-gradient(135deg, #4f46e5 0%, #7c3aed 45%, #06b6d4 100%);
-    --radius: 18px;
+/* Layout: left-aligned "signal path" — every section reads phone → Mac, left to right.
+   One loud moment (the live cast demo in the hero); everything else is quiet paper + ink. */
+:root {
+  --paper: #f3f4f9;
+  --panel: #ffffff;
+  --ink: #12142b;
+  --ink-2: #4a4e6b;
+  --ink-3: #868aa3;
+  --line: #dcdeea;
+  --signal: #4f45e6;
+  --signal-ink: #ffffff;
+  --wave: #0798b3;
+  --live: #16a34a;
+  --key-top: #ffffff;
+  --key-side: #c9ccdc;
+  --term: #10122a;
+  --term-ink: #c9cdf8;
+
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Instrument Sans", -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --gutter: max(20px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(20px, env(safe-area-inset-right, 0px));
+  --max: 1200px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0b0c18; --panel: #14162a; --ink: #eceef8; --ink-2: #a8abc6; --ink-3: #6c7090;
+    --line: #262944; --signal: #8a84ff; --signal-ink: #0b0c18; --wave: #45d4ee; --live: #4ade80;
+    --key-top: #24273f; --key-side: #0a0b16; --term: #05060f; --term-ink: #c9cdf8;
     color-scheme: dark;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
-  a { color: inherit; text-decoration: none; }
-  img { max-width: 100%; display: block; }
-  .wrap { width: min(1180px, 100% - 32px); margin-inline: auto; }
+}
+:root[data-theme="dark"] {
+  --paper: #0b0c18; --panel: #14162a; --ink: #eceef8; --ink-2: #a8abc6; --ink-3: #6c7090;
+  --line: #262944; --signal: #8a84ff; --signal-ink: #0b0c18; --wave: #45d4ee; --live: #4ade80;
+  --key-top: #24273f; --key-side: #0a0b16; --term: #05060f; --term-ink: #c9cdf8;
+  color-scheme: dark;
+}
 
-  /* Background glow */
-  .glow { position: fixed; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
-  .glow::before, .glow::after {
-    content: ""; position: absolute; width: 900px; height: 900px; border-radius: 50%;
-    filter: blur(140px); opacity: .35;
-  }
-  .glow::before { background: var(--indigo); top: -420px; left: -260px; }
-  .glow::after { background: var(--cyan); top: -380px; right: -320px; opacity: .22; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 17px/1.6 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+img, svg { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 6px; }
+.wrap { max-width: var(--max); margin-inline: auto; padding-left: var(--gutter); padding-right: var(--gutter-r); }
 
-  /* Nav */
-  nav {
-    position: sticky; top: 0; z-index: 50;
-    backdrop-filter: saturate(160%) blur(18px);
-    -webkit-backdrop-filter: saturate(160%) blur(18px);
-    background: rgba(7,7,13,.62);
-    border-bottom: 1px solid var(--border);
-  }
-  nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; }
-  .brand img { width: 32px; height: 32px; }
-  .nav-links { display: flex; gap: 24px; margin-left: auto; font-size: 14.5px; color: var(--muted); }
-  .nav-links a:hover { color: var(--text); }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-    padding: 12px 22px; border-radius: 12px; font-weight: 700; font-size: 15px;
-    border: 1px solid transparent; transition: transform .15s, box-shadow .2s, background .2s;
-    cursor: pointer; white-space: nowrap;
-  }
-  .btn:hover { transform: translateY(-1px); }
-  .btn svg { width: 18px; height: 18px; flex: none; }
-  .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 10px 30px -8px rgba(99,102,241,.7); }
-  .btn-primary:hover { box-shadow: 0 14px 40px -8px rgba(99,102,241,.9); }
-  .btn-ghost { background: var(--surface); border-color: var(--border); color: var(--text); }
-  .btn-ghost:hover { background: var(--surface-2); }
-  .btn-sm { padding: 8px 14px; font-size: 13.5px; border-radius: 10px; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 112%; text-wrap: balance; letter-spacing: -.02em; }
+h1 { font-size: clamp(42px, 6.2vw, 80px); line-height: .98; font-weight: 850; }
+h2 { font-size: clamp(32px, 4.6vw, 56px); line-height: 1.02; font-weight: 800; }
+h3 { font-size: 21px; line-height: 1.25; font-weight: 750; font-stretch: 105%; letter-spacing: -.01em; }
+p { text-wrap: pretty; }
+.mono { font-family: var(--f-mono); font-size: 12.5px; letter-spacing: .02em; }
+.label {
+  font-family: var(--f-mono); font-size: 11.5px; font-weight: 500; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-3); display: inline-flex; align-items: center; gap: 10px;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--live); box-shadow: 0 0 0 4px color-mix(in srgb, var(--live) 18%, transparent); }
+.lead { font-size: clamp(18px, 1.6vw, 21px); color: var(--ink-2); max-width: 34ch; }
+.muted { color: var(--ink-2); }
 
-  /* Hero */
-  .hero { padding: 88px 0 40px; text-align: center; }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px;
-    border-radius: 999px; background: var(--surface); border: 1px solid var(--border);
-    font-size: 13px; color: var(--muted); margin-bottom: 26px;
-  }
-  .eyebrow b {
-    background: var(--grad); color: #fff; font-size: 11px; letter-spacing: .06em;
-    padding: 3px 9px; border-radius: 999px;
-  }
-  h1 {
-    font-size: clamp(40px, 7vw, 76px); line-height: 1.04; font-weight: 800;
-    letter-spacing: -.035em; max-width: 900px; margin: 0 auto;
-  }
-  .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .lead { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 640px; margin: 22px auto 0; }
-  .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
-  .meta { margin-top: 16px; font-size: 13px; color: var(--dim); }
-  .badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 30px; }
-  .badge {
-    display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted);
-    padding: 7px 13px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border);
-  }
-  .badge i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer;
+  font: 600 16px/1 var(--f-body); padding: 15px 22px; border-radius: 10px; border: 1px solid transparent;
+  transition: transform .15s ease, background .2s ease, border-color .2s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.btn-main { background: var(--ink); color: var(--paper); }
+.btn-line { border-color: var(--line); background: var(--panel); color: var(--ink); }
+.btn-line:hover { border-color: var(--ink-3); }
+.btn-sm { padding: 10px 14px; font-size: 14px; border-radius: 8px; }
 
-  /* Window mock */
-  .window {
-    margin: 64px auto 0; max-width: 1080px; border-radius: 16px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.12); background: #1d1d22;
-    box-shadow: 0 50px 120px -30px rgba(79,70,229,.55), 0 0 0 1px rgba(0,0,0,.4);
-    position: relative;
-  }
-  .window-bar { height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 16px; background: #26262c; border-bottom: 1px solid rgba(255,255,255,.06); }
-  .window-bar span { width: 12px; height: 12px; border-radius: 50%; }
-  .window-bar span:nth-child(1) { background: #ff5f57; }
-  .window-bar span:nth-child(2) { background: #febc2e; }
-  .window-bar span:nth-child(3) { background: #28c840; }
-  .window-bar em { margin-left: auto; margin-right: auto; font-style: normal; font-size: 12.5px; color: #8b8b98; transform: translateX(-30px); }
-  .window img { width: 100%; }
+/* Nav */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--paper); }
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50;
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border-bottom: 1px solid var(--line);
+}
+.nav .wrap { display: flex; align-items: center; gap: 32px; height: 66px; }
+.logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+.logo svg { width: 34px; height: 34px; filter: drop-shadow(0 4px 10px rgba(79,69,230,.35)); }
+.logo b { font: 800 19px/1 var(--f-display); font-stretch: 115%; letter-spacing: -.01em; }
+.logo small { font: 500 10px/1 var(--f-mono); letter-spacing: .1em; color: var(--ink-3); border: 1px solid var(--line); padding: 4px 6px; border-radius: 5px; }
+.nav-links { display: flex; gap: 26px; margin-left: auto; font-size: 15px; }
+.nav-links a { text-decoration: none; color: var(--ink-2); }
+.nav-links a:hover { color: var(--ink); }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; padding: 3px; background: var(--panel); }
+.lang button { font: 500 11.5px/1 var(--f-mono); letter-spacing: .06em; border: 0; background: none; color: var(--ink-3); padding: 7px 9px; border-radius: 5px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.nav-end { display: flex; align-items: center; gap: 10px; }
 
-  /* Sections */
-  section { padding: 110px 0 0; }
-  .section-head { text-align: center; max-width: 720px; margin: 0 auto 52px; }
-  .kicker { font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #8b8bff; }
-  h2 { font-size: clamp(30px, 4.4vw, 46px); line-height: 1.12; letter-spacing: -.025em; font-weight: 800; margin-top: 10px; }
-  .section-head p { color: var(--muted); font-size: 17px; margin-top: 14px; }
+/* Hero */
+.hero { padding-block: clamp(48px, 8vw, 96px) 40px; position: relative; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+.hero-copy { display: grid; gap: 26px; justify-items: start; }
+.hero h1 .tail { display: block; color: var(--signal); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--ink-3); }
+.facts span { display: inline-flex; align-items: center; gap: 8px; }
+.facts span + span::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--line); margin-right: 10px; }
 
-  /* Features */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-  .card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 26px; transition: border-color .2s, transform .2s, background .2s;
-  }
-  .card:hover { border-color: rgba(139,139,255,.35); transform: translateY(-3px); background: var(--surface-2); }
-  .icon {
-    width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; margin-bottom: 18px;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
-  }
-  .icon svg { width: 24px; height: 24px; color: #fff; }
-  .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-  .card p { color: var(--muted); font-size: 15px; }
-  .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 3px 9px; border-radius: 999px; margin-bottom: 12px; }
-  .tag-a { background: rgba(47,191,113,.15); color: #4ade80; }
-  .tag-i { background: rgba(91,124,250,.16); color: #93a8ff; }
-  .tag-b { background: rgba(236,72,153,.15); color: #f9a8d4; }
+/* Cast demo */
+.stage { position: relative; aspect-ratio: 6 / 5; max-width: 100%; }
+.mac {
+  position: absolute; right: 0; top: 0; width: 84%; height: 86%;
+  background: #1b1c2a; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 40px 80px -30px rgba(18,20,43,.45), 0 0 0 1px rgba(18,20,43,.25);
+  display: flex; flex-direction: column;
+}
+.mac-bar { height: 30px; flex: none; display: flex; align-items: center; gap: 7px; padding: 0 12px; background: #262838; border-bottom: 1px solid rgba(255,255,255,.06); }
+.mac-bar i { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; }
+.mac-bar i:nth-child(2) { background: #febc2e; } .mac-bar i:nth-child(3) { background: #28c840; }
+.mac-bar em { font: 500 10.5px/1 var(--f-mono); color: #8a8ca3; font-style: normal; margin-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mac-body { flex: 1; display: grid; place-items: center; position: relative; background: radial-gradient(80% 70% at 50% 40%, #232540, #12131f); }
+.mac-body .scr { height: 88%; }
+.phone {
+  position: absolute; left: 0; bottom: 0; width: 27%; aspect-ratio: 9 / 19.2;
+  background: #0d0e17; border-radius: 13% / 6%; padding: 3.2%;
+  box-shadow: 0 30px 60px -20px rgba(18,20,43,.55), inset 0 0 0 1.5px #3a3c52;
+}
+.phone .scr { width: 100%; height: 100%; border-radius: 10% / 4.6%; }
+.waves { position: absolute; left: 22%; bottom: 46%; width: 15%; color: var(--wave); }
+.waves path { animation: wave 2.4s ease-out infinite; opacity: 0; }
+.waves path:nth-child(2) { animation-delay: .3s; } .waves path:nth-child(3) { animation-delay: .6s; }
+@keyframes wave { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
 
-  /* Platform split */
-  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .platform { border-radius: 22px; padding: 34px; position: relative; overflow: hidden; border: 1px solid var(--border); }
-  .platform::before { content: ""; position: absolute; inset: 0; opacity: .14; z-index: -1; }
-  .platform.android::before { background: linear-gradient(140deg, #2fbf71, #0b8a6a); }
-  .platform.ios::before { background: linear-gradient(140deg, #5b7cfa, #7c3aed); }
-  .platform h3 { font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-  .platform ul { list-style: none; display: grid; gap: 12px; }
-  .platform li { display: flex; gap: 12px; color: #d4d4e0; font-size: 15.5px; }
-  .platform li svg { width: 20px; height: 20px; flex: none; margin-top: 2px; }
-  .android li svg { color: #4ade80; }
-  .ios li svg { color: #93a8ff; }
-  .note { margin-top: 20px; font-size: 13.5px; color: var(--muted); padding: 12px 14px; border-radius: 12px; background: rgba(0,0,0,.25); border: 1px solid var(--border); }
+/* A tiny Android home screen, drawn twice (phone + mirror) and animated in sync */
+.scr {
+  --w: 1; aspect-ratio: 9 / 19.5; position: relative; overflow: hidden; container-type: size;
+  background: linear-gradient(165deg, #3b2fd1 0%, #6d3bd8 40%, #0e9fbf 100%); border-radius: 6% / 2.8%;
+  color: #fff; font-family: var(--f-body);
+}
+.scr .sb { display: flex; justify-content: space-between; padding: 4cqh 7cqw 0; font: 600 3.4cqh/1 var(--f-body); opacity: .9; }
+.scr .clock { padding: 7cqh 7cqw 0; font: 700 13cqh/1 var(--f-display); font-stretch: 90%; letter-spacing: -.02em; }
+.scr .date { padding: 1.5cqh 7cqw 0; font-size: 3.6cqh; opacity: .85; }
+.scr .apps { position: absolute; left: 7cqw; right: 7cqw; bottom: 16cqh; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5cqh 6cqw; }
+.scr .apps b { aspect-ratio: 1; border-radius: 30%; background: rgba(255,255,255,.22); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); position: relative; }
+.scr .apps b:nth-child(1) { background: #ffcf4a; } .scr .apps b:nth-child(2) { background: #ff6b8b; }
+.scr .apps b:nth-child(3) { background: #39d98a; } .scr .apps b:nth-child(4) { background: #ffffff; }
+.scr .apps b:nth-child(5) { background: #ff8a3d; } .scr .apps b:nth-child(6) { background: #61a8ff; }
+.scr .apps b:nth-child(7) { background: #c084fc; } .scr .apps b:nth-child(8) { background: #f5f5f5; }
+.scr .dock { position: absolute; left: 7cqw; right: 7cqw; bottom: 4cqh; height: 8cqh; border-radius: 4cqh; background: rgba(255,255,255,.18); }
+.scr .tap { position: absolute; inset: 0; border-radius: 30%; background: #fff; opacity: 0; animation: tap 7s infinite; }
+.scr .app {
+  position: absolute; inset: 0; background: #f6f6fb; color: #12142b; transform: translateY(102%);
+  animation: open 7s cubic-bezier(.2,.8,.2,1) infinite; padding: 6cqh 6cqw;
+}
+.scr .app h4 { font: 700 6cqh/1 var(--f-display); font-stretch: 100%; margin: 3cqh 0 4cqh; }
+.scr .app .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6cqw; }
+.scr .app .grid i { aspect-ratio: 1; border-radius: 2px; }
+.scr .app .grid i:nth-child(6n+1) { background: #ffb4a2; } .scr .app .grid i:nth-child(6n+2) { background: #a5b4fc; }
+.scr .app .grid i:nth-child(6n+3) { background: #86efac; } .scr .app .grid i:nth-child(6n+4) { background: #fde68a; }
+.scr .app .grid i:nth-child(6n+5) { background: #93c5fd; } .scr .app .grid i:nth-child(6n) { background: #f0abfc; }
+@keyframes tap { 0%, 30% { opacity: 0; transform: scale(.6); } 33% { opacity: .55; transform: scale(1.05); } 40%, 100% { opacity: 0; transform: scale(1.3); } }
+@keyframes open { 0%, 34% { transform: translateY(102%); } 44%, 82% { transform: translateY(0); } 92%, 100% { transform: translateY(102%); } }
+.cursor { position: absolute; width: 22px; z-index: 3; left: 70%; top: 85%; animation: cursor 7s ease-in-out infinite; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+@keyframes cursor {
+  0% { left: 72%; top: 86%; } 26%, 36% { left: 55%; top: 63%; } 31% { transform: scale(.85); }
+  33% { transform: scale(1); } 60% { left: 63%; top: 40%; } 100% { left: 72%; top: 86%; }
+}
+.readout {
+  position: absolute; left: 30%; bottom: 2%; right: 0; display: flex; flex-wrap: wrap; gap: 6px 14px;
+  color: var(--ink-2); padding-left: 10px;
+}
+.readout .on { color: var(--live); display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+.readout .on::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: blink 1.4s steps(2, start) infinite; }
+@keyframes blink { 50% { opacity: .25; } }
 
-  /* Gallery */
-  .tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 26px; }
-  .tab {
-    padding: 9px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--muted);
-    background: var(--surface); border: 1px solid var(--border); cursor: pointer; font-family: inherit;
-  }
-  .tab[aria-selected="true"] { background: var(--grad); color: #fff; border-color: transparent; }
-  .gallery .window { margin-top: 0; }
-  .gallery img { transition: opacity .25s; }
+/* Spec strip */
+.specs { border-block: 1px solid var(--line); margin-top: 56px; }
+.specs .wrap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.spec { padding: 26px 22px 24px 0; display: grid; gap: 4px; }
+.spec + .spec { border-left: 1px solid var(--line); padding-left: 22px; }
+.spec strong { font: 800 clamp(30px, 3.4vw, 42px)/1 var(--f-display); font-stretch: 115%; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.spec strong small { font-size: .5em; font-weight: 700; color: var(--ink-3); margin-left: 4px; letter-spacing: 0; }
+.spec span { color: var(--ink-2); font-size: 15px; }
 
-  /* Steps */
-  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: s; }
-  .step { counter-increment: s; }
-  .step::before {
-    content: counter(s); display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px;
-    background: var(--grad); font-weight: 800; margin-bottom: 16px;
-  }
-  .code {
-    margin-top: 22px; display: flex; align-items: center; gap: 12px; background: #0b0b14;
-    border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
-    font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13.5px; color: #c7d2fe;
-    overflow-x: auto;
-  }
-  .code span { flex: 1; white-space: nowrap; }
-  .copy { flex: none; font-family: "Plus Jakarta Sans", sans-serif; }
-  .req { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 26px; }
+/* Sections */
+section { padding-block: clamp(80px, 10vw, 130px) 0; }
+.head { display: grid; gap: 16px; max-width: 780px; margin-bottom: 48px; }
+.head p { color: var(--ink-2); max-width: 58ch; font-size: 18px; }
+.row { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.45fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+.row.flip { grid-template-columns: minmax(0, 1.45fr) minmax(0, .75fr); }
+.row.flip .shot { order: -1; }
+.row + .row { margin-top: clamp(64px, 8vw, 110px); }
+.shot { border-radius: 12px; overflow: hidden; background: var(--panel); aspect-ratio: 16 / 10; max-width: 100%;
+  box-shadow: 0 34px 70px -32px rgba(18,20,43,.45), 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent); }
+.shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.wide-shot { margin-top: clamp(64px, 8vw, 110px); display: grid; gap: 18px; }
+.wide-shot figcaption { color: var(--ink-3); }
+.points { list-style: none; display: grid; gap: 0; margin-top: 26px; border-top: 1px solid var(--line); }
+.points li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.points b { font-weight: 650; }
+.points span { color: var(--ink-2); }
+.copy-col { display: grid; gap: 14px; }
+.copy-col > p { color: var(--ink-2); max-width: 46ch; }
 
-  /* FAQ */
-  .faq { max-width: 820px; margin: 0 auto; display: grid; gap: 12px; }
-  details { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; }
-  details[open] { background: var(--surface-2); }
-  summary { cursor: pointer; font-weight: 700; font-size: 16.5px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
-  summary::-webkit-details-marker { display: none; }
-  summary::after { content: "+"; color: var(--dim); font-size: 22px; line-height: 1; transition: transform .2s; }
-  details[open] summary::after { transform: rotate(45deg); }
-  details p { color: var(--muted); margin-top: 10px; font-size: 15px; }
+/* Keycaps — the Mac keyboard is the remote */
+.keys { margin-top: clamp(64px, 8vw, 110px); background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: clamp(24px, 4vw, 44px); display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: 40px; align-items: start; }
+.keys .copy-col h3 { font-size: 28px; }
+.keymap { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 20px; }
+.km { display: flex; align-items: center; gap: 12px; }
+.km span { color: var(--ink-2); font-size: 15px; }
+.cap {
+  display: inline-grid; place-items: center; min-width: 34px; height: 34px; padding: 0 9px;
+  font: 500 13px/1 var(--f-mono); color: var(--ink); background: var(--key-top);
+  border: 1px solid var(--key-side); border-bottom-width: 3px; border-radius: 7px;
+}
+.caps { display: inline-flex; gap: 5px; flex: none; }
 
-  /* Donate */
-  .donate {
-    display: grid; grid-template-columns: 1.15fr .85fr; gap: 40px; align-items: center;
-    border-radius: 28px; padding: 48px; border: 1px solid rgba(236,72,153,.25);
-    background: radial-gradient(120% 120% at 0% 0%, rgba(236,72,153,.18), transparent 60%),
-                radial-gradient(120% 120% at 100% 100%, rgba(124,58,237,.18), transparent 60%), var(--bg-2);
-  }
-  .donate h2 { margin-top: 8px; }
-  .donate p { color: var(--muted); margin-top: 14px; font-size: 16px; }
-  .donate ol { margin: 22px 0 0 20px; color: #d4d4e0; display: grid; gap: 8px; }
-  .confirm {
-    margin-top: 26px; padding: 20px; border-radius: 16px; background: rgba(34,197,94,.08);
-    border: 1px solid rgba(34,197,94,.3);
-  }
-  .confirm small { color: var(--muted); display: block; }
-  .phone { font-size: 30px; font-weight: 800; letter-spacing: .01em; margin: 4px 0 14px; }
-  .btn-wa { background: #22c55e; color: #052e14; }
-  .btn-wa:hover { box-shadow: 0 10px 30px -8px rgba(34,197,94,.7); }
-  .qris { background: #fff; border-radius: 20px; padding: 10px; box-shadow: 0 30px 80px -20px rgba(236,72,153,.5); max-width: 340px; margin-inline: auto; }
-  .qris img { border-radius: 12px; }
-  .qris-cap { text-align: center; font-size: 13px; color: var(--muted); margin-top: 14px; }
+/* iOS table */
+.tbl-wrap { overflow-x: auto; margin-top: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 11px/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+tr:last-child td { border-bottom: 0; }
+td b { font-weight: 650; }
+.yes { color: var(--live); font-weight: 600; }
+.note { color: var(--ink-3); font-size: 14px; margin-top: 12px; max-width: 60ch; }
 
-  /* Final CTA + footer */
-  .final { text-align: center; padding: 120px 0 100px; }
-  .final img { width: 96px; height: 96px; margin: 0 auto 24px; filter: drop-shadow(0 20px 40px rgba(79,70,229,.6)); }
-  footer { border-top: 1px solid var(--border); padding: 36px 0 48px; color: var(--dim); font-size: 14px; }
-  footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
-  footer a { color: var(--muted); }
-  footer a:hover { color: var(--text); }
-  .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
+/* Install */
+.steps { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); counter-reset: step; }
+.steps li { counter-increment: step; padding: 22px 24px 0 0; display: grid; gap: 8px; align-content: start; }
+.steps li + li { padding-left: 24px; border-left: 1px solid var(--line); }
+.steps li::before { content: "0" counter(step); font: 500 12px/1 var(--f-mono); color: var(--ink-3); letter-spacing: .1em; }
+.steps p { color: var(--ink-2); }
+.term { margin-top: 36px; background: var(--term); color: var(--term-ink); border-radius: 12px; overflow: hidden; }
+.term-bar { display: flex; align-items: center; gap: 7px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.term-bar i { width: 9px; height: 9px; border-radius: 50%; background: #3a3d5c; }
+.term-bar em { font: 500 11px/1 var(--f-mono); color: #6d7199; font-style: normal; margin-left: 6px; }
+.term-bar .btn { margin-left: auto; background: rgba(255,255,255,.08); color: #e6e8ff; border: 0; padding: 7px 11px; font-size: 13px; }
+.term pre { padding: 18px 18px 20px; overflow-x: auto; font: 400 13.5px/1.7 var(--f-mono); }
+.term .c { color: #6d7199; }
+.term .p { color: #7ee2f5; }
+.reqs { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; color: var(--ink-3); }
 
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
-  .reveal.in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } html { scroll-behavior: auto; } }
+/* FAQ */
+.faq { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: 48px; align-items: start; }
+.faq-list { border-top: 1px solid var(--line); }
+details { border-bottom: 1px solid var(--line); }
+summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 20px; padding: 20px 0; font-weight: 650; font-size: 18px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; font: 400 22px/1 var(--f-mono); color: var(--ink-3); transition: transform .2s; }
+details[open] summary::after { transform: rotate(45deg); }
+details p { color: var(--ink-2); padding-bottom: 22px; max-width: 62ch; }
 
-  @media (max-width: 900px) {
-    .nav-links { display: none; }
-    nav .btn-sm { margin-left: auto; }
-    .split, .donate { grid-template-columns: 1fr; }
-    .donate { padding: 28px 20px; }
-    .steps { grid-template-columns: 1fr; }
-    .hero { padding-top: 56px; }
-    section { padding-top: 80px; }
-    .window-bar em { display: none; }
-  }
+/* Donate */
+.donate { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
+.standee { position: relative; max-width: 360px; justify-self: center; }
+.standee img { border-radius: 10px; box-shadow: 0 40px 80px -30px rgba(18,20,43,.5), 0 0 0 1px rgba(18,20,43,.08); transform: rotate(-2.5deg); background: #fff; }
+.standee figcaption { margin-top: 22px; color: var(--ink-3); text-align: center; }
+.donate .copy-col { gap: 20px; }
+.donate ol { list-style: none; counter-reset: d; display: grid; gap: 10px; }
+.donate ol li { counter-increment: d; display: grid; grid-template-columns: 28px minmax(0, 1fr); color: var(--ink-2); }
+.donate ol li::before { content: counter(d) "."; font: 500 13px/1.9 var(--f-mono); color: var(--ink-3); }
+.confirm { border: 1px solid var(--line); background: var(--panel); border-radius: 14px; padding: 22px; display: grid; gap: 10px; }
+.phone-no { font: 800 clamp(30px, 4vw, 40px)/1 var(--f-display); font-stretch: 110%; letter-spacing: .01em; font-variant-numeric: tabular-nums; user-select: all; }
+.confirm .acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.btn-wa { background: #25d366; color: #062c16; }
+
+/* Closing + footer */
+.closing { padding-block: clamp(90px, 12vw, 150px); }
+.closing .wrap { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 32px; align-items: center; }
+.closing svg { width: 96px; height: 96px; filter: drop-shadow(0 18px 30px rgba(79,69,230,.35)); }
+footer { border-top: 1px solid var(--line); padding-block: 28px 40px; color: var(--ink-3); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 14px 28px; justify-content: space-between; }
+footer nav { display: flex; flex-wrap: wrap; gap: 22px; }
+footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .waves path, .scr .tap, .scr .app, .cursor, .readout .on::before { animation: none; }
+  .waves path { opacity: 1; }
+  .cursor { left: 55%; top: 63%; }
+}
+@media (max-width: 920px) {
+  .nav-links { display: none; }
+  .nav-end { margin-left: auto; }
+  .nav-end .btn span { display: none; }
+  .hero .wrap, .row, .row.flip, .keys, .faq, .donate { grid-template-columns: minmax(0, 1fr); }
+  .row.flip .shot { order: 0; }
+  .specs .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .spec:nth-child(3) { border-left: 0; padding-left: 0; }
+  .spec:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .steps { grid-template-columns: minmax(0, 1fr); }
+  .steps li + li { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); margin-top: 18px; }
+  .closing .wrap { grid-template-columns: minmax(0, 1fr); }
+  .points li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+@media (max-width: 520px) {
+  .logo small { display: none; }
+  .readout { left: 0; bottom: auto; top: 100%; padding: 12px 0 0; }
+  .stage { margin-bottom: 36px; }
+  .keymap { grid-template-columns: minmax(0, 1fr); }
+  .spec { padding-right: 12px; }
+  .spec + .spec { padding-left: 14px; }
+  .spec:nth-child(3) { padding-left: 0; }
+  .spec span { font-size: 14px; }
+}
+
+/* Live streaming flow */
+.live { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.25fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+.flow { list-style: none; display: grid; gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.flow li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; padding: 20px 22px; align-items: start; }
+.flow li + li { border-top: 1px solid var(--line); }
+.flow .n { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font: 500 12px/1 var(--f-mono); background: color-mix(in srgb, var(--signal) 12%, transparent); color: var(--signal); }
+.flow b { display: block; font-weight: 650; margin-bottom: 2px; }
+.flow span { color: var(--ink-2); font-size: 15.5px; }
+.apps-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chip { font: 500 12.5px/1 var(--f-mono); padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.chip.soft { color: var(--ink-3); border-style: dashed; }
+@media (max-width: 920px) { .live { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
 <body>
-<div class="glow"></div>
 
-<nav>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F45E6"/><stop offset="1" stop-color="#05B5D4"/></linearGradient>
+    <symbol id="logo" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="22.5" fill="url(#lg)"/>
+      <rect x="24.3" y="17.5" width="36.4" height="65.5" rx="6.8" fill="#fff"/>
+      <rect x="27.5" y="21.6" width="30" height="57.3" rx="3.9" fill="#33388C"/>
+      <path d="M35.2 38.5h6.6c6.9 0 10.9 4.2 10.9 11.3s-4 11.5-10.9 11.5h-6.6Zm5.9 17.7h.8c3.6 0 5.2-2.3 5.2-6.4s-1.6-6.3-5.2-6.3h-.8Z" fill="#59D9F2"/>
+      <g fill="none" stroke="#fff" stroke-width="5.6" stroke-linecap="round">
+        <path d="M71.56 38.35A10.9 10.9 0 0 0 61.65 28.44"/>
+        <path d="M81.22 37.5A20.6 20.6 0 0 0 62.5 18.78" stroke-opacity=".78"/>
+        <path d="M90.88 36.66A30.3 30.3 0 0 0 63.34 9.12" stroke-opacity=".56"/>
+      </g>
+    </symbol>
+    <symbol id="i-apple" viewBox="0 0 24 24"><path fill="currentColor" d="M16.37 12.6c.02 2.5 2.2 3.33 2.22 3.34-.02.06-.35 1.19-1.150 2.36-.69 1.01-1.41 2.02-2.55 2.04-1.11.02-1.47-.66-2.75-.66s-1.67.64-2.73.68c-1.1.04-1.94-1.1-2.64-2.1-1.43-2.07-2.53-5.85-1.06-8.4.73-1.27 2.04-2.07 3.46-2.09 1.08-.02 2.1.73 2.76.73.66 0 1.9-.9 3.2-.77.55.02 2.08.22 3.06 1.66-.08.05-1.83 1.07-1.81 3.2ZM14.27 4.82c.58-.71.98-1.7.87-2.68-.84.03-1.86.56-2.470 1.27-.54.62-1.02 1.63-.89 2.59.94.07 1.9-.48 2.49-1.18Z"/></symbol>
+    <symbol id="i-gh" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.770 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
   <div class="wrap">
-    <a href="#" class="brand"><img src="assets/icon.png" alt="">Djie Cast</a>
-    <div class="nav-links">
-      <a href="#fitur">Fitur</a>
-      <a href="#tampilan">Tampilan</a>
-      <a href="#install">Install</a>
-      <a href="#faq">FAQ</a>
-      <a href="#donasi">Donasi</a>
-    </div>
-    <a class="btn btn-ghost btn-sm" href="https://github.com/masadjie/djie-cast" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
-      GitHub
+    <a class="logo" href="#top" aria-label="Djie Cast">
+      <svg><use href="#logo"/></svg><b>Djie Cast</b><small class="js-ver">1.0 BETA</small>
     </a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <div class="eyebrow"><b class="js-version">v1.0 BETA</b> Gratis &amp; open source untuk macOS</div>
-    <h1>Layar HP kamu,<br><span class="grad-text">langsung di Mac.</span></h1>
-    <p class="lead">Mirror, kontrol, dan kelola file Android &amp; iPhone dari Mac — cukup satu klik, tanpa terminal, tanpa ribet.</p>
-    <div class="cta">
-      <a class="btn btn-primary js-download" href="https://github.com/masadjie/djie-cast/releases/download/v1.0-beta/DjieCast-1.0-beta.dmg">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.37 12.6c.02 2.5 2.2 3.33 2.22 3.34-.02.06-.35 1.19-1.15 2.36-.69 1.01-1.41 2.02-2.55 2.04-1.11.02-1.47-.66-2.75-.66s-1.67.64-2.73.68c-1.1.04-1.94-1.1-2.64-2.1-1.43-2.07-2.53-5.85-1.06-8.4.73-1.27 2.04-2.07 3.46-2.09 1.08-.02 2.1.73 2.76.73.66 0 1.9-.9 3.2-.77.55.02 2.08.22 3.06 1.66-.08.05-1.83 1.07-1.81 3.2ZM14.27 4.82c.58-.71.98-1.7.87-2.68-.84.03-1.86.56-2.47 1.27-.54.62-1.02 1.63-.89 2.59.94.07 1.9-.48 2.49-1.18Z"/></svg>
-        Download untuk Mac
+    <nav class="nav-links" aria-label="Menu">
+      <a href="#android">Android</a>
+      <a href="#iphone">iPhone</a>
+      <a href="#live" data-i18n="nav.live">Live</a>
+      <a href="#install" data-i18n="nav.install">Install</a>
+      <a href="#faq">FAQ</a>
+      <a href="#donasi" data-i18n="nav.donate">Donasi</a>
+    </nav>
+    <div class="nav-end">
+      <div class="lang" role="group" aria-label="Bahasa / Language">
+        <button type="button" data-lang="id" aria-pressed="true">ID</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn btn-line btn-sm" href="https://github.com/masadjie/djie-cast" target="_blank" rel="noopener" aria-label="GitHub">
+        <svg><use href="#i-gh"/></svg><span>GitHub</span>
       </a>
-      <a class="btn btn-ghost" href="https://github.com/masadjie/djie-cast" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
-        Lihat kode sumber
-      </a>
-    </div>
-    <p class="meta"><span class="js-size">DMG · 20 MB</span> · macOS 14 Sonoma atau lebih baru</p>
-    <div class="badges">
-      <span class="badge"><i style="background:var(--android)"></i>Android</span>
-      <span class="badge"><i style="background:var(--ios)"></i>iPhone &amp; iPad</span>
-      <span class="badge"><i style="background:#f59e0b"></i>Apple Silicon &amp; Intel</span>
-      <span class="badge"><i style="background:var(--pink)"></i>Lisensi MIT</span>
-    </div>
-
-    <div class="window reveal">
-      <div class="window-bar"><span></span><span></span><span></span><em>Djie Cast</em></div>
-      <img src="assets/shot-home-dark.jpg" alt="Tampilan Beranda Djie Cast" width="1800" height="1031">
     </div>
   </div>
 </header>
 
-<main>
-  <section id="fitur">
+<main id="top">
+  <section class="hero">
     <div class="wrap">
-      <div class="section-head reveal">
-        <div class="kicker">Fitur</div>
-        <h2>Semua yang kamu butuhkan,<br>dalam satu aplikasi</h2>
-        <p>Dibangun di atas scrcpy — mesin mirroring paling cepat dan ringan untuk Android — dibungkus aplikasi Mac yang rapi.</p>
+      <div class="hero-copy">
+        <span class="label"><i class="dot"></i><span data-i18n="hero.label">Aplikasi macOS · gratis · open source</span></span>
+        <h1 data-i18n="hero.title">Layar HP-mu, <span class="tail">langsung di Mac.</span></h1>
+        <p class="lead" data-i18n="hero.lead">Mirror, kendalikan, dan kelola file Android &amp; iPhone dari Mac. Satu klik, tanpa terminal.</p>
+        <div class="hero-actions">
+          <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.0-beta/DjieCast-1.0-beta.dmg">
+            <svg><use href="#i-apple"/></svg><span data-i18n="cta.download">Download untuk Mac</span>
+          </a>
+          <a class="btn btn-line" href="https://github.com/masadjie/djie-cast" target="_blank" rel="noopener" data-i18n="cta.source">Kode sumber</a>
+        </div>
+        <div class="facts mono">
+          <span class="js-size">DMG 20 MB</span><span>macOS 14+</span><span>Apple Silicon &amp; Intel</span>
+        </div>
       </div>
-      <div class="grid">
-        <div class="card reveal">
-          <div class="icon" style="background:linear-gradient(135deg,#2fbf71,#0b8a6a)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg></div>
-          <span class="tag tag-a">ANDROID</span>
-          <h3>Kontrol penuh dari Mac</h3>
-          <p>Klik, scroll, drag, dan ketik pakai mouse &amp; keyboard Mac. Tidak perlu menyentuh HP sama sekali.</p>
+
+      <div class="stage" role="img" aria-label="Animasi: layar HP Android tampil di jendela Mac dan dikontrol dengan mouse" data-i18n-aria="hero.stage">
+        <div class="mac">
+          <div class="mac-bar"><i></i><i></i><i></i><em>Galaxy S24 Ultra — Djie Cast</em></div>
+          <div class="mac-body">
+            <div class="scr" aria-hidden="true">
+              <div class="sb"><span>14:05</span><span>5G ▮▮▮</span></div>
+              <div class="clock">14:05</div>
+              <div class="date" data-i18n="demo.date">Sabtu, 8 November</div>
+              <div class="apps"><b></b><b></b><b></b><b></b><b></b><b><i class="tap"></i></b><b></b><b></b></div>
+              <div class="dock"></div>
+              <div class="app"><div class="sb" style="padding:0;color:#12142b"><span>14:05</span><span>▮▮▮</span></div><h4 data-i18n="demo.gallery">Galeri</h4><div class="grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+            </div>
+            <svg class="cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2.5v17.2l4.7-4.3 2.9 6.6 3-1.3-2.9-6.5H18Z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </div>
         </div>
-        <div class="card reveal">
-          <div class="icon" style="background:linear-gradient(135deg,#f59e0b,#ea580c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
-          <span class="tag tag-a">ANDROID</span>
-          <h3>File manager</h3>
-          <p>Jelajahi isi HP, unduh foto &amp; video ke Mac, unggah file dengan drag &amp; drop, ganti nama, dan hapus.</p>
+        <svg class="waves" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M8 26a10 10 0 0 1 10-10"/><path d="M8 34a18 18 0 0 1 18-18"/><path d="M8 42a26 26 0 0 1 26-26" transform="translate(0 -8)"/>
+        </svg>
+        <div class="phone" aria-hidden="true">
+          <div class="scr">
+            <div class="sb"><span>14:05</span><span>5G ▮▮▮</span></div>
+            <div class="clock">14:05</div>
+            <div class="date" data-i18n="demo.date">Sabtu, 8 November</div>
+            <div class="apps"><b></b><b></b><b></b><b></b><b></b><b><i class="tap"></i></b><b></b><b></b></div>
+            <div class="dock"></div>
+            <div class="app"><div class="sb" style="padding:0;color:#12142b"><span>14:05</span><span>▮▮▮</span></div><h4 data-i18n="demo.gallery">Galeri</h4><div class="grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+          </div>
         </div>
-        <div class="card reveal">
-          <div class="icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg></div>
-          <span class="tag tag-a">ANDROID</span>
-          <h3>USB atau Wi-Fi</h3>
-          <p>Colok kabel untuk kualitas terbaik, atau aktifkan mode wireless dengan satu klik dan bebas kabel.</p>
+        <div class="readout mono"><span class="on">LIVE</span><span>USB</span><span>1600p</span><span>60 fps</span><span>8 Mbps</span></div>
+      </div>
+    </div>
+
+    <div class="specs">
+      <div class="wrap">
+        <div class="spec"><strong>120<small>fps</small></strong><span data-i18n="spec.fps">Batas atas preset Maksimal lewat USB</span></div>
+        <div class="spec"><strong>0<small data-i18n="spec.accUnit">akun</small></strong><span data-i18n="spec.acc">Tanpa login, tanpa server, tanpa iklan</span></div>
+        <div class="spec"><strong>2<small>platform</small></strong><span data-i18n="spec.plat">Android dan iPhone/iPad dalam satu app</span></div>
+        <div class="spec"><strong>1<small data-i18n="spec.clickUnit">klik</small></strong><span data-i18n="spec.click">scrcpy &amp; adb sudah ada di dalam app</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="android">
+    <div class="wrap">
+      <div class="head">
+        <span class="label"><i class="dot"></i>Android</span>
+        <h2 data-i18n="and.title">Pakai HP Android tanpa menyentuhnya.</h2>
+        <p data-i18n="and.lead">Djie Cast menjalankan scrcpy di balik layar: video dari HP dikirim lewat kabel atau Wi-Fi, lalu klik dan ketikanmu dikirim balik ke HP.</p>
+      </div>
+
+      <div class="row">
+        <div class="copy-col">
+          <h3 data-i18n="and.h1">Mirror dan kendalikan</h3>
+          <p data-i18n="and.p1">Setiap HP yang tersambung muncul sebagai kartu. Tekan Mulai Cast, jendela HP terbuka di Mac dan langsung bisa diklik.</p>
+          <ul class="points">
+            <li><b data-i18n="and.k1">USB atau Wi-Fi</b><span data-i18n="and.v1">Mode wireless aktif dengan satu klik dari kartu perangkat.</span></li>
+            <li><b data-i18n="and.k2">Tombol cepat</b><span data-i18n="and.v2">Back, Home, Recent, volume, power, dan screenshot ke Desktop.</span></li>
+            <li><b data-i18n="and.k3">Rotasi</b><span data-i18n="and.v3">Paksa portrait, landscape, atau kembali ke putar otomatis.</span></li>
+            <li><b data-i18n="and.k4">Kualitas</b><span data-i18n="and.v4">Hemat 1024p, Seimbang 1600p, Maksimal resolusi asli 120 fps.</span></li>
+            <li><b data-i18n="and.k5">Rekam</b><span data-i18n="and.v5">Simpan rekaman layar HP ke folder Movies.</span></li>
+          </ul>
         </div>
-        <div class="card reveal">
-          <div class="icon" style="background:linear-gradient(135deg,#8b5cf6,#d946ef)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-          <span class="tag tag-b">ANDROID + iOS</span>
-          <h3>Rotasi layar</h3>
-          <p>Portrait atau landscape dalam sekali klik — jendela otomatis menyesuaikan. Cocok untuk main game dan nonton video.</p>
+        <figure class="shot">
+          <picture>
+            <source srcset="assets/android-dark.jpg" media="(prefers-color-scheme: dark)">
+            <img src="assets/android-light.jpg" alt="Halaman Android di Djie Cast dengan kartu perangkat dan tombol kontrol" data-i18n-alt="alt.android" width="1600" height="1000" loading="lazy">
+          </picture>
+        </figure>
+      </div>
+
+      <div class="row flip">
+        <div class="copy-col">
+          <h3 data-i18n="and.h2">Isi HP, dibuka seperti Finder</h3>
+          <p data-i18n="and.p2">Jelajahi penyimpanan internal, lompat ke Kamera, Download, atau media WhatsApp. Klik dua kali untuk membuka file di Mac.</p>
+          <ul class="points">
+            <li><b data-i18n="and.k6">Unduh</b><span data-i18n="and.v6">Foto dan video tersalin ke Downloads/Djie Cast.</span></li>
+            <li><b data-i18n="and.k7">Unggah</b><span data-i18n="and.v7">Seret file dari Finder ke daftar, langsung terkirim ke HP.</span></li>
+            <li><b data-i18n="and.k8">Rapikan</b><span data-i18n="and.v8">Buat folder, ganti nama, hapus dengan konfirmasi.</span></li>
+          </ul>
         </div>
-        <div class="card reveal">
-          <div class="icon" style="background:linear-gradient(135deg,#5b7cfa,#7c3aed)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg></div>
-          <span class="tag tag-i">iOS</span>
-          <h3>iPhone &amp; iPad</h3>
-          <p>Tampilkan layar + audio iPhone lewat kabel tanpa install apa pun, atau pakai iPhone Mirroring &amp; AirPlay.</p>
+        <figure class="shot">
+          <picture>
+            <source srcset="assets/files-dark.jpg" media="(prefers-color-scheme: dark)">
+            <img src="assets/files-light.jpg" alt="File manager Android di Djie Cast" data-i18n-alt="alt.files" width="1600" height="1000" loading="lazy">
+          </picture>
+        </figure>
+      </div>
+
+      <div class="keys">
+        <div class="copy-col">
+          <span class="label" data-i18n="keys.label">Keyboard = remote</span>
+          <h3 data-i18n="keys.title">Saat jendela cast aktif, keyboard Mac jadi tombol HP.</h3>
+          <p data-i18n="keys.note">Klik kanan juga berfungsi sebagai tombol Kembali.</p>
         </div>
-        <div class="card reveal">
-          <div class="icon" style="background:linear-gradient(135deg,#ef4444,#f97316)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></div>
-          <span class="tag tag-a">ANDROID</span>
-          <h3>Rekam &amp; screenshot</h3>
-          <p>Rekam layar HP langsung ke folder Movies, atau ambil screenshot ke Desktop dengan satu tombol.</p>
-        </div>
-        <div class="card reveal">
-          <div class="icon" style="background:linear-gradient(135deg,#10b981,#14b8a6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-          <span class="tag tag-b">PRIVASI</span>
-          <h3>100% lokal</h3>
-          <p>Semua berjalan di Mac kamu. Tidak ada akun, tidak ada cloud, tidak ada data yang dikirim ke internet.</p>
-        </div>
-        <div class="card reveal">
-          <div class="icon" style="background:linear-gradient(135deg,#64748b,#334155)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/></svg></div>
-          <span class="tag tag-b">MUDAH</span>
-          <h3>Tanpa install tambahan</h3>
-          <p>scrcpy &amp; adb sudah ada di dalam app. Tidak perlu Homebrew, tidak perlu Android Studio.</p>
+        <div class="keymap">
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">B</kbd></span><span data-i18n="key.back">Kembali</span></div>
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">H</kbd></span><span>Home</span></div>
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">S</kbd></span><span data-i18n="key.recent">Aplikasi terbaru</span></div>
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">↑</kbd><kbd class="cap">↓</kbd></span><span>Volume</span></div>
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">P</kbd></span><span>Power</span></div>
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">R</kbd></span><span data-i18n="key.rotate">Putar layar HP</span></div>
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">←</kbd><kbd class="cap">→</kbd></span><span data-i18n="key.rotwin">Putar jendela</span></div>
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">V</kbd></span><span data-i18n="key.paste">Tempel teks ke HP</span></div>
+          <div class="km"><span class="caps"><kbd class="cap">⌘</kbd><kbd class="cap">F</kbd></span><span data-i18n="key.full">Layar penuh</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section>
+  <section id="iphone">
     <div class="wrap">
-      <div class="section-head reveal">
-        <div class="kicker">Dua platform</div>
-        <h2>Android atau iPhone? Dua-duanya bisa.</h2>
+      <div class="head">
+        <span class="label"><i class="dot" style="background:var(--signal);box-shadow:0 0 0 4px color-mix(in srgb,var(--signal) 18%,transparent)"></i>iPhone &amp; iPad</span>
+        <h2 data-i18n="ios.title">Tiga jalur untuk iPhone.</h2>
+        <p data-i18n="ios.lead">Colok kabel dan layar iPhone tampil di Mac, lengkap dengan suara. Jendelanya ikut berputar saat iPhone dimiringkan.</p>
       </div>
-      <div class="split">
-        <div class="platform android reveal">
-          <h3>🤖 Android</h3>
-          <ul>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Mirror sampai 120 fps dengan latensi rendah</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Kontrol penuh mouse &amp; keyboard + tombol Back, Home, Recent</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Audio diteruskan ke speaker Mac</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>File manager, rekam layar &amp; screenshot</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Paksa portrait / landscape</li>
-          </ul>
+      <div class="row">
+        <div class="copy-col">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th data-i18n="ios.th1">Jalur</th><th data-i18n="ios.th2">Kontrol</th><th data-i18n="ios.th3">Butuh</th></tr></thead>
+              <tbody>
+                <tr><td><b>USB</b></td><td data-i18n="ios.c1">Lihat + audio</td><td data-i18n="ios.r1">Kabel, ketuk “Percayai”</td></tr>
+                <tr><td><b>iPhone Mirroring</b></td><td class="yes" data-i18n="ios.c2">Penuh</td><td data-i18n="ios.r2">macOS 15 + iOS 18, Apple ID sama</td></tr>
+                <tr><td><b>AirPlay</b></td><td data-i18n="ios.c3">Lihat</td><td data-i18n="ios.r3">Wi-Fi sama, AirPlay Receiver aktif</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note" data-i18n="ios.note">Apple hanya mengizinkan kontrol iPhone lewat iPhone Mirroring. Djie Cast membukakannya untukmu dari halaman yang sama.</p>
         </div>
-        <div class="platform ios reveal">
-          <h3> iPhone &amp; iPad</h3>
-          <ul>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>USB: layar + audio, tanpa install apa pun di iPhone</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Jendela otomatis ikut rotasi iPhone, bisa diputar manual</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>iPhone Mirroring untuk kontrol penuh (macOS Sequoia + iOS 18)</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>AirPlay untuk mirror wireless</li>
-          </ul>
-          <p class="note">Apple tidak mengizinkan aplikasi lain mengontrol iPhone lewat USB/AirPlay. Untuk klik &amp; ketik dari Mac, Djie Cast membuka iPhone Mirroring resmi Apple.</p>
-        </div>
+        <figure class="shot">
+          <picture>
+            <source srcset="assets/ios-dark.jpg" media="(prefers-color-scheme: dark)">
+            <img src="assets/ios-light.jpg" alt="Halaman iPhone & iPad di Djie Cast" data-i18n-alt="alt.ios" width="1600" height="1000" loading="lazy">
+          </picture>
+        </figure>
       </div>
     </div>
   </section>
 
-  <section id="tampilan">
-    <div class="wrap gallery">
-      <div class="section-head reveal">
-        <div class="kicker">Tampilan</div>
-        <h2>Rapi, modern, terasa seperti app Mac asli</h2>
+  <section id="live">
+    <div class="wrap live">
+      <div class="copy-col">
+        <span class="label"><i class="dot" style="background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.18)"></i><span data-i18n="live.label">Untuk live streaming</span></span>
+        <h2 data-i18n="live.title">Bawa layar HP ke siaran live.</h2>
+        <p data-i18n="live.lead">Jendela cast Djie Cast bisa ditangkap software live di Mac. Cocok untuk live jualan, tutorial aplikasi, atau main game mobile sambil siaran.</p>
+        <div class="apps-row">
+          <span class="chip">OBS Studio</span><span class="chip">Streamlabs</span><span class="chip">Ecamm Live</span><span class="chip">TikTok LIVE Studio*</span><span class="chip soft" data-i18n="live.other">+ app lain dengan Window Capture</span>
+        </div>
+        <p class="note" data-i18n="live.note">* Selama versi Mac-nya tersedia. Untuk live ke TikTok dari Mac, OBS dengan stream key TikTok juga bisa dipakai.</p>
       </div>
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" aria-selected="true" data-src="assets/shot-android-light.jpg" data-alt="Halaman Android">Android</button>
-        <button class="tab" role="tab" aria-selected="false" data-src="assets/shot-files-light.jpg" data-alt="File manager Android">File Android</button>
-        <button class="tab" role="tab" aria-selected="false" data-src="assets/shot-ios-light.jpg" data-alt="Halaman iPhone & iPad">iPhone &amp; iPad</button>
-        <button class="tab" role="tab" aria-selected="false" data-src="assets/shot-donate-light.jpg" data-alt="Halaman Donasi">Donasi</button>
-      </div>
-      <div class="window reveal">
-        <div class="window-bar"><span></span><span></span><span></span><em>Djie Cast</em></div>
-        <img id="shot" src="assets/shot-android-light.jpg" alt="Halaman Android" width="1800" height="1322" loading="lazy">
-      </div>
+      <ol class="flow">
+        <li><span class="n">01</span><div><b data-i18n="live.s1">Mulai cast</b><span data-i18n="live.d1">Sambungkan HP Android atau iPhone, lalu tekan Mulai Cast.</span></div></li>
+        <li><span class="n">02</span><div><b data-i18n="live.s2">Rapikan jendelanya</b><span data-i18n="live.d2">Nyalakan “Tanpa bingkai jendela” dan pilih preset Maksimal supaya gambar bersih dan tajam.</span></div></li>
+        <li><span class="n">03</span><div><b data-i18n="live.s3">Tangkap di software live</b><span data-i18n="live.d3">Di OBS: Sources → + → macOS Screen Capture → Window → pilih jendela HP.</span></div></li>
+        <li><span class="n">04</span><div><b data-i18n="live.s4">Siaran</b><span data-i18n="live.d4">Atur posisi di scene, dan HP tetap bisa dikontrol dari Mac selama live.</span></div></li>
+      </ol>
     </div>
   </section>
 
   <section id="install">
     <div class="wrap">
-      <div class="section-head reveal">
-        <div class="kicker">Install</div>
-        <h2>Siap dalam 1 menit</h2>
+      <div class="head">
+        <span class="label">Install</span>
+        <h2 data-i18n="inst.title">Tiga langkah, sekali saja.</h2>
       </div>
-      <div class="steps">
-        <div class="card step reveal">
-          <h3>Download</h3>
-          <p>Unduh file <b>DjieCast-1.0-beta.dmg</b> dari tombol di atas atau halaman Releases GitHub.</p>
+      <ol class="steps">
+        <li><h3 data-i18n="inst.h1">Unduh DMG</h3><p data-i18n="inst.p1">File <b>DjieCast-1.0-beta.dmg</b> dari tombol di atas atau halaman Releases.</p></li>
+        <li><h3 data-i18n="inst.h2">Seret ke Applications</h3><p data-i18n="inst.p2">Buka DMG, seret ikon Djie Cast ke folder Applications.</p></li>
+        <li><h3 data-i18n="inst.h3">Klik kanan → Open</h3><p data-i18n="inst.p3">Hanya untuk pembukaan pertama, karena app belum dinotarisasi Apple.</p></li>
+      </ol>
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><em data-i18n="inst.term">Terminal — kalau muncul pesan “damaged”</em>
+          <button class="btn btn-sm" type="button" id="copy-cmd" data-i18n="btn.copy">Salin</button>
         </div>
-        <div class="card step reveal">
-          <h3>Seret ke Applications</h3>
-          <p>Buka DMG, lalu seret ikon <b>Djie Cast</b> ke folder <b>Applications</b>.</p>
-        </div>
-        <div class="card step reveal">
-          <h3>Buka pertama kali</h3>
-          <p><b>Klik kanan → Open → Open</b>. Langkah ini hanya sekali karena app belum dinotarisasi Apple.</p>
-        </div>
+        <pre><span class="c" data-i18n="inst.comment"># hapus tanda karantina, lalu buka app lagi</span>
+<span class="p">$</span> <span id="cmd">xattr -dr com.apple.quarantine "/Applications/Djie Cast.app"</span></pre>
       </div>
-      <div class="code reveal">
-        <span id="xattr">xattr -dr com.apple.quarantine "/Applications/Djie Cast.app"</span>
-        <button class="btn btn-ghost btn-sm copy" data-copy="xattr">Salin</button>
-      </div>
-      <p class="meta" style="text-align:center">Muncul pesan <i>“damaged”</i>? Jalankan perintah di atas di Terminal, lalu buka lagi.</p>
-      <div class="req">
-        <span class="badge">macOS 14 Sonoma+</span>
-        <span class="badge">Apple Silicon (M1–M4) &amp; Intel</span>
-        <span class="badge">Android 5+ dengan USB Debugging</span>
-        <span class="badge">iOS: kabel USB / iPhone Mirroring / AirPlay</span>
+      <div class="reqs mono">
+        <span data-i18n="inst.r1">macOS 14 Sonoma atau lebih baru</span><span>Apple Silicon M1–M4 &amp; Intel</span><span data-i18n="inst.r3">Android 5+ dengan USB Debugging</span>
       </div>
     </div>
   </section>
 
   <section id="faq">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <div class="kicker">FAQ</div>
-        <h2>Pertanyaan yang sering muncul</h2>
+    <div class="wrap faq">
+      <div class="head" style="margin:0">
+        <span class="label">FAQ</span>
+        <h2 data-i18n="faq.title">Yang sering ditanyakan.</h2>
       </div>
-      <div class="faq">
-        <details class="reveal"><summary>Apakah Djie Cast benar-benar gratis?</summary>
-          <p>Ya, gratis selamanya dan open source di bawah lisensi MIT. Tidak ada iklan, tidak ada langganan. Donasi bersifat sukarela.</p></details>
-        <details class="reveal"><summary>Bagaimana cara mengaktifkan USB Debugging di Android?</summary>
-          <p>Buka Pengaturan → Tentang ponsel, ketuk “Nomor bentukan” (Build number) 7 kali sampai Opsi Developer aktif. Lalu buka Opsi Developer dan nyalakan “USB Debugging”. Saat dicolok ke Mac, ketuk “Izinkan” di HP.</p></details>
-        <details class="reveal"><summary>Kenapa iPhone tidak bisa dikontrol lewat kabel?</summary>
-          <p>Apple membatasi kontrol iPhone hanya untuk fitur resmi mereka. Lewat USB dan AirPlay, Djie Cast bisa menampilkan layar &amp; audio. Untuk kontrol penuh, gunakan iPhone Mirroring (macOS Sequoia + iOS 18) yang bisa dibuka langsung dari Djie Cast.</p></details>
-        <details class="reveal"><summary>Kenapa muncul peringatan saat pertama dibuka?</summary>
-          <p>Djie Cast belum dinotarisasi Apple (butuh akun developer berbayar). Aplikasinya aman — kode sumbernya bisa kamu periksa sendiri di GitHub. Cukup klik kanan → Open sekali saja.</p></details>
-        <details class="reveal"><summary>Apakah data saya dikirim ke internet?</summary>
-          <p>Tidak. Djie Cast bekerja sepenuhnya lokal antara Mac dan HP kamu. Tidak ada akun, analitik, atau server.</p></details>
-        <details class="reveal"><summary>Apakah bisa dipakai untuk main game?</summary>
-          <p>Bisa. Gunakan preset kualitas “Maksimal” lewat kabel USB untuk hasil terbaik (hingga 120 fps), dan paksa layar ke landscape dari tombol rotasi.</p></details>
+      <div class="faq-list">
+        <details><summary data-i18n="faq.q1">Benar-benar gratis?</summary>
+          <p data-i18n="faq.a1">Ya. Lisensi MIT, tanpa iklan dan tanpa langganan. Donasi sifatnya sukarela.</p></details>
+        <details><summary data-i18n="faq.q2">Cara menyalakan USB Debugging?</summary>
+          <p data-i18n="faq.a2">Pengaturan → Tentang ponsel → ketuk “Nomor bentukan” tujuh kali. Lalu buka Opsi Developer, nyalakan USB Debugging, colok kabel, dan ketuk Izinkan di HP.</p></details>
+        <details><summary data-i18n="faq.q3">Kenapa iPhone tidak bisa diklik lewat kabel?</summary>
+          <p data-i18n="faq.a3">Itu batasan Apple. Lewat USB dan AirPlay, aplikasi pihak ketiga hanya boleh menampilkan layar. Untuk kontrol penuh, pakai iPhone Mirroring yang bisa dibuka dari Djie Cast.</p></details>
+        <details><summary data-i18n="faq.q4">Kenapa muncul peringatan saat dibuka?</summary>
+          <p data-i18n="faq.a4">App belum dinotarisasi Apple karena itu butuh akun developer berbayar. Kode sumbernya terbuka di GitHub untuk diperiksa siapa saja. Klik kanan → Open cukup sekali.</p></details>
+        <details><summary data-i18n="faq.q5">Ada data yang dikirim ke internet?</summary>
+          <p data-i18n="faq.a5">Tidak. Video dan file hanya berpindah antara Mac dan HP-mu. Tidak ada akun, analitik, atau server.</p></details>
+        <details><summary data-i18n="faq.q6">Bisa untuk main game?</summary>
+          <p data-i18n="faq.a6">Bisa. Pakai kabel USB, pilih preset Maksimal, lalu paksa layar ke landscape dari tombol rotasi.</p></details>
       </div>
     </div>
   </section>
 
   <section id="donasi">
-    <div class="wrap">
-      <div class="donate reveal">
-        <div>
-          <div class="kicker" style="color:#f9a8d4">Dukung pengembangan</div>
-          <h2>Suka dengan Djie Cast? ☕</h2>
-          <p>Djie Cast dibuat oleh <b>Adjie Kurniawan</b> dan dibagikan gratis untuk semua. Donasi sekecil apa pun sangat membantu pengembangan fitur baru.</p>
-          <ol>
-            <li>Buka aplikasi bank atau e-wallet berlogo QRIS (GoPay, OVO, DANA, ShopeePay, m-banking).</li>
-            <li>Scan kode QRIS di samping, masukkan nominal seikhlasnya.</li>
-            <li>Konfirmasi donasi ke nomor di bawah. Terima kasih! 🙏</li>
-          </ol>
-          <div class="confirm">
-            <small>Konfirmasi donasi ke Adjie Kurniawan</small>
-            <div class="phone">0812-6949-4591</div>
-            <a class="btn btn-wa btn-sm" href="https://wa.me/6281269494591" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.8 11.8 0 0 0 12.05 0C5.5 0 .17 5.33.17 11.88c0 2.1.55 4.14 1.6 5.94L0 24l6.33-1.66a11.86 11.86 0 0 0 5.72 1.46h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.24-6.16-3.42-8.44ZM12.06 21.8h-.01a9.86 9.86 0 0 1-5.03-1.38l-.36-.21-3.76.98 1-3.66-.23-.38a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.89 9.9-9.89 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.9 7c0 5.45-4.44 9.9-9.89 9.9Zm5.43-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.08-.13-.27-.2-.57-.35Z"/></svg>
-              Chat WhatsApp
-            </a>
+    <div class="wrap donate">
+      <figure class="standee">
+        <img src="assets/qris.png" alt="Kode QRIS untuk donasi Djie Cast atas nama Ruang Kiitaa" data-i18n-alt="alt.qris" width="874" height="1240" loading="lazy">
+        <figcaption class="mono">Ruang Kiitaa · NMID ID1026525837765</figcaption>
+      </figure>
+      <div class="copy-col">
+        <span class="label" data-i18n="don.label">Donasi</span>
+        <h2 data-i18n="don.title">Traktir kopi pembuatnya.</h2>
+        <p class="muted" data-i18n="don.lead">Djie Cast dibuat oleh <b style="color:var(--ink)">Adjie Kurniawan</b> dan dibagikan gratis. Donasi membantu fitur berikutnya lahir lebih cepat.</p>
+        <ol>
+          <li data-i18n="don.s1">Buka aplikasi bank atau e-wallet berlogo QRIS: GoPay, OVO, DANA, ShopeePay, atau m-banking.</li>
+          <li data-i18n="don.s2">Scan kode QRIS dan isi nominal seikhlasnya.</li>
+          <li data-i18n="don.s3">Kirim bukti transfer ke nomor di bawah.</li>
+        </ol>
+        <div class="confirm">
+          <span class="label" data-i18n="don.confirm">Konfirmasi donasi</span>
+          <div class="phone-no" id="phone">0812-6949-4591</div>
+          <div class="acts">
+            <a class="btn btn-wa btn-sm" href="https://wa.me/6281269494591" target="_blank" rel="noopener">Chat WhatsApp</a>
+            <button class="btn btn-line btn-sm" type="button" id="copy-phone" data-i18n="btn.copyPhone">Salin nomor</button>
           </div>
-        </div>
-        <div>
-          <div class="qris"><img src="assets/qris.png" alt="QRIS donasi Djie Cast — Ruang Kiitaa" width="874" height="1240" loading="lazy"></div>
-          <p class="qris-cap">QRIS · Ruang Kiitaa · NMID ID1026525837765</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="final">
-    <div class="wrap reveal">
-      <img src="assets/icon.png" alt="">
-      <h2>Siap cast layar HP-mu?</h2>
-      <p class="lead">Gratis. Open source. Tanpa ribet.</p>
-      <div class="cta">
-        <a class="btn btn-primary js-download" href="https://github.com/masadjie/djie-cast/releases/download/v1.0-beta/DjieCast-1.0-beta.dmg">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          Download Djie Cast
-        </a>
-        <a class="btn btn-ghost" href="https://github.com/masadjie/djie-cast/releases" target="_blank" rel="noopener">Semua rilis</a>
+  <section class="closing">
+    <div class="wrap">
+      <svg aria-hidden="true"><use href="#logo"/></svg>
+      <div>
+        <h2 data-i18n="end.title">Colok. Klik. Selesai.</h2>
+        <p class="muted" style="margin-top:10px"><span data-i18n="end.sub">Djie Cast untuk macOS 14 ke atas.</span> <span class="js-ver2">1.0 Beta</span></p>
       </div>
+      <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.0-beta/DjieCast-1.0-beta.dmg">
+        <svg><use href="#i-apple"/></svg>Download
+      </a>
     </div>
   </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <div>© 2026 <b style="color:var(--muted)">Adjie Kurniawan</b> · Djie Cast · Lisensi MIT</div>
-    <div class="foot-links">
+    <span>© 2026 Adjie Kurniawan · <span data-i18n="foot.license">Lisensi MIT</span></span>
+    <nav aria-label="Links">
       <a href="https://github.com/masadjie/djie-cast" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/masadjie/djie-cast/issues" target="_blank" rel="noopener">Laporkan bug</a>
-      <a href="https://github.com/Genymobile/scrcpy" target="_blank" rel="noopener">Dibangun dengan scrcpy</a>
-    </div>
+      <a href="https://github.com/masadjie/djie-cast/releases" target="_blank" rel="noopener" data-i18n="foot.releases">Semua rilis</a>
+      <a href="https://github.com/masadjie/djie-cast/issues" target="_blank" rel="noopener" data-i18n="foot.bug">Laporkan bug</a>
+      <a href="https://github.com/Genymobile/scrcpy" target="_blank" rel="noopener" data-i18n="foot.scrcpy">Dibangun dengan scrcpy</a>
+    </nav>
   </div>
 </footer>
 
 <script>
-  // Point download buttons at the newest release (including betas) when GitHub is reachable.
+  // ---------- Language: Indonesian is written in the HTML; English lives here. ----------
+  const EN = {
+    "nav.install": "Install", "nav.donate": "Donate",
+    "live.label": "For live streaming", "live.title": "Put your phone screen on stream.",
+    "live.lead": "Live streaming software on your Mac can capture the Djie Cast window. Great for live selling, app tutorials, or mobile gaming on stream.",
+    "live.other": "+ any app with Window Capture",
+    "live.note": "* Where a Mac version is available. To go live on TikTok from a Mac, OBS with your TikTok stream key works too.",
+    "live.s1": "Start casting", "live.d1": "Connect your Android phone or iPhone and press Start Cast.",
+    "live.s2": "Clean up the window", "live.d2": "Turn on “Borderless window” and choose the Maximum preset for a clean, sharp picture.",
+    "live.s3": "Capture it in your live app", "live.d3": "In OBS: Sources → + → macOS Screen Capture → Window → pick the phone window.",
+    "live.s4": "Go live", "live.d4": "Place it in your scene. You can still control the phone from your Mac while live.",
+    "nav.live": "Live",
+
+    "hero.label": "macOS app · free · open source",
+    "hero.title": 'Your phone screen, <span class="tail">right on your Mac.</span>',
+    "hero.lead": "Mirror, control, and manage files on Android &amp; iPhone from your Mac. One click, no terminal.",
+    "hero.stage": "Animation: an Android phone screen shown in a Mac window and controlled with the mouse",
+    "cta.download": "Download for Mac", "cta.source": "Source code",
+    "demo.date": "Saturday, 8 November", "demo.gallery": "Gallery",
+    "spec.fps": "Ceiling of the Maximum preset over USB",
+    "spec.accUnit": "accounts", "spec.acc": "No sign-in, no servers, no ads",
+    "spec.plat": "Android and iPhone/iPad in one app",
+    "spec.clickUnit": "click", "spec.click": "scrcpy &amp; adb are bundled inside",
+    "and.title": "Use your Android phone without touching it.",
+    "and.lead": "Djie Cast runs scrcpy under the hood: video streams from the phone over cable or Wi-Fi, and your clicks and keystrokes go straight back.",
+    "and.h1": "Mirror and control",
+    "and.p1": "Every connected phone shows up as a card. Press Start Cast and the phone opens in a window you can click right away.",
+    "and.k1": "USB or Wi-Fi", "and.v1": "Switch to wireless with one click from the device card.",
+    "and.k2": "Quick keys", "and.v2": "Back, Home, Recent, volume, power, and screenshot to Desktop.",
+    "and.k3": "Rotation", "and.v3": "Force portrait, landscape, or go back to auto-rotate.",
+    "and.k4": "Quality", "and.v4": "Saver 1024p, Balanced 1600p, Maximum native resolution at 120 fps.",
+    "and.k5": "Record", "and.v5": "Save screen recordings to your Movies folder.",
+    "and.h2": "Your phone's files, opened like Finder",
+    "and.p2": "Browse internal storage, jump to Camera, Download, or WhatsApp media. Double-click to open a file on your Mac.",
+    "and.k6": "Download", "and.v6": "Photos and videos are copied to Downloads/Djie Cast.",
+    "and.k7": "Upload", "and.v7": "Drag files from Finder onto the list and they land on the phone.",
+    "and.k8": "Organise", "and.v8": "Create folders, rename, and delete with confirmation.",
+    "keys.label": "Keyboard = remote",
+    "keys.title": "While the cast window is active, your Mac keyboard drives the phone.",
+    "keys.note": "Right-click also works as Back.",
+    "key.back": "Back", "key.recent": "Recent apps", "key.rotate": "Rotate phone screen",
+    "key.rotwin": "Rotate window", "key.paste": "Paste text to phone", "key.full": "Full screen",
+    "ios.title": "Three ways in for iPhone.",
+    "ios.lead": "Plug in a cable and the iPhone screen appears on your Mac, sound included. The window turns when you turn the phone.",
+    "ios.th1": "Route", "ios.th2": "Control", "ios.th3": "Needs",
+    "ios.c1": "View + audio", "ios.r1": "Cable, tap “Trust”",
+    "ios.c2": "Full", "ios.r2": "macOS 15 + iOS 18, same Apple ID",
+    "ios.c3": "View", "ios.r3": "Same Wi-Fi, AirPlay Receiver on",
+    "ios.note": "Apple only allows iPhone control through iPhone Mirroring. Djie Cast opens it for you from the same page.",
+    "inst.title": "Three steps, only once.",
+    "inst.h1": "Download the DMG", "inst.p1": "Get <b>DjieCast-1.0-beta.dmg</b> from the button above or the Releases page.",
+    "inst.h2": "Drag to Applications", "inst.p2": "Open the DMG and drag the Djie Cast icon into Applications.",
+    "inst.h3": "Right-click → Open", "inst.p3": "Only the first time, because the app is not notarized by Apple yet.",
+    "inst.term": "Terminal — if you see a “damaged” message",
+    "inst.comment": "# remove the quarantine flag, then open the app again",
+    "inst.r1": "macOS 14 Sonoma or later", "inst.r3": "Android 5+ with USB Debugging",
+    "btn.copy": "Copy", "btn.copied": "Copied", "btn.copyPhone": "Copy number",
+    "faq.title": "Common questions.",
+    "faq.q1": "Is it really free?", "faq.a1": "Yes. MIT licensed, no ads, no subscription. Donations are optional.",
+    "faq.q2": "How do I turn on USB Debugging?", "faq.a2": "Settings → About phone → tap “Build number” seven times. Then open Developer options, turn on USB Debugging, plug in the cable, and tap Allow on the phone.",
+    "faq.q3": "Why can't I click my iPhone over a cable?", "faq.a3": "That's Apple's rule. Over USB and AirPlay, third-party apps may only show the screen. For full control, use iPhone Mirroring, which Djie Cast can open for you.",
+    "faq.q4": "Why do I see a warning when opening it?", "faq.a4": "The app isn't notarized by Apple yet, which requires a paid developer account. The source is open on GitHub for anyone to inspect. Right-click → Open is needed only once.",
+    "faq.q5": "Is any data sent to the internet?", "faq.a5": "No. Video and files only travel between your Mac and your phone. No accounts, analytics, or servers.",
+    "faq.q6": "Can I use it for gaming?", "faq.a6": "Yes. Use a USB cable, pick the Maximum preset, and force landscape with the rotate button.",
+    "alt.android": "Djie Cast Android page with device cards and control buttons",
+    "alt.files": "Djie Cast Android file manager",
+    "alt.ios": "Djie Cast iPhone & iPad page",
+    "alt.qris": "QRIS code for donating to Djie Cast, merchant Ruang Kiitaa",
+    "don.label": "Donate", "don.title": "Buy the maker a coffee.",
+    "don.lead": 'Djie Cast is made by <b style="color:var(--ink)">Adjie Kurniawan</b> and shared for free. Donations help the next features ship sooner.',
+    "don.s1": "Open any bank or e-wallet app with the QRIS logo: GoPay, OVO, DANA, ShopeePay, or mobile banking.",
+    "don.s2": "Scan the QRIS code and enter any amount.",
+    "don.s3": "Send your transfer receipt to the number below.",
+    "don.confirm": "Confirm your donation",
+    "end.title": "Plug in. Click. Done.", "end.sub": "Djie Cast for macOS 14 and later.",
+    "foot.license": "MIT License", "foot.releases": "All releases", "foot.bug": "Report a bug", "foot.scrcpy": "Built with scrcpy",
+    "_title": "Djie Cast",
+    "_desc": "Djie Cast: a free, open-source macOS app to mirror, control, and manage files on Android phones and iPhones from your Mac. No terminal needed."
+  };
+  const ID = { "btn.copied": "Tersalin" };
+  document.querySelectorAll("[data-i18n]").forEach(el => ID[el.dataset.i18n] = el.innerHTML);
+  document.querySelectorAll("[data-i18n-alt]").forEach(el => ID[el.dataset.i18nAlt] = el.alt);
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => ID[el.dataset.i18nAria] = el.getAttribute("aria-label"));
+  ID._title = document.title;
+  ID._desc = document.querySelector('meta[name="description"]').content;
+
+  let lang = "id";
+  const t = key => (lang === "en" ? EN : ID)[key] ?? ID[key];
+
+  function applyLang(next, remember) {
+    lang = next === "en" ? "en" : "id";
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(el => el.innerHTML = t(el.dataset.i18n));
+    document.querySelectorAll("[data-i18n-alt]").forEach(el => el.alt = t(el.dataset.i18nAlt));
+    document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
+    document.title = t("_title");
+    document.querySelector('meta[name="description"]').content = t("_desc");
+    document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+    if (remember) { try { localStorage.setItem("djiecast-lang", lang); } catch (e) {} }
+  }
+
+  function detectLang() {
+    try { const saved = localStorage.getItem("djiecast-lang"); if (saved) return saved; } catch (e) {}
+    const prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""];
+    return prefs.some(l => /^(id|ms)\b/i.test(l)) ? "id" : "en";
+  }
+  applyLang(detectLang(), false);
+  document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => applyLang(b.dataset.lang, true)));
+
+  // ---------- Newest release (betas included) for the download buttons ----------
   fetch("https://api.github.com/repos/masadjie/djie-cast/releases?per_page=1")
     .then(r => r.ok ? r.json() : [])
-    .then(list => {
-      const rel = list[0];
+    .then(([rel]) => {
       const dmg = rel && rel.assets.find(a => a.name.endsWith(".dmg"));
       if (!dmg) return;
-      document.querySelectorAll(".js-download").forEach(a => a.href = dmg.browser_download_url);
-      const mb = Math.round(dmg.size / 1048576);
-      document.querySelectorAll(".js-size").forEach(e => e.textContent = `DMG · ${mb} MB`);
-      document.querySelectorAll(".js-version").forEach(e => e.textContent = rel.tag_name.replace(/^v/, "v").replace("-", " ").toUpperCase());
+      document.querySelectorAll(".js-dl").forEach(a => a.href = dmg.browser_download_url);
+      document.querySelectorAll(".js-size").forEach(e => e.textContent = `DMG ${Math.round(dmg.size / 1048576)} MB`);
+      const v = rel.tag_name.replace(/^v/, "").replace("-", " ");
+      document.querySelectorAll(".js-ver").forEach(e => e.textContent = v.toUpperCase());
+      document.querySelectorAll(".js-ver2").forEach(e => e.textContent = v.replace(/beta/i, "Beta"));
     })
     .catch(() => {});
 
-  // Screenshot tabs
-  const shot = document.getElementById("shot");
-  document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t === tab));
-    shot.style.opacity = 0;
-    setTimeout(() => { shot.src = tab.dataset.src; shot.alt = tab.dataset.alt; shot.style.opacity = 1; }, 180);
-  }));
-
-  // Copy buttons
-  document.querySelectorAll("[data-copy]").forEach(btn => btn.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(document.getElementById(btn.dataset.copy).textContent);
-      btn.textContent = "Tersalin ✓";
-      setTimeout(() => btn.textContent = "Salin", 1500);
-    } catch (e) {}
-  }));
-
-  // Reveal on scroll
-  const io = new IntersectionObserver(entries => entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-  }), { threshold: .12 });
-  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+  // ---------- Copy buttons ----------
+  function copyFrom(btn, sourceId, value, labelKey) {
+    btn.addEventListener("click", async () => {
+      const text = value || document.getElementById(sourceId).textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = t("btn.copied");
+        setTimeout(() => btn.textContent = t(labelKey), 1400);
+      } catch (e) {
+        const r = document.createRange(); r.selectNodeContents(document.getElementById(sourceId));
+        const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      }
+    });
+  }
+  copyFrom(document.getElementById("copy-cmd"), "cmd", null, "btn.copy");
+  copyFrom(document.getElementById("copy-phone"), "phone", "081269494591", "btn.copyPhone");
 </script>
 </body>
 </html>
