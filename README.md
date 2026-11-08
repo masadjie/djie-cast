@@ -7,6 +7,10 @@
 Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di atas <a href="https://github.com/Genymobile/scrcpy">scrcpy</a>.</p>
 
 <p align="center">
+  🌐 <a href="https://masadjie.github.io/djie-cast/"><b>masadjie.github.io/djie-cast</b></a>
+</p>
+
+<p align="center">
   <img alt="Versi" src="https://img.shields.io/badge/versi-1.0%20Beta-6366f1">
   <img alt="macOS" src="https://img.shields.io/badge/macOS-14%2B-black">
   <img alt="Lisensi" src="https://img.shields.io/badge/lisensi-MIT-green">
