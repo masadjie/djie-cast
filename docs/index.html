@@ -388,6 +388,17 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
 .tool p { color: var(--ink-2); font-size: 15.5px; }
 @media (max-width: 920px) { .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tool:nth-child(3) { border-left: 0; padding-left: 0; } .tool:nth-child(n+3) { border-top: 1px solid var(--line); } }
 @media (max-width: 520px) { .tools { grid-template-columns: minmax(0, 1fr); } .tool + .tool { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); } }
+
+/* All features */
+.allfeat { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); }
+.allfeat > div { padding: 22px 20px 0 0; }
+.allfeat > div + div { padding-left: 20px; border-left: 1px solid var(--line); }
+.allfeat h3 { font-size: 18px; margin-bottom: 12px; }
+.allfeat ul { list-style: none; display: grid; gap: 9px; }
+.allfeat li { color: var(--ink-2); font-size: 15px; padding-left: 18px; position: relative; }
+.allfeat li::before { content: ""; position: absolute; left: 0; top: .62em; width: 7px; height: 7px; border-radius: 2px; background: var(--signal); }
+@media (max-width: 1100px) { .allfeat { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 26px; } .allfeat > div:nth-child(4) { border-left: 0; padding-left: 0; } }
+@media (max-width: 640px) { .allfeat { grid-template-columns: minmax(0, 1fr); } .allfeat > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 18px; } }
 </style>
 </head>
 <body>
@@ -419,6 +430,8 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
     <nav class="nav-links" aria-label="Menu">
       <a href="#android">Android</a>
       <a href="#iphone">iPhone</a>
+      <a href="#emulator">Emulator</a>
+      <a href="#remote">Remote</a>
       <a href="#live" data-i18n="nav.live">Live</a>
       <a href="#install" data-i18n="nav.install">Install</a>
       <a href="#faq">FAQ</a>
@@ -598,36 +611,112 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
           </picture>
         </figure>
       </div>
+
+      <div class="row flip">
+        <div class="copy-col">
+          <h3 data-i18n="iosf.h">Galeri iPhone, langsung di Mac</h3>
+          <p data-i18n="iosf.p">Colok kabel, buka kunci, dan semua foto &amp; video iPhone/iPad tampil sebagai galeri lengkap dengan thumbnail.</p>
+          <ul class="points">
+            <li><b data-i18n="iosf.k1">Filter</b><span data-i18n="iosf.v1">Semua, Foto, atau Video, diurutkan dari yang terbaru.</span></li>
+            <li><b data-i18n="iosf.k2">Unduh</b><span data-i18n="iosf.v2">Pilih beberapa atau unduh semua ke Downloads/Djie Cast/iPhone.</span></li>
+            <li><b data-i18n="iosf.k3">Buka cepat</b><span data-i18n="iosf.v3">Klik dua kali untuk membuka foto atau video di Mac.</span></li>
+          </ul>
+        </div>
+        <figure class="shot">
+          <picture>
+            <source srcset="assets/iosfiles-dark.jpg" media="(prefers-color-scheme: dark)">
+            <img src="assets/iosfiles-light.jpg" alt="Galeri foto dan video iPhone di Djie Cast" data-i18n-alt="alt.iosfiles" width="1600" height="1000" loading="lazy">
+          </picture>
+        </figure>
+      </div>
     </div>
   </section>
 
-  <section id="lainnya">
+  <section id="emulator">
     <div class="wrap">
       <div class="head">
-        <span class="label" data-i18n="more.label">Lebih dari sekadar cast</span>
-        <h2 data-i18n="more.title">Satu app untuk HP, emulator, dan Mac lain.</h2>
+        <span class="label"><i class="dot" style="background:#0d8a77;box-shadow:0 0 0 4px rgba(13,138,119,.18)"></i><span data-i18n="emu.label">Emulator Android</span></span>
+        <h2 data-i18n="emu.title">Emulator Android yang ngebut, tanpa Android Studio.</h2>
+        <p data-i18n="emu.lead">Pilih sendiri versi Android yang mau diunduh, buat emulator dalam satu klik, lalu jalankan dengan GPU Mac dan akselerasi hardware.</p>
       </div>
-      <div class="tools">
-        <div class="tool">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></span>
-          <h3 data-i18n="more.t1">File iPhone</h3>
-          <p data-i18n="more.p1">Buka galeri foto &amp; video iPhone/iPad lewat kabel, lalu unduh ke Mac satu per satu atau sekaligus.</p>
+      <div class="row">
+        <div class="copy-col">
+          <ul class="points">
+            <li><b data-i18n="emu.k1">Bahan pilihanmu</b><span data-i18n="emu.v1">Mesin emulator dan system image Android 13–17 (Google Play atau Google APIs), langsung dari server resmi Google.</span></li>
+            <li><b data-i18n="emu.k2">Aman</b><span data-i18n="emu.v2">Setiap unduhan dicek checksum-nya dan lisensi Google ditampilkan sebelum diunduh.</span></li>
+            <li><b data-i18n="emu.k3">Profil</b><span data-i18n="emu.v3">Ponsel, ponsel kecil, atau tablet dengan RAM, core, dan penyimpanan sesuai kebutuhan.</span></li>
+            <li><b data-i18n="emu.k4">Cepat</b><span data-i18n="emu.v4">Boot ke Android dalam hitungan detik, dengan Quick Boot dan tanpa animasi boot.</span></li>
+          </ul>
+          <div class="term" style="margin-top:6px">
+            <div class="term-bar"><i></i><i></i><i></i><em data-i18n="emu.term">Perintah yang dijalankan Djie Cast</em></div>
+            <pre><span class="p">$</span> emulator -avd Pixel_Djie -gpu host -accel on -cores 4 -no-boot-anim -qemu -m 4096</pre>
+          </div>
         </div>
-        <div class="tool">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 6h4M9 18h6"/></svg></span>
-          <h3 data-i18n="more.t2">Emulator Android</h3>
-          <p data-i18n="more.p2">Pilih versi Android yang mau diunduh, buat emulator, lalu jalankan dengan GPU Mac dan akselerasi hardware.</p>
+        <figure class="shot">
+          <picture>
+            <source srcset="assets/emulator-dark.jpg" media="(prefers-color-scheme: dark)">
+            <img src="assets/emulator-light.jpg" alt="Halaman Emulator Android di Djie Cast" data-i18n-alt="alt.emulator" width="1600" height="1000" loading="lazy">
+          </picture>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="remote">
+    <div class="wrap">
+      <div class="head">
+        <span class="label"><i class="dot" style="background:var(--signal);box-shadow:0 0 0 4px color-mix(in srgb,var(--signal) 18%,transparent)"></i>Remote Desktop</span>
+        <h2 data-i18n="rem.title">Kendalikan Mac lain, dari mana saja.</h2>
+        <p data-i18n="rem.lead">Seperti AnyDesk, tapi gratis dan tanpa server pihak ketiga. Bagikan kode 6 angka, dan Mac lain bisa melihat serta mengontrol layar Mac ini.</p>
+      </div>
+      <div class="row flip">
+        <div class="copy-col">
+          <ul class="points">
+            <li><b data-i18n="rem.k1">Kode akses</b><span data-i18n="rem.v1">6 angka sekali pakai, bisa diganti kapan saja. Kode salah langsung ditolak.</span></li>
+            <li><b data-i18n="rem.k2">Terenkripsi</b><span data-i18n="rem.v2">Koneksi TLS dengan kunci dari kode akses; video H.264 hardware yang tajam.</span></li>
+            <li><b data-i18n="rem.k3">Kontrol penuh</b><span data-i18n="rem.v3">Mouse, klik kanan, scroll, keyboard, dan shortcut ⌘ dikirim ke Mac tujuan.</span></li>
+            <li><b data-i18n="rem.k4">Lewat internet</b><span data-i18n="rem.v4">Tailscale sudah tertanam. Masuk akun gratis, lalu Mac di jaringan mana pun bisa terhubung.</span></li>
+            <li><b data-i18n="rem.k5">Tetap aman</b><span data-i18n="rem.v5">Mac yang dikontrol menampilkan panel merah dengan tombol Putuskan, dan izin macOS terpantau.</span></li>
+          </ul>
         </div>
-        <div class="tool">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="13" height="10" rx="1.5"/><rect x="9" y="9" width="13" height="10" rx="1.5"/></svg></span>
-          <h3 data-i18n="more.t3">Remote Desktop</h3>
-          <p data-i18n="more.p3">Kendalikan Mac lain dengan kode akses 6 angka. Koneksi terenkripsi, bisa diputus kapan saja dari Mac tujuan.</p>
-        </div>
-        <div class="tool">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
-          <h3 data-i18n="more.t4">Lewat internet</h3>
-          <p data-i18n="more.p4">Tailscale sudah ada di dalam app. Masuk dengan akun gratis, lalu remote Mac dari jaringan mana pun.</p>
-        </div>
+        <figure class="shot">
+          <picture>
+            <source srcset="assets/remote-dark.jpg" media="(prefers-color-scheme: dark)">
+            <img src="assets/remote-light.jpg" alt="Halaman Remote Desktop di Djie Cast" data-i18n-alt="alt.remote" width="1600" height="1000" loading="lazy">
+          </picture>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="semua">
+    <div class="wrap">
+      <div class="head">
+        <span class="label" data-i18n="all.label">Semua fitur</span>
+        <h2 data-i18n="all.title">Semua yang ada di Djie Cast 1.0.</h2>
+      </div>
+      <div class="allfeat">
+        <div><h3>Android</h3><ul>
+          <li data-i18n="all.a1">Mirror &amp; kontrol lewat USB atau Wi-Fi</li><li data-i18n="all.a2">Hingga 120 fps, audio ikut terdengar</li>
+          <li data-i18n="all.a3">Back, Home, Recent, volume, power</li><li data-i18n="all.a4">Screenshot &amp; rekam layar</li>
+          <li data-i18n="all.a5">Rotasi portrait / landscape</li><li data-i18n="all.a6">File manager: unduh, unggah, ganti nama, hapus</li>
+          <li data-i18n="all.a7">Panduan USB Debugging bawaan</li></ul></div>
+        <div><h3>iPhone &amp; iPad</h3><ul>
+          <li data-i18n="all.i1">Layar + audio lewat kabel USB</li><li data-i18n="all.i2">iPhone Mirroring untuk kontrol penuh</li>
+          <li data-i18n="all.i3">AirPlay wireless</li><li data-i18n="all.i4">Jendela ikut berputar, bisa diputar manual</li>
+          <li data-i18n="all.i5">Galeri foto &amp; video, unduh ke Mac</li><li data-i18n="all.i6">Panduan “Percayai Komputer Ini”</li></ul></div>
+        <div><h3 data-i18n="all.eh">Emulator</h3><ul>
+          <li data-i18n="all.e1">Unduh versi Android pilihanmu</li><li data-i18n="all.e2">Checksum &amp; lisensi resmi Google</li>
+          <li data-i18n="all.e3">Ponsel, ponsel kecil, tablet</li><li data-i18n="all.e4">GPU Mac + akselerasi hardware</li>
+          <li data-i18n="all.e5">Bisa langsung di-cast di Djie Cast</li></ul></div>
+        <div><h3>Remote Desktop</h3><ul>
+          <li data-i18n="all.r1">Mac ke Mac dengan kode 6 angka</li><li data-i18n="all.r2">Terenkripsi TLS</li>
+          <li data-i18n="all.r3">Deteksi otomatis di jaringan yang sama</li><li data-i18n="all.r4">Tailscale bawaan untuk internet</li>
+          <li data-i18n="all.r5">Satu pengontrol, bisa diputus kapan saja</li></ul></div>
+        <div><h3 data-i18n="all.oh">Lainnya</h3><ul>
+          <li data-i18n="all.o1">Mode terang / gelap / ikuti sistem</li><li data-i18n="all.o2">Siap untuk OBS &amp; live streaming</li>
+          <li data-i18n="all.o3">Universal: Apple Silicon &amp; Intel</li><li data-i18n="all.o4">100% lokal, tanpa akun &amp; iklan</li>
+          <li data-i18n="all.o5">Open source, lisensi MIT</li></ul></div>
       </div>
     </div>
   </section>
@@ -693,6 +782,10 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
           <p data-i18n="faq.a4">App belum dinotarisasi Apple karena itu butuh akun developer berbayar. Kode sumbernya terbuka di GitHub untuk diperiksa siapa saja. Klik kanan → Open cukup sekali.</p></details>
         <details><summary data-i18n="faq.q5">Ada data yang dikirim ke internet?</summary>
           <p data-i18n="faq.a5">Tidak. Video dan file hanya berpindah antara Mac dan HP-mu. Tidak ada akun, analitik, atau server.</p></details>
+        <details><summary data-i18n="faq.q7">Remote Desktop bisa ke Windows?</summary>
+          <p data-i18n="faq.a7">Untuk saat ini Remote Desktop bekerja antar Mac. Djie Cast adalah aplikasi macOS, jadi kedua komputer perlu memasang Djie Cast.</p></details>
+        <details><summary data-i18n="faq.q8">Apakah emulator butuh Android Studio?</summary>
+          <p data-i18n="faq.a8">Tidak. Djie Cast mengunduh mesin emulator dan versi Android pilihanmu langsung dari server Google. Kalau Android Studio sudah terpasang, bahan yang ada dipakai bersama.</p></details>
         <details><summary data-i18n="faq.q6">Bisa untuk main game?</summary>
           <p data-i18n="faq.a6">Bisa. Pakai kabel USB, pilih preset Maksimal, lalu paksa layar ke landscape dari tombol rotasi.</p></details>
       </div>
@@ -771,6 +864,39 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
   // ---------- Language: Indonesian is written in the HTML; English lives here. ----------
   const EN = {
     "nav.install": "Install", "nav.donate": "Donate",
+    "iosf.h": "Your iPhone gallery, right on your Mac", "iosf.p": "Plug in, unlock, and every photo & video on your iPhone/iPad appears as a gallery with thumbnails.",
+    "iosf.k1": "Filter", "iosf.v1": "All, Photos, or Videos, newest first.",
+    "iosf.k2": "Download", "iosf.v2": "Pick a few or download everything to Downloads/Djie Cast/iPhone.",
+    "iosf.k3": "Quick open", "iosf.v3": "Double-click to open a photo or video on your Mac.",
+    "emu.label": "Android emulator", "emu.title": "A fast Android emulator, no Android Studio needed.",
+    "emu.lead": "Choose which Android versions to download, create an emulator in one click, and run it on your Mac's GPU with hardware acceleration.",
+    "emu.k1": "Your pick", "emu.v1": "The emulator engine and Android 13–17 system images (Google Play or Google APIs), straight from Google's official servers.",
+    "emu.k2": "Safe", "emu.v2": "Every download is checksum-verified and Google's license is shown before downloading.",
+    "emu.k3": "Profiles", "emu.v3": "Phone, small phone, or tablet with the RAM, cores, and storage you need.",
+    "emu.k4": "Fast", "emu.v4": "Boots into Android in seconds, with Quick Boot and no boot animation.",
+    "emu.term": "The command Djie Cast runs",
+    "rem.title": "Control another Mac, from anywhere.", "rem.lead": "Like AnyDesk, but free and with no third-party server. Share a 6-digit code and another Mac can see and control this Mac's screen.",
+    "rem.k1": "Access code", "rem.v1": "A one-time 6-digit code you can change any time. Wrong codes are rejected instantly.",
+    "rem.k2": "Encrypted", "rem.v2": "TLS keyed from the access code; sharp hardware H.264 video.",
+    "rem.k3": "Full control", "rem.v3": "Mouse, right-click, scroll, keyboard, and ⌘ shortcuts are sent to the other Mac.",
+    "rem.k4": "Over the internet", "rem.v4": "Tailscale is built in. Sign in with a free account and reach Macs on any network.",
+    "rem.k5": "Stays safe", "rem.v5": "The controlled Mac shows a red panel with a Disconnect button, and macOS permissions are tracked live.",
+    "all.label": "All features", "all.title": "Everything in Djie Cast 1.0.",
+    "all.a1": "Mirror & control over USB or Wi-Fi", "all.a2": "Up to 120 fps, with audio", "all.a3": "Back, Home, Recent, volume, power",
+    "all.a4": "Screenshots & screen recording", "all.a5": "Portrait / landscape rotation", "all.a6": "File manager: download, upload, rename, delete",
+    "all.a7": "Built-in USB Debugging guide",
+    "all.i1": "Screen + audio over USB", "all.i2": "iPhone Mirroring for full control", "all.i3": "Wireless AirPlay",
+    "all.i4": "Window follows rotation, or rotate manually", "all.i5": "Photo & video gallery, download to Mac", "all.i6": "“Trust This Computer” guide",
+    "all.eh": "Emulator", "all.e1": "Download the Android versions you pick", "all.e2": "Google checksums & licenses", "all.e3": "Phone, small phone, tablet",
+    "all.e4": "Mac GPU + hardware acceleration", "all.e5": "Cast it in Djie Cast right away",
+    "all.r1": "Mac to Mac with a 6-digit code", "all.r2": "TLS encrypted", "all.r3": "Auto-discovery on the same network",
+    "all.r4": "Built-in Tailscale for the internet", "all.r5": "One controller, disconnect any time",
+    "all.oh": "More", "all.o1": "Light / dark / system appearance", "all.o2": "Ready for OBS & live streaming", "all.o3": "Universal: Apple Silicon & Intel",
+    "all.o4": "100% local, no account, no ads", "all.o5": "Open source, MIT license",
+    "faq.q7": "Does Remote Desktop work with Windows?", "faq.a7": "For now Remote Desktop works between Macs. Djie Cast is a macOS app, so both computers need Djie Cast installed.",
+    "faq.q8": "Does the emulator need Android Studio?", "faq.a8": "No. Djie Cast downloads the emulator engine and the Android versions you choose straight from Google. If Android Studio is installed, existing components are shared.",
+    "alt.iosfiles": "iPhone photo and video gallery in Djie Cast", "alt.emulator": "Djie Cast Android emulator page", "alt.remote": "Djie Cast Remote Desktop page",
+
     "more.label": "More than casting", "more.title": "One app for your phone, emulators, and other Macs.",
     "more.t1": "iPhone files", "more.p1": "Open your iPhone/iPad photo & video library over a cable and download items to your Mac, one by one or all at once.",
     "more.t2": "Android emulator", "more.p2": "Pick the Android versions you want to download, create emulators, and run them on your Mac's GPU with hardware acceleration.",
