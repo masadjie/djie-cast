@@ -63,6 +63,17 @@ struct IOSBackend: DeviceBackend {
         let disk = (await diskP as? [String: Any]) ?? [:]
         let gaugeRoot = (await gaugeP as? [String: Any]) ?? [:]
         let gauge = (gaugeRoot["IORegistry"] as? [String: Any]) ?? gaugeRoot
+        // Battery keys sit at different depths depending on the iOS version; search the whole tree.
+        func num(_ key: String, _ node: Any? = nil) -> Double? {
+            let n = node ?? gauge
+            if let d = n as? [String: Any] {
+                if let v = d[key] as? NSNumber { return v.doubleValue }
+                for v in d.values { if let r = num(key, v) { return r } }
+            } else if let a = n as? [Any] {
+                for v in a { if let r = num(key, v) { return r } }
+            }
+            return nil
+        }
 
         func s(_ k: String) -> String? { (basic[k] as? String).flatMap { $0.isEmpty ? nil : $0 } }
         var d = DeviceDetail()
@@ -93,12 +104,12 @@ struct IOSBackend: DeviceBackend {
         d.batteryLevel = (bat["BatteryCurrentCapacity"] as? NSNumber)?.intValue
         let charging = (bat["BatteryIsCharging"] as? Bool) ?? false, ext = (bat["ExternalConnected"] as? Bool) ?? false
         d.batteryState = (bat["FullyCharged"] as? Bool) == true ? "Penuh" : charging ? "Mengisi daya" : ext ? "Tersambung, tidak mengisi" : "Tidak mengisi"
-        let design = (gauge["DesignCapacity"] as? NSNumber)?.doubleValue
-        let maxCap = ((gauge["AppleRawMaxCapacity"] ?? gauge["NominalChargeCapacity"]) as? NSNumber)?.doubleValue
+        let design = num("DesignCapacity")
+        let maxCap = num("NominalChargeCapacity") ?? num("AppleRawMaxCapacity")
         if let design, let maxCap, design > 0 { d.batteryHealth = "\(min(100, Int((maxCap / design * 100).rounded())))%" }
-        if let c = (gauge["CycleCount"] as? NSNumber)?.intValue { d.batteryCycles = "\(c)" }
-        if let t = (gauge["Temperature"] as? NSNumber)?.doubleValue { d.batteryExtra.append(SpecRow(label: "Suhu", value: String(format: "%.1f °C", t / 100))) }
-        if let v = (gauge["Voltage"] as? NSNumber)?.doubleValue { d.batteryExtra.append(SpecRow(label: "Tegangan", value: String(format: "%.2f V", v / 1000))) }
+        if let c = num("CycleCount") { d.batteryCycles = "\(Int(c))" }
+        if let t = num("Temperature") { d.batteryExtra.append(SpecRow(label: "Suhu", value: String(format: "%.1f °C", t / 100))) }
+        if let v = num("Voltage") { d.batteryExtra.append(SpecRow(label: "Tegangan", value: String(format: "%.2f V", v / 1000))) }
         d.status = [
             SpecRow(label: "Warna", value: s("DeviceColor").map { $0 == "1" ? "Hitam" : $0 == "2" ? "Putih" : $0 } ?? "-"),
             SpecRow(label: "Kode wilayah", value: s("RegionInfo") ?? "-"),

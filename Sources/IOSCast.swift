@@ -289,15 +289,13 @@ struct IOSCastView: View {
                             }
                         }
                     } else {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
+                        VStack(spacing: 16) {
                             ForEach(model.devices, id: \.uniqueID) { d in
-                                IOSDeviceCard(name: d.localizedName,
-                                              running: model.mirroring.contains(d.uniqueID),
-                                              onStart: { Task { await model.start(d) } },
-                                              onStop: { model.stop(d) },
-                                              onRotate: { model.rotate(d, by: $0) },
-                                              onInfo: { openInfo(name: d.localizedName) })
-                                .transition(.scale(scale: 0.92).combined(with: .opacity))
+                                IOSRichCard(name: d.localizedName, running: model.mirroring.contains(d.uniqueID),
+                                            onStart: { Task { await model.start(d) } }, onStop: { model.stop(d) },
+                                            onRotate: { model.rotate(d, by: $0) },
+                                            onDetails: { detailUDID = $0 })
+                                .transition(.scale(scale: 0.96).combined(with: .opacity))
                             }
                         }
                     }
@@ -447,6 +445,43 @@ struct WirelessCard: View {
                     .disabled(!enabled)
             }
             .frame(maxHeight: .infinity, alignment: .top)
+        }
+    }
+}
+
+/// iPhone/iPad card with its details shown inline (libimobiledevice when available).
+struct IOSRichCard: View {
+    let name: String
+    let running: Bool
+    let onStart: () -> Void
+    let onStop: () -> Void
+    let onRotate: (Int) -> Void
+    let onDetails: (String) -> Void
+    @State private var udid: String?
+    @State private var resolved = false
+
+    var body: some View {
+        DeviceSummaryCard(backend: udid.map { IOSBackend(udid: $0) }, fallbackTitle: name,
+                          fallbackSubtitle: resolved && udid == nil ? "Buka kunci iPhone & ketuk “Percayai” untuk melihat detail" : "iPhone",
+                          live: running, connection: "USB", showScreen: !running,
+                          onDetails: { if let udid { onDetails(udid) } }) {
+            if running {
+                Button { onRotate(-90) } label: { Image(systemName: "rotate.left") }.buttonStyle(SoftButtonStyle(tint: Theme.ios[0])).fixedSize()
+                Button { onRotate(90) } label: { Image(systemName: "rotate.right") }.buttonStyle(SoftButtonStyle(tint: Theme.ios[0])).fixedSize()
+                Button(action: onStop) { Label("Hentikan", systemImage: "stop.fill") }.buttonStyle(SoftButtonStyle(tint: .red)).fixedSize()
+            } else {
+                Button(action: onStart) { Label("Mulai Cast", systemImage: "play.fill") }
+                    .buttonStyle(GradientButtonStyle(colors: Theme.ios)).fixedSize()
+            }
+        }
+        .task(id: name) {
+            guard IMD.available else { resolved = true; return }
+            for _ in 0..<5 {
+                let list = await IMD.devices()
+                if let hit = list.first(where: { $0.name == name }) ?? (list.count == 1 ? list.first : nil) { udid = hit.udid; break }
+                try? await Task.sleep(for: .seconds(2))
+            }
+            resolved = true
         }
     }
 }

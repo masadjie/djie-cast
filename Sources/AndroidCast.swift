@@ -360,16 +360,48 @@ struct AndroidCastView: View {
                             }
                         }
                     } else {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
+                        VStack(spacing: 16) {
                             ForEach(model.devices) { d in
-                                AndroidDeviceCard(device: d, running: model.running[d.serial] != nil,
-                                                  busy: model.busy,
-                                                  onStart: { model.start(serial: d.serial, args: scrcpyArgs()) },
-                                                  onStop: { model.stop(d.serial) },
-                                                  onWifi: { Task { await model.enableTcpip(d.serial) } },
-                                                  onDisconnect: { Task { await model.disconnect(d.serial) } },
-                                                  onInfo: { detailSerial = d.serial })
-                                .transition(.scale(scale: 0.92).combined(with: .opacity))
+                                if d.state == "device" {
+                                    let running = model.running[d.serial] != nil
+                                    DeviceSummaryCard(backend: AndroidBackend(serial: d.serial), fallbackTitle: d.displayName,
+                                                      fallbackSubtitle: d.serial, live: running,
+                                                      connection: d.isWireless ? "Wi-Fi" : "USB", showScreen: true,
+                                                      onDetails: { detailSerial = d.serial }) {
+                                        if running {
+                                            Button { model.stop(d.serial) } label: { Label("Hentikan", systemImage: "stop.fill") }
+                                                .buttonStyle(SoftButtonStyle(tint: .red)).fixedSize()
+                                        } else {
+                                            Button { model.start(serial: d.serial, args: scrcpyArgs()) } label: { Label("Mulai Cast", systemImage: "play.fill") }
+                                                .buttonStyle(GradientButtonStyle(colors: Theme.android)).fixedSize()
+                                        }
+                                        ControlBar(serial: d.serial).frame(width: 290)
+                                        Menu {
+                                            if !d.isWireless {
+                                                Button("Aktifkan Wi-Fi", systemImage: "wifi") { Task { await model.enableTcpip(d.serial) } }
+                                            } else {
+                                                Button("Putuskan", systemImage: "xmark.circle") { Task { await model.disconnect(d.serial) } }
+                                            }
+                                            Button("Buka File", systemImage: "folder") {
+                                                AndroidFilesModel.shared.select(serial: d.serial); Nav.shared.page = .files
+                                            }
+                                            Button("Salin serial", systemImage: "doc.on.doc") {
+                                                NSPasteboard.general.clearContents(); NSPasteboard.general.setString(d.serial, forType: .string)
+                                            }
+                                        } label: { Image(systemName: "ellipsis").frame(width: 22, height: 22) }
+                                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                                    }
+                                    .transition(.scale(scale: 0.96).combined(with: .opacity))
+                                } else {
+                                    AndroidDeviceCard(device: d, running: false, busy: model.busy,
+                                                      onStart: {}, onStop: {},
+                                                      onWifi: { Task { await model.enableTcpip(d.serial) } },
+                                                      onDisconnect: { Task { await model.disconnect(d.serial) } },
+                                                      onInfo: { detailSerial = d.serial })
+                                    .frame(maxWidth: 360, alignment: .leading)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .transition(.scale(scale: 0.96).combined(with: .opacity))
+                                }
                             }
                         }
                     }
