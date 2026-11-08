@@ -237,6 +237,18 @@ final class MirrorWindow: NSObject, NSWindowDelegate {
 struct IOSCastView: View {
     @ObservedObject var model = IOSCastModel.shared
     @State private var showGuide = false
+    @State private var detailUDID: String?
+    @State private var infoError: String?
+
+    /// Finds the libimobiledevice UDID for a device (by name), or the first connected one.
+    private func openInfo(name: String?) {
+        guard IMD.available else { infoError = "Info iPhone butuh komponen libimobiledevice (sudah termasuk di Djie Cast untuk Apple Silicon)."; return }
+        Task {
+            let list = await IMD.devices()
+            if let hit = list.first(where: { $0.name == name }) ?? list.first { detailUDID = hit.udid; infoError = nil }
+            else { infoError = "iPhone belum terbaca. Buka kunci iPhone dan pastikan sudah “Percayai Komputer Ini”." }
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -248,6 +260,9 @@ struct IOSCastView: View {
 
                 if !model.devices.isEmpty {
                     RequirementBanner(guide: .ios) { showGuide = true }
+                }
+                if let infoError {
+                    Label(infoError, systemImage: "info.circle").font(.callout).foregroundStyle(.orange)
                 }
 
                 Panel {
@@ -280,7 +295,8 @@ struct IOSCastView: View {
                                               running: model.mirroring.contains(d.uniqueID),
                                               onStart: { Task { await model.start(d) } },
                                               onStop: { model.stop(d) },
-                                              onRotate: { model.rotate(d, by: $0) })
+                                              onRotate: { model.rotate(d, by: $0) },
+                                              onInfo: { openInfo(name: d.localizedName) })
                                 .transition(.scale(scale: 0.92).combined(with: .opacity))
                             }
                         }
@@ -323,7 +339,14 @@ struct IOSCastView: View {
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: model.devices.map(\.uniqueID))
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .ios) }
+        .sheet(item: Binding(get: { detailUDID.map { SerialItem(id: $0) } }, set: { detailUDID = $0?.id })) { item in
+            DeviceDetailSheet(backend: IOSBackend(udid: item.id))
+        }
         .toolbar {
+            ToolbarItem {
+                Button { openInfo(name: nil) } label: { Label("Info & aplikasi iPhone", systemImage: "info.circle") }
+                    .help("Spesifikasi, baterai & aplikasi iPhone yang tersambung")
+            }
             ToolbarItem {
                 Button { showGuide = true } label: { Label("Panduan Trust", systemImage: "questionmark.circle") }
                     .help("Cara mempercayai Mac ini di iPhone/iPad")
@@ -342,6 +365,7 @@ struct IOSDeviceCard: View {
     let onStart: () -> Void
     let onStop: () -> Void
     let onRotate: (Int) -> Void
+    let onInfo: () -> Void
     private var isPad: Bool { name.lowercased().contains("ipad") }
 
     var body: some View {
@@ -352,6 +376,8 @@ struct IOSDeviceCard: View {
                     Spacer()
                     if running { LiveBadge() }
                     Pill(text: "USB", icon: "cable.connector", color: .secondary)
+                    Button(action: onInfo) { Image(systemName: "info.circle").font(.system(size: 15)) }
+                        .buttonStyle(.borderless).help("Info perangkat & aplikasi")
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     Text(name).font(.headline).lineLimit(1)

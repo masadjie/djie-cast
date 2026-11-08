@@ -28,3 +28,8 @@ included in the app at Contents/Resources/scrcpy/LICENSE.
 
 Djie Cast also links libtailscale (https://github.com/tailscale/libtailscale),
 distributed under the BSD 3-Clause License.
+
+Djie Cast also bundles, unmodified, libimobiledevice and its libraries (LGPL-2.1)
+and ideviceinstaller (GPL-2.0) from https://libimobiledevice.org. Their license
+texts are included in the app at Contents/Resources/licenses/. Source code is
+available at https://github.com/libimobiledevice.

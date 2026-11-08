@@ -23,6 +23,8 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 ### Android
 - **Mirror + kontrol penuh** — klik, scroll, drag & ketik langsung dari Mac, tanpa menyentuh HP.
 - **USB atau Wi-Fi** — aktifkan mode wireless dengan satu klik.
+- **Info perangkat** — spesifikasi lengkap, baterai, penyimpanan, RAM, layar, plus tangkapan layar terkini; Restart / Matikan HP.
+- **Aplikasi terinstal** — cari, uninstall, dan pasang APK.
 - **Panduan bawaan** — langkah mengaktifkan USB Debugging langsung di aplikasi.
 - **Kontrol cepat** — Back, Home, Recent, volume, power & screenshot.
 - **Rotasi layar** — paksa HP ke portrait / landscape / otomatis, atau putar tampilan jendela (⌘R, ⌘← / ⌘→).
@@ -48,6 +50,8 @@ Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di at
 Jendela cast bisa ditangkap software live di Mac seperti **OBS Studio**, **Streamlabs**, **Ecamm Live**, dan **TikTok LIVE Studio** (bila versi Mac tersedia) lewat *Window Capture*. Nyalakan "Tanpa bingkai jendela" untuk gambar yang bersih. HP tetap bisa dikontrol dari Mac selama siaran.
 
 ### iPhone & iPad
+- **Info iPhone** — model, iOS, serial, IMEI, kesehatan & siklus baterai, penyimpanan; Restart / Matikan iPhone.
+- **Aplikasi iPhone** — daftar aplikasi terinstal dan uninstall (lewat libimobiledevice, sudah dibundel untuk Apple Silicon).
 - **File iPhone** — lihat galeri foto & video iPhone/iPad, unduh ke Mac (satu, beberapa, atau semua).
 - **Panduan Trust** — langkah “Percayai Komputer Ini” langsung di aplikasi.
 - **USB** — tampilkan layar + audio langsung di Mac (hanya lihat). Jendela mengikuti rotasi iPhone otomatis, bisa diputar manual (⌘← / ⌘→).

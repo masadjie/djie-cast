@@ -299,6 +299,7 @@ struct AndroidCastView: View {
     @AppStorage("androidInspector") private var showInspector = true
     @State private var showConsole = false
     @State private var showGuide = false
+    @State private var detailSerial: String?
 
     func scrcpyArgs() -> [String] {
         var a: [String] = []
@@ -366,7 +367,8 @@ struct AndroidCastView: View {
                                                   onStart: { model.start(serial: d.serial, args: scrcpyArgs()) },
                                                   onStop: { model.stop(d.serial) },
                                                   onWifi: { Task { await model.enableTcpip(d.serial) } },
-                                                  onDisconnect: { Task { await model.disconnect(d.serial) } })
+                                                  onDisconnect: { Task { await model.disconnect(d.serial) } },
+                                                  onInfo: { detailSerial = d.serial })
                                 .transition(.scale(scale: 0.92).combined(with: .opacity))
                             }
                         }
@@ -387,6 +389,9 @@ struct AndroidCastView: View {
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: model.devices.map(\.serial))
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: Array(model.running.keys))
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .android) }
+        .sheet(item: Binding(get: { detailSerial.map { SerialItem(id: $0) } }, set: { detailSerial = $0?.id })) { item in
+            DeviceDetailSheet(backend: AndroidBackend(serial: item.id))
+        }
         .inspector(isPresented: $showInspector) {
             settingsForm
                 .inspectorColumnWidth(min: 260, ideal: 290, max: 360)
@@ -593,6 +598,7 @@ struct AndroidDeviceCard: View {
     let onStop: () -> Void
     let onWifi: () -> Void
     let onDisconnect: () -> Void
+    let onInfo: () -> Void
 
     private var ready: Bool { device.state == "device" }
 
@@ -606,7 +612,12 @@ struct AndroidDeviceCard: View {
                     Pill(text: device.isWireless ? "Wi-Fi" : "USB",
                          icon: device.isWireless ? "wifi" : "cable.connector",
                          color: device.isWireless ? .blue : .secondary)
+                    Button(action: onInfo) { Image(systemName: "info.circle").font(.system(size: 15)) }
+                        .buttonStyle(.borderless)
+                        .help("Info perangkat & aplikasi")
+                        .disabled(!ready)
                     Menu {
+                        Button("Info perangkat & aplikasi", systemImage: "info.circle", action: onInfo).disabled(!ready)
                         if !device.isWireless {
                             Button("Aktifkan Wi-Fi", systemImage: "wifi", action: onWifi).disabled(!ready || busy)
                         } else {
@@ -715,3 +726,5 @@ struct ControlBar: View {
         .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }
+
+struct SerialItem: Identifiable { let id: String }

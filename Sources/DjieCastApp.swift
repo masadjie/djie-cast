@@ -459,9 +459,9 @@ struct DjieCastApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         MainActor.assumeIsolated {
-            RemoteSelfTest.runIfRequested(); EmulatorSelfTest.runIfRequested(); RemoteSelfTest.runTailnetIfRequested()
+            RemoteSelfTest.runIfRequested(); EmulatorSelfTest.runIfRequested(); RemoteSelfTest.runTailnetIfRequested(); DeviceSelfTest.runIfRequested()
             let env = ProcessInfo.processInfo.environment
-            if env["DJIE_REMOTE_SELFTEST"] == nil && env["DJIE_EMU_SELFTEST"] == nil && env["DJIE_TAILNET_SELFTEST"] == nil && env["DJIE_DEMO"] == nil {
+            if env["DJIE_REMOTE_SELFTEST"] == nil && env["DJIE_EMU_SELFTEST"] == nil && env["DJIE_TAILNET_SELFTEST"] == nil && env["DJIE_DEMO"] == nil && env["DJIE_DEVICE_SELFTEST"] == nil {
                 TailnetModel.shared.autoStart()
             }
         }

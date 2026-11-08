@@ -65,7 +65,31 @@ cp vendor/tailscale/LICENSE "$APP/Contents/Resources/tailscale-LICENSE"
 
 cp Resources/qris.png "$APP/Contents/Resources/"
 
+# iOS info & aplikasi: bundel libimobiledevice (LGPL) + ideviceinstaller (GPL) dari Homebrew bila ada.
+# Pasang sekali di Mac build: brew install libimobiledevice ideviceinstaller dylibbundler
+BREW_BIN="$(brew --prefix 2>/dev/null)/bin"
+if [ -x "$BREW_BIN/ideviceinfo" ] && [ -x "$BREW_BIN/ideviceinstaller" ] && command -v dylibbundler >/dev/null; then
+  echo "→ Bundel libimobiledevice..."
+  IMD_DIR="$APP/Contents/MacOS/imd"; IMD_LIB="$APP/Contents/Frameworks/imd"
+  mkdir -p "$IMD_DIR" "$IMD_LIB" "$APP/Contents/Resources/licenses"
+  XARGS=()
+  for t in idevice_id ideviceinfo idevicediagnostics ideviceinstaller; do
+    cp -L "$BREW_BIN/$t" "$IMD_DIR/$t"; chmod u+w "$IMD_DIR/$t"; XARGS+=(-x "$IMD_DIR/$t")
+  done
+  dylibbundler -of -b "${XARGS[@]}" -d "$IMD_LIB" -p "@executable_path/../../Frameworks/imd/" >/dev/null
+  for pkg in libimobiledevice libplist libusbmuxd libimobiledevice-glue libtatsu ideviceinstaller openssl@3 openssl@4 xz zstd libzip; do
+    d="$(brew --prefix $pkg 2>/dev/null)"; [ -d "$d" ] || continue
+    for f in "$d"/COPYING* "$d"/LICENSE*; do [ -f "$f" ] && cp "$f" "$APP/Contents/Resources/licenses/$pkg-$(basename "$f")"; done
+  done
+else
+  echo "   (lewati libimobiledevice: brew install libimobiledevice ideviceinstaller dylibbundler)"
+fi
+
 echo "→ Codesign..."
+if [ -d "$APP/Contents/Frameworks" ]; then
+  find "$APP/Contents/Frameworks" -name "*.dylib" -exec codesign --force -s - {} \; 2>/dev/null
+fi
+[ -d "$APP/Contents/MacOS/imd" ] && codesign --force -s - "$APP"/Contents/MacOS/imd/* 2>/dev/null
 codesign --force -s - "$APP/Contents/MacOS/scrcpy" "$APP/Contents/MacOS/adb"
 codesign --force -s - "$APP"
 
