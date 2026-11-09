@@ -191,6 +191,18 @@ final class LauncherModel: ObservableObject {
         }
     }
 
+    /// Shows the phone's camera on the Mac instead of its screen (scrcpy camera source, Android 12+).
+    func startCamera(serial: String, front: Bool, name: String) {
+        if running[serial] != nil { stop(serial) }
+        let args = ["--video-source=camera", "--camera-facing=\(front ? "front" : "back")",
+                    "--max-size=1920", "--camera-fps=30", "--no-audio",
+                    "--window-title=Kamera \(front ? "depan" : "belakang") — \(name)"]
+        // give a previous session a moment to release the device
+        DispatchQueue.main.asyncAfter(deadline: .now() + (running[serial] == nil ? 0 : 0.6)) { [weak self] in
+            self?.start(serial: serial, args: args)
+        }
+    }
+
     /// Sends an Android key event (works with or without an open cast window).
     func key(_ serial: String, _ code: String) {
         guard let adb = adbPath, !Demo.enabled else { return }
@@ -376,6 +388,16 @@ struct AndroidCastView: View {
                                                 .buttonStyle(GradientButtonStyle(colors: Theme.android)).fixedSize()
                                         }
                                         ControlBar(serial: d.serial).frame(width: 290)
+                                        Menu {
+                                            Section("Kamera HP · Android 12+") {
+                                                Button("Kamera belakang", systemImage: "camera.fill") { model.startCamera(serial: d.serial, front: false, name: d.displayName) }
+                                                Button("Kamera depan", systemImage: "camera.rotate") { model.startCamera(serial: d.serial, front: true, name: d.displayName) }
+                                            }
+                                        } label: { Label("Kamera", systemImage: "camera.fill") }
+                                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                                        .padding(.horizontal, 12).padding(.vertical, 7)
+                                        .background(Theme.android[1].opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                                        .help("Tampilkan kamera HP di Mac")
                                         Menu {
                                             if !d.isWireless {
                                                 Button("Aktifkan Wi-Fi", systemImage: "wifi") { Task { await model.enableTcpip(d.serial) } }

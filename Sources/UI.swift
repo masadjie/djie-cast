@@ -25,11 +25,65 @@ enum Demo {
     static var startPage: String? { env["DJIE_PAGE"] }
     static var snapshotPath: String? { env["DJIE_SNAPSHOT"] }
 
+    /// Sample specs for screenshots (demo devices are not real phones).
+    static func androidDetail(_ serial: String) -> DeviceDetail {
+        let pixel = serial.contains(":")
+        var d = DeviceDetail()
+        d.title = pixel ? "Pixel 8 Pro" : "Galaxy S24 Ultra"
+        d.subtitle = pixel ? "Google · GC3VE" : "Samsung · SM-S928B"
+        d.storagePill = pixel ? "128 GB" : "256 GB"
+        d.specs = [
+            SpecRow(label: "Versi Android", value: pixel ? "Android 16 (API 36)" : "Android 15 (API 35)"),
+            SpecRow(label: "One UI / Build", value: pixel ? "BP2A.250605.031" : "One UI 7.0"),
+            SpecRow(label: "Chipset", value: pixel ? "Google Tensor G3" : "Snapdragon 8 Gen 3"),
+            SpecRow(label: "RAM", value: pixel ? "12 GB" : "12 GB"),
+            SpecRow(label: "Layar", value: pixel ? "1344 × 2992 · 120 Hz" : "1440 × 3120 · 120 Hz"),
+            SpecRow(label: "CPU", value: "8 core · arm64-v8a"),
+            SpecRow(label: "Patch keamanan", value: "2026-10-01"),
+            SpecRow(label: "Serial", value: serial),
+        ]
+        d.batteryLevel = pixel ? 64 : 82
+        d.batteryState = pixel ? "Tidak mengisi" : "Mengisi daya (USB)"
+        d.batteryHealth = "Baik"
+        d.batteryCycles = pixel ? "214" : "318"
+        d.storageTotal = pixel ? 128_000_000_000 : 256_000_000_000
+        d.storageUsed = pixel ? 71_000_000_000 : 148_000_000_000
+        return d
+    }
+
+    /// A drawn lock screen for demo phones.
+    static func lockScreen(_ alt: Bool) -> NSImage {
+        NSImage(size: NSSize(width: 540, height: 1170), flipped: true) { r in
+            let g = NSGradient(colors: alt ? [NSColor(red: 0.05, green: 0.45, blue: 0.55, alpha: 1), NSColor(red: 0.12, green: 0.16, blue: 0.40, alpha: 1)]
+                                           : [NSColor(red: 0.31, green: 0.27, blue: 0.90, alpha: 1), NSColor(red: 0.62, green: 0.30, blue: 0.85, alpha: 1)])!
+            g.draw(in: r, angle: 90)
+            let style = NSMutableParagraphStyle(); style.alignment = .center
+            ("14:05" as NSString).draw(in: NSRect(x: 0, y: 190, width: 540, height: 170),
+                withAttributes: [.font: NSFont.systemFont(ofSize: 132, weight: .semibold), .foregroundColor: NSColor.white, .paragraphStyle: style])
+            ("Senin, 9 November" as NSString).draw(in: NSRect(x: 0, y: 370, width: 540, height: 50),
+                withAttributes: [.font: NSFont.systemFont(ofSize: 30, weight: .medium), .foregroundColor: NSColor.white.withAlphaComponent(0.85), .paragraphStyle: style])
+            let colors: [NSColor] = [.systemOrange, .systemRed, .systemGreen, .systemBlue, .systemPink, .systemTeal, .systemYellow, .systemIndigo]
+            for i in 0..<8 {
+                let x = 70 + CGFloat(i % 4) * 110, y = 820 + CGFloat(i / 4) * 120
+                colors[i].withAlphaComponent(0.9).setFill()
+                NSBezierPath(roundedRect: NSRect(x: x, y: y, width: 80, height: 80), xRadius: 22, yRadius: 22).fill()
+            }
+            NSColor.white.withAlphaComponent(0.35).setFill()
+            NSBezierPath(roundedRect: NSRect(x: 60, y: 1070, width: 420, height: 60), xRadius: 30, yRadius: 30).fill()
+            return true
+        }
+    }
+
     /// Saves the key window (incl. toolbar) to a PNG and quits.
     @MainActor static func snapshotIfRequested() {
         guard let path = snapshotPath else { return }
         if env["DJIE_APPEARANCE"] == "light" { NSApp.appearance = NSAppearance(named: .aqua) }
         if env["DJIE_APPEARANCE"] == "dark" { NSApp.appearance = NSAppearance(named: .darkAqua) }
+        if let size = env["DJIE_WINDOW"]?.split(separator: "x").compactMap({ Double($0) }), size.count == 2 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                NSApp.windows.first(where: { $0.isVisible })?.setContentSize(NSSize(width: size[0], height: size[1]))
+            }
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             guard let win = NSApp.windows.first(where: { $0.isVisible }),
                   let view = win.contentView?.superview ?? win.contentView,
@@ -279,3 +333,55 @@ struct OutlineButtonStyle: ButtonStyle {
             .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
+
+
+/// Lays children out left to right and wraps to a new line when the row is full.
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 10
+    var lineSpacing: CGFloat = 10
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxW = proposal.width ?? .infinity
+        var x: CGFloat = 0, y: CGFloat = 0, line: CGFloat = 0, widest: CGFloat = 0
+        for v in subviews {
+            let sz = v.sizeThatFits(.unspecified)
+            if x > 0 && x + sz.width > maxW { y += line + lineSpacing; x = 0; line = 0 }
+            x += sz.width + spacing; line = max(line, sz.height); widest = max(widest, x - spacing)
+        }
+        return CGSize(width: proposal.width ?? widest, height: y + line)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX, y = bounds.minY, line: CGFloat = 0
+        // vertically centre items within their line
+        var rows: [[(LayoutSubview, CGSize)]] = [[]]
+        var rowW: CGFloat = 0
+        for v in subviews {
+            let sz = v.sizeThatFits(.unspecified)
+            if rowW > 0 && rowW + sz.width > bounds.width { rows.append([]); rowW = 0 }
+            rows[rows.count - 1].append((v, sz)); rowW += sz.width + spacing
+        }
+        for row in rows {
+            line = row.map(\.1.height).max() ?? 0
+            x = bounds.minX
+            for (v, sz) in row {
+                v.place(at: CGPoint(x: x, y: y + (line - sz.height) / 2), proposal: ProposedViewSize(sz))
+                x += sz.width + spacing
+            }
+            y += line + lineSpacing
+        }
+    }
+}
+
+/// Reports a view's width so a layout can switch between wide and compact arrangements.
+struct WidthReader: ViewModifier {
+    @Binding var width: CGFloat
+    func body(content: Content) -> some View {
+        content.background(GeometryReader { g in
+            Color.clear
+                .onAppear { width = g.size.width }
+                .onChange(of: g.size.width) { _, w in width = w }
+        })
+    }
+}
+extension View { func readWidth(_ w: Binding<CGFloat>) -> some View { modifier(WidthReader(width: w)) } }

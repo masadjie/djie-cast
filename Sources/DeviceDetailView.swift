@@ -20,8 +20,8 @@ struct AndroidBackend: DeviceBackend {
     var id: String { serial }
     let supportsApps = true, supportsPower = true
     var accent: [Color] { Theme.android }
-    func detail() async -> DeviceDetail { await AndroidInspector.load(serial: serial) }
-    func screenshot() async -> NSImage? { await AndroidInspector.screenshot(serial: serial) }
+    func detail() async -> DeviceDetail { Demo.enabled ? Demo.androidDetail(serial) : await AndroidInspector.load(serial: serial) }
+    func screenshot() async -> NSImage? { Demo.enabled ? Demo.lockScreen(serial.contains(":")) : await AndroidInspector.screenshot(serial: serial) }
     func apps(includeSystem: Bool) async -> [InstalledApp] { await AndroidInspector.apps(serial: serial, includeSystem: includeSystem) }
     func uninstall(_ id: String) async -> String { await AndroidInspector.uninstall(serial: serial, package: id) }
     func install(_ file: URL) async -> String { await AndroidInspector.install(serial: serial, apk: file) }

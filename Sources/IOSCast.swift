@@ -11,6 +11,8 @@ final class IOSCastModel: ObservableObject {
 
     @Published var devices: [AVCaptureDevice] = []
     @Published var mirroring: Set<String> = []
+    /// iPhones offered by Continuity Camera (wireless, iOS 17+ / macOS 14+).
+    @Published var cameras: [AVCaptureDevice] = []
     @Published var permissionDenied = false
     private var windows: [String: MirrorWindow] = [:]
     private var observers: [NSObjectProtocol] = []
@@ -42,6 +44,8 @@ final class IOSCastModel: ObservableObject {
     func refresh() {
         let session = AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .muxed, position: .unspecified)
         devices = session.devices
+        let cams = AVCaptureDevice.DiscoverySession(deviceTypes: [.continuityCamera], mediaType: .video, position: .unspecified)
+        cameras = cams.devices
     }
 
     func requestAccess() async -> Bool {
@@ -306,6 +310,8 @@ struct IOSCastView: View {
                     }
                 }
 
+                cameraSection
+
                 VStack(alignment: .leading, spacing: 12) {
                     SectionTitle(title: "Wireless")
                     HStack(alignment: .top, spacing: 16) {
@@ -352,6 +358,61 @@ struct IOSCastView: View {
             ToolbarItem {
                 Button { model.refresh() } label: { Label("Refresh", systemImage: "arrow.clockwise") }
                     .help("Cari ulang perangkat")
+            }
+        }
+    }
+}
+
+extension IOSCastView {
+    /// Uses the iPhone's own camera as a live view on the Mac (Continuity Camera).
+    @ViewBuilder var cameraSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionTitle(title: "Kamera iPhone", detail: "· Continuity Camera, tanpa kabel")
+            Panel(padding: 20) {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(alignment: .top, spacing: 14) {
+                        IconBadge(icon: "camera.fill", colors: Theme.ios, size: 44)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Pakai kamera iPhone dari Mac").font(.headline)
+                            Text("Kamera belakang iPhone tampil di jendela Mac — cocok untuk dokumen, produk, atau sumber video di OBS & aplikasi live.")
+                                .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer()
+                        Button { model.refresh() } label: { Image(systemName: "arrow.clockwise") }
+                            .buttonStyle(.borderless).help("Cari kamera iPhone")
+                    }
+                    if model.cameras.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(Array(["iPhone dengan iOS 17+ dan Mac dengan macOS 14+, Apple ID yang sama",
+                                           "Wi-Fi & Bluetooth menyala di keduanya, iPhone di dekat Mac",
+                                           "Di iPhone: Pengaturan → Umum → AirPlay & Kontinuitas → Kamera Kontinuitas",
+                                           "Letakkan iPhone dalam posisi diam, layar terkunci"].enumerated()), id: \.offset) { i, step in
+                                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                    Text(String(format: "%02d", i + 1)).font(.caption.monospacedDigit().weight(.semibold)).foregroundStyle(Theme.ios[1])
+                                    Text(step).font(.callout).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    } else {
+                        ForEach(model.cameras, id: \.uniqueID) { cam in
+                            HStack(spacing: 12) {
+                                Image(systemName: "iphone.rear.camera").foregroundStyle(Theme.ios[1])
+                                Text(cam.localizedName).font(.callout.weight(.medium))
+                                if model.mirroring.contains(cam.uniqueID) { LiveBadge() }
+                                Spacer()
+                                if model.mirroring.contains(cam.uniqueID) {
+                                    Button { model.stop(cam) } label: { Label("Tutup", systemImage: "stop.fill") }
+                                        .buttonStyle(SoftButtonStyle(tint: .red)).fixedSize()
+                                } else {
+                                    Button { Task { await model.start(cam) } } label: { Label("Buka kamera", systemImage: "camera.fill") }
+                                        .buttonStyle(GradientButtonStyle(colors: Theme.ios)).fixedSize()
+                                }
+                            }
+                            .padding(10)
+                            .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 10))
+                        }
+                    }
+                }
             }
         }
     }

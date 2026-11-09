@@ -38,6 +38,9 @@ struct DeviceSummaryCard<Actions: View>: View {
     var titleOverride: String? = nil
     @ViewBuilder var actions: Actions
     @ObservedObject private var store = DeviceSummaryStore.shared
+    @State private var width: CGFloat = 1100
+    private var wide: Bool { width >= 960 }
+    private var specColumns: Int { width >= 640 ? 2 : 1 }
 
     private var id: String? { backend?.id }
     private var d: DeviceDetail? { id.flatMap { store.details[$0] } }
@@ -47,6 +50,7 @@ struct DeviceSummaryCard<Actions: View>: View {
         Panel(highlight: live ? Theme.live : nil, padding: 20) {
             HStack(alignment: .top, spacing: 24) {
                 // Live screen in a phone bezel
+                if width >= 560 {
                 PhoneFrame(image: showScreen ? id.flatMap { store.shots[$0] } : nil, tint: accent[0])
                     .frame(width: 128, height: 264)
                     .overlay(alignment: .center) {
@@ -55,6 +59,7 @@ struct DeviceSummaryCard<Actions: View>: View {
                                 .font(.system(size: 34, weight: .light)).foregroundStyle(.white.opacity(0.5))
                         }
                     }
+                }
 
                 // Name + key specs
                 VStack(alignment: .leading, spacing: 14) {
@@ -73,21 +78,18 @@ struct DeviceSummaryCard<Actions: View>: View {
                         Pill(text: connection, icon: connection == "Wi-Fi" ? "wifi" : connection == "Emulator" ? "cpu" : "cable.connector", color: connection == "Wi-Fi" ? .blue : .secondary)
                     }
                     if let d {
-                        Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 7) {
-                            ForEach(Array(stride(from: 0, to: min(8, d.specs.count), by: 2)), id: \.self) { i in
-                                GridRow {
-                                    specCell(d.specs[i])
-                                    if i + 1 < min(8, d.specs.count) { specCell(d.specs[i + 1]) } else { Color.clear }
-                                }
-                            }
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 18, alignment: .leading), count: specColumns),
+                                  alignment: .leading, spacing: 7) {
+                            ForEach(Array(d.specs.prefix(8).enumerated()), id: \.offset) { _, r in specCell(r) }
                         }
                         .transition(.opacity)
+                        if !wide { HStack(alignment: .top, spacing: 20) { rings }.padding(.top, 4) }
                     } else {
                         HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Membaca spesifikasi perangkat…").font(.callout).foregroundStyle(.secondary) }
                             .frame(minHeight: 120, alignment: .center)
                     }
                     Spacer(minLength: 0)
-                    HStack(spacing: 10) {
+                    FlowLayout(spacing: 10, lineSpacing: 10) {
                         actions
                         Button(action: onDetails) { Label("Info & aplikasi", systemImage: "info.circle") }
                             .buttonStyle(SoftButtonStyle(tint: accent[1])).fixedSize()
@@ -100,8 +102,15 @@ struct DeviceSummaryCard<Actions: View>: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Battery + storage rings
-                VStack(spacing: 18) {
+                // Battery + storage rings (move under the specs when the window is narrow)
+                if wide { VStack(spacing: 18) { rings }.frame(width: 230) }
+            }
+        }
+        .readWidth($width)
+        .task(id: id) { if let backend { store.load(backend, withShot: showScreen) } }
+    }
+
+    @ViewBuilder private var rings: some View {
                     ringBlock(progress: Double(d?.batteryLevel ?? 0) / 100,
                               label: d?.batteryLevel.map { "\($0)%" } ?? "–",
                               color: (d?.batteryLevel ?? 100) < 20 ? .red : Theme.live,
@@ -110,11 +119,6 @@ struct DeviceSummaryCard<Actions: View>: View {
                     ringBlock(progress: storageFraction, label: "\(Int(storageFraction * 100))%", color: accent[1],
                               title: "Penyimpanan",
                               lines: storageLines)
-                }
-                .frame(width: 230)
-            }
-        }
-        .task(id: id) { if let backend { store.load(backend, withShot: showScreen) } }
     }
 
     private var storageFraction: Double {

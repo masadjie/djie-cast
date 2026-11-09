@@ -250,28 +250,12 @@ struct EmulatorView: View {
                             .buttonStyle(GradientButtonStyle(colors: Theme.emulator)).fixedSize()
                             if let createError { Text(createError).font(.callout).foregroundStyle(.orange) }
                         }
-                        Text(previewCommand)
-                            .font(.system(size: 11, design: .monospaced))
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-                            .padding(10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
                     }
                 }
             }
         }
     }
 
-    private var previewCommand: String {
-        let n = name.replacingOccurrences(of: " ", with: "_")
-        var parts = ["emulator -avd \(n) -gpu host -accel on -cores \(cores)"]
-        if noBootAnim { parts.append("-no-boot-anim") }
-        if !quickBoot { parts.append("-no-snapshot-load") }
-        if !showWindow { parts.append("-no-window") }
-        parts.append("-qemu -m \(ramGB * 1024)")
-        return "$ " + parts.joined(separator: " ")
-    }
 
     // MARK: Ingredients (user picks what to download)
 
@@ -379,7 +363,7 @@ struct EmulatorView: View {
                     Toggle("Lewati animasi boot (-no-boot-anim)", isOn: $noBootAnim)
                     Toggle("Boot cepat dari snapshot (Quick Boot)", isOn: $quickBoot)
                     Toggle("Tampilkan jendela emulator", isOn: $showWindow)
-                    Text("Selalu memakai GPU Mac (-gpu host) dan akselerasi hardware (-accel on). RAM dan jumlah core mengikuti setelan tiap emulator.")
+                    Text("Selalu memakai GPU Mac dan akselerasi hardware. RAM dan jumlah core mengikuti setelan tiap emulator.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 .toggleStyle(.switch)
