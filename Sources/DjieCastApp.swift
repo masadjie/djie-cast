@@ -781,7 +781,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationWillTerminate(_ notification: Notification) {
-        MainActor.assumeIsolated { LauncherModel.shared.stopAll(); TailnetModel.shared.shutdownForQuit() }
+        MainActor.assumeIsolated { LauncherModel.shared.stopAll(); AppWindows.shared.closeAll(); TailnetModel.shared.shutdownForQuit() }
     }
 }
 

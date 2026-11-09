@@ -445,6 +445,7 @@ struct AndroidCastView: View {
     @AppStorage("alwaysOnTop") var alwaysOnTop = false
     @AppStorage("fullscreen") var fullscreen = false
     @AppStorage("showTouches") var showTouches = false
+    @AppStorage("clipboardSync") var clipboardSync = true
     @AppStorage("borderless") var borderless = false
     @AppStorage("displayOrientation") var displayOrientation = 0
     @AppStorage("noControl") var noControl = false
@@ -453,6 +454,9 @@ struct AndroidCastView: View {
     @AppStorage("wirelessIP") private var wirelessIP = ""
     @State private var showWifiHelp = false
     @State private var showWifiGuide = false
+    @State private var showQRPair = false
+    @State private var appWindowsFor: Device?
+    @ObservedObject private var appWindows = AppWindows.shared
     @State private var showManualIP = false
     @State private var pairCodes: [String: String] = [:]
     @AppStorage("androidInspector") private var showInspector = true
@@ -470,6 +474,7 @@ struct AndroidCastView: View {
         if alwaysOnTop { a.append("--always-on-top") }
         if fullscreen { a.append("--fullscreen") }
         if showTouches { a.append("--show-touches") }
+        if !clipboardSync { a.append("--no-clipboard-autosync") }
         if borderless { a.append("--window-borderless") }
         if displayOrientation != 0 { a.append("--display-orientation=\(displayOrientation)") }
         if noControl { a.append("--no-control") }
@@ -536,6 +541,12 @@ struct AndroidCastView: View {
                                                 .buttonStyle(GradientButtonStyle(colors: Theme.android)).fixedSize()
                                         }
                                         ControlBar(serial: d.serial).frame(width: 290)
+                                        Button { appWindowsFor = d } label: {
+                                            let n = appWindows.count(for: d.serial)
+                                            Label(n > 0 ? "Aplikasi di jendela · \(n)" : "Aplikasi di jendela", systemImage: "macwindow.on.rectangle")
+                                        }
+                                        .buttonStyle(SoftButtonStyle(tint: Theme.android[1])).fixedSize()
+                                        .help("Buka aplikasi Android di jendela Mac sendiri (Android 10+)")
                                         Menu {
                                             Section("Kamera HP · Android 12+") {
                                                 Button("Kamera belakang", systemImage: "camera.fill") { model.startCamera(serial: d.serial, front: false, name: d.displayName) }
@@ -552,6 +563,7 @@ struct AndroidCastView: View {
                                             } else {
                                                 Button("Putuskan", systemImage: "xmark.circle") { Task { await model.disconnect(d.serial) } }
                                             }
+                                            Button("Kirim file ke HP…", systemImage: "arrow.up.doc") { FileSender.shared.pick(for: d.serial, name: d.displayName) }
                                             Button("Buka File", systemImage: "folder") {
                                                 AndroidFilesModel.shared.select(serial: d.serial); Nav.shared.page = .files
                                             }
@@ -561,6 +573,7 @@ struct AndroidCastView: View {
                                         } label: { Image(systemName: "ellipsis").frame(width: 22, height: 22) }
                                         .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
                                     }
+                                    .acceptsFiles(for: d.serial)
                                     .transition(.scale(scale: 0.96).combined(with: .opacity))
                                 } else {
                                     AndroidDeviceCard(device: d, running: false, busy: model.busy,
@@ -591,6 +604,7 @@ struct AndroidCastView: View {
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: model.devices.map(\.serial))
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: Array(model.running.keys))
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .android) }
+        .sheet(item: $appWindowsFor) { d in AppWindowsSheet(serial: d.serial, device: d.displayName) }
         .sheet(item: Binding(get: { detailSerial.map { SerialItem(id: $0) } }, set: { detailSerial = $0?.id })) { item in
             DeviceDetailSheet(backend: AndroidBackend(serial: item.id))
         }
@@ -627,7 +641,7 @@ struct AndroidCastView: View {
                     ForEach([("⌘ B", "Kembali"), ("⌘ H", "Home"), ("⌘ S", "Aplikasi terbaru"),
                              ("⌘ ↑ / ↓", "Volume"), ("⌘ P", "Power"), ("⌘ F", "Fullscreen"),
                              ("⌘ R", "Putar layar HP"), ("⌘ ← / →", "Putar jendela"),
-                             ("⌘ V", "Tempel teks ke HP"), ("Klik kanan", "Kembali")], id: \.0) { k, v in
+                             ("⌘ V", "Tempel teks ke HP"), ("⌘ C", "Salin teks dari HP"), ("Klik kanan", "Kembali")], id: \.0) { k, v in
                         HStack(spacing: 8) {
                             Text(L(k))
                                 .font(.system(size: 11, weight: .semibold))
@@ -658,6 +672,8 @@ struct AndroidCastView: View {
                             .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer()
+                    Button { showQRPair = true } label: { Label("Pasangkan dengan QR", systemImage: "qrcode") }
+                        .buttonStyle(GradientButtonStyle(colors: Theme.airplay)).fixedSize()
                     Button { showWifiGuide = true } label: { Label("Panduan Wi-Fi", systemImage: "book") }
                         .buttonStyle(SoftButtonStyle(tint: Theme.android[1])).fixedSize()
                 }
@@ -742,6 +758,13 @@ struct AndroidCastView: View {
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: showWifiHelp)
         .sheet(isPresented: $showWifiGuide) { SetupGuideSheet(guide: .androidWifi) }
+        .sheet(isPresented: $showQRPair) { QRPairSheet() }
+        .onAppear {   // snapshot aid: DJIE_SHEET=qr | apps
+            if Demo.env["DJIE_SHEET"] == "qr" { showQRPair = true }
+            if Demo.env["DJIE_SHEET"] == "apps" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { appWindowsFor = model.devices.first { $0.state == "device" } }
+            }
+        }
         .task {
             model.primeLocalNetwork()
             while !Task.isCancelled {
@@ -889,6 +912,8 @@ struct AndroidCastView: View {
                 Toggle("Matikan layar HP", isOn: $turnScreenOff)
                 Toggle("Jaga HP tetap menyala", isOn: $stayAwake)
                 Toggle("Tampilkan sentuhan", isOn: $showTouches)
+                Toggle("Clipboard bersama Mac ↔ HP", isOn: $clipboardSync)
+                    .help("Salin di Mac lalu tempel di HP (⌘V di jendela cast), dan teks yang disalin di HP langsung ada di clipboard Mac.")
                 Toggle("Mode lihat saja", isOn: $noControl)
             } header: { Label("Perangkat", systemImage: "iphone.gen3") }
 

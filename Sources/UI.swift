@@ -90,8 +90,9 @@ enum Demo {
                 NSApp.windows.first(where: { $0.isVisible })?.setContentSize(NSSize(width: size[0], height: size[1]))
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            guard let win = NSApp.windows.first(where: { $0.isVisible }),
+        DispatchQueue.main.asyncAfter(deadline: .now() + (env["DJIE_SHEET"] != nil ? 5 : 2.5)) {
+            guard let main = NSApp.windows.first(where: { $0.isVisible && $0.sheetParent == nil }),
+                  case let win = main.attachedSheet ?? main,
                   let view = win.contentView?.superview ?? win.contentView,
                   let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { exit(1) }
             view.cacheDisplay(in: view.bounds, to: rep)
