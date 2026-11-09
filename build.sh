@@ -91,7 +91,9 @@ if [ -d "$APP/Contents/Frameworks" ]; then
 fi
 [ -d "$APP/Contents/MacOS/imd" ] && codesign --force -s - "$APP"/Contents/MacOS/imd/* 2>/dev/null
 codesign --force -s - "$APP/Contents/MacOS/scrcpy" "$APP/Contents/MacOS/adb"
-codesign --force -s - "$APP"
+# Ad-hoc signatures change with every build, and macOS ties Screen Recording / Accessibility grants to the
+# signature. A fixed designated requirement (the bundle id) keeps the grants across updates.
+codesign --force -s - -r='designated => identifier "local.djiecast.app"' "$APP"
 
 echo "→ DMG..."
 STAGE="build/dmg"

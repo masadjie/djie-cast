@@ -141,6 +141,19 @@ struct RemoteDesktopView: View {
                     }
                     permissionRow("Aksesibilitas", detail: "Agar mouse & keyboard dari jauh bisa dipakai", ok: host.inputAllowed,
                                   action: host.requestInputPermission)
+                    if !host.screenAllowed || !host.inputAllowed {
+                        HStack(spacing: 8) {
+                            Image(systemName: "questionmark.circle").foregroundStyle(.secondary)
+                            Text("Di Pengaturan Sistem sudah menyala tapi di sini masih “Belum”? Biasanya karena izin lama dari versi Djie Cast sebelumnya. Reset, lalu izinkan sekali lagi.")
+                                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                            Spacer()
+                            Button("Cek lagi") { host.refreshPermissions(); host.verifyScreenAccess() }
+                                .buttonStyle(.borderless).fixedSize()
+                            Button("Reset izin") { host.resetPermissions() }
+                                .buttonStyle(SoftButtonStyle(tint: Theme.remote[1])).fixedSize()
+                        }
+                        .padding(.top, 2)
+                    }
                 }
             }
         }

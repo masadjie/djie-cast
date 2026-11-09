@@ -172,6 +172,8 @@ final class EmulatorModel: NSObject, ObservableObject, URLSessionDownloadDelegat
     @Published var installedImages: Set<String> = []
     @Published var avds: [AVD] = []
     @Published var running: Set<String> = []
+    /// adb serial (emulator-5554…) of each running AVD, once it has finished booting.
+    @Published var serials: [String: String] = [:]
     @Published var download: (title: String, received: Int64, total: Int64, phase: String)?
     @Published var errorText: String?
     @Published var log = ""
@@ -498,13 +500,32 @@ final class EmulatorModel: NSObject, ObservableObject, URLSessionDownloadDelegat
             for line in devices.split(separator: "\n") where line.hasPrefix("emulator-") {
                 let serial = String(line.split(separator: "\t").first ?? "")
                 let name = await Tools.run(adb, ["-s", serial, "emu", "avd", "name"])
-                if name.split(separator: "\n").first?.trimmingCharacters(in: .whitespaces) == avd.name {
+                if name.split(whereSeparator: \.isNewline).first?.trimmingCharacters(in: .whitespaces) == avd.name {
                     _ = await Tools.run(adb, ["-s", serial, "emu", "kill"])
                 }
             }
             try? await Task.sleep(for: .seconds(2))
             detectRunning()
         }
+    }
+
+    /// Maps running AVDs to their adb serials; only booted ones, so their specs read completely.
+    func refreshSerials() async {
+        guard let adb = Tools.adb else { return }
+        var map: [String: String] = [:]
+        let devices = await Tools.run(adb, ["devices"])
+        for line in devices.split(separator: "\n") where line.hasPrefix("emulator-") && line.hasSuffix("device") {
+            let serial = String(line.split(separator: "\t").first ?? "")
+            // the console answers with CRLF, which Swift treats as one Character: split on any newline
+            let name = (await Tools.run(adb, ["-s", serial, "emu", "avd", "name"])).split(whereSeparator: \.isNewline).first?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            guard !name.isEmpty else { continue }
+            let booted = (await Tools.run(adb, ["-s", serial, "shell", "getprop", "sys.boot_completed"])).trimmingCharacters(in: .whitespacesAndNewlines)
+            if booted == "1" { map[name] = serial }
+        }
+        if map != serials { serials = map }
+        let found = Set(map.keys).subtracting(running)
+        if !found.isEmpty { running.formUnion(found) }
     }
 
     func stopAll() { processes.values.forEach { $0.terminate() } }

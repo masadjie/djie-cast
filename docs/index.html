@@ -235,8 +235,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 section { padding-block: clamp(80px, 10vw, 130px) 0; }
 .head { display: grid; gap: 16px; max-width: 780px; margin-bottom: 48px; }
 .head p { color: var(--ink-2); max-width: 58ch; font-size: 18px; }
-.row { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.45fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
-.row.flip { grid-template-columns: minmax(0, 1.45fr) minmax(0, .75fr); }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.row.flip { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+@media (min-width: 921px) { .row .shot { position: sticky; top: 96px; } }
 .row.flip .shot { order: -1; }
 .row + .row { margin-top: clamp(64px, 8vw, 110px); }
 .shot { border-radius: 12px; overflow: hidden; background: var(--panel); aspect-ratio: 16 / 10; max-width: 100%;
@@ -249,7 +250,7 @@ section { padding-block: clamp(80px, 10vw, 130px) 0; }
 .wide-shot { margin-top: clamp(64px, 8vw, 110px); display: grid; gap: 18px; }
 .wide-shot figcaption { color: var(--ink-3); }
 .points { list-style: none; display: grid; gap: 0; margin-top: 26px; border-top: 1px solid var(--line); }
-.points li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.points li { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 18px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 16px; line-height: 1.5; }
 .points b { font-weight: 650; }
 .points span { color: var(--ink-2); }
 .copy-col { display: grid; gap: 14px; }
@@ -270,7 +271,8 @@ section { padding-block: clamp(80px, 10vw, 130px) 0; }
 
 /* iOS table */
 .tbl-wrap { overflow-x: auto; margin-top: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
-table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; table-layout: fixed; }
+th:nth-child(1) { width: 34%; } th:nth-child(2) { width: 24%; }
 th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { font: 500 11px/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
 tr:last-child td { border-bottom: 0; }
@@ -672,10 +674,6 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
             <li><b data-i18n="emu.k3">Profil</b><span data-i18n="emu.v3">Ponsel, ponsel kecil, atau tablet dengan RAM, core, dan penyimpanan sesuai kebutuhan.</span></li>
             <li><b data-i18n="emu.k4">Cepat</b><span data-i18n="emu.v4">Boot ke Android dalam hitungan detik, dengan Quick Boot dan tanpa animasi boot.</span></li>
           </ul>
-          <div class="term" style="margin-top:6px">
-            <div class="term-bar"><i></i><i></i><i></i><em data-i18n="emu.term">Perintah yang dijalankan Djie Cast</em></div>
-            <pre><span class="p">$</span> emulator -avd Pixel_Djie -gpu host -accel on -cores 4 -no-boot-anim -qemu -m 4096</pre>
-          </div>
         </div>
         <figure class="shot">
           <picture>
@@ -909,7 +907,6 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
     "emu.k2": "Safe", "emu.v2": "Every download is checksum-verified and Google's license is shown before downloading.",
     "emu.k3": "Profiles", "emu.v3": "Phone, small phone, or tablet with the RAM, cores, and storage you need.",
     "emu.k4": "Fast", "emu.v4": "Boots into Android in seconds, with Quick Boot and no boot animation.",
-    "emu.term": "The command Djie Cast runs",
     "rem.title": "Control another Mac, from anywhere.", "rem.lead": "Like AnyDesk, but free and with no third-party server. Share a 6-digit code and another Mac can see and control this Mac's screen.",
     "rem.k1": "Access code", "rem.v1": "A one-time 6-digit code you can change any time. Wrong codes are rejected instantly.",
     "rem.k2": "Encrypted", "rem.v2": "TLS keyed from the access code; sharp hardware H.264 video.",

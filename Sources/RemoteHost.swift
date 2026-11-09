@@ -245,15 +245,37 @@ final class RemoteHostModel: ObservableObject {
     /// Set after the user asks for Screen Recording; macOS only applies it after a relaunch.
     @Published var screenRequested = false
 
+    /// Cheap check, safe to poll. Never touches ScreenCaptureKit: asking it while access is missing
+    /// makes macOS show its permission alert again, which is what kept nagging users.
     func refreshPermissions() {
         inputAllowed = InputInjector.trusted
         addresses = NetInfo.ipv4Addresses()
-        if CGPreflightScreenCaptureAccess() { screenAllowed = true; return }
-        // The preflight value is cached per launch; asking ScreenCaptureKit reflects the live setting.
+        if CGPreflightScreenCaptureAccess() { screenAllowed = true }
+    }
+
+    /// Live Screen Recording check (the preflight value is cached per launch). Only on explicit user action.
+    func verifyScreenAccess() {
         Task {
             let ok = (try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)) != nil
-            await MainActor.run { self.screenAllowed = ok }
+            await MainActor.run { self.screenAllowed = ok || CGPreflightScreenCaptureAccess() }
         }
+    }
+
+    /// macOS keeps a grant per app signature; an older Djie Cast build can stay ticked in System Settings
+    /// while this build is not trusted. Clear Djie Cast's entries so the next request starts clean.
+    func resetPermissions() {
+        let id = Bundle.main.bundleIdentifier ?? "local.djiecast.app"
+        for service in ["ScreenCapture", "Accessibility"] {
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: "/usr/bin/tccutil")
+            p.arguments = ["reset", service, id]
+            try? p.run(); p.waitUntilExit()
+        }
+        screenRequested = false
+        screenAllowed = false
+        inputAllowed = InputInjector.trusted
+        requestInputPermission()
+        requestScreenPermission()
     }
 
     /// Relaunch so a freshly granted Screen Recording permission takes effect.

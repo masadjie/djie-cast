@@ -35,6 +35,7 @@ struct DeviceSummaryCard<Actions: View>: View {
     let connection: String
     let showScreen: Bool
     let onDetails: () -> Void
+    var titleOverride: String? = nil
     @ViewBuilder var actions: Actions
     @ObservedObject private var store = DeviceSummaryStore.shared
 
@@ -59,7 +60,7 @@ struct DeviceSummaryCard<Actions: View>: View {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(d?.title ?? fallbackTitle).font(.title2.weight(.bold)).lineLimit(1)
+                            Text(titleOverride ?? d?.title ?? fallbackTitle).font(.title2.weight(.bold)).lineLimit(1)
                             Text(d?.subtitle ?? fallbackSubtitle).font(.callout).foregroundStyle(.secondary).lineLimit(1)
                         }
                         if let pill = d?.storagePill, !pill.isEmpty {
@@ -69,7 +70,7 @@ struct DeviceSummaryCard<Actions: View>: View {
                         }
                         Spacer()
                         if live { LiveBadge() }
-                        Pill(text: connection, icon: connection == "Wi-Fi" ? "wifi" : "cable.connector", color: connection == "Wi-Fi" ? .blue : .secondary)
+                        Pill(text: connection, icon: connection == "Wi-Fi" ? "wifi" : connection == "Emulator" ? "cpu" : "cable.connector", color: connection == "Wi-Fi" ? .blue : .secondary)
                     }
                     if let d {
                         Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 7) {

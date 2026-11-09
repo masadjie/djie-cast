@@ -30,6 +30,7 @@ struct EmulatorView: View {
     @State private var showAllImages = false
     @State private var licenseFor: (id: String, action: () -> Void)?
     @State private var confirmDelete: AVD?
+    @State private var detailSerial: String?
     @State private var createError: String?
 
     private var installedOptions: [SystemImageOption] {
@@ -77,6 +78,17 @@ struct EmulatorView: View {
                 action?()
             } onCancel: { licenseFor = nil }
         }
+        .sheet(item: Binding(get: { detailSerial.map { SerialItem(id: $0) } }, set: { detailSerial = $0?.id })) { item in
+            DeviceDetailSheet(backend: AndroidBackend(serial: item.id))
+        }
+        .task {
+            // Watch for emulators finishing their boot so their specs card can appear.
+            while !Task.isCancelled {
+                await model.refreshSerials()
+                try? await Task.sleep(for: .seconds(3))
+            }
+        }
+        .animation(.spring(response: 0.45, dampingFraction: 0.85), value: model.serials)
         .alert("Hapus emulator “\(confirmDelete?.displayName ?? "")”?", isPresented: Binding(get: { confirmDelete != nil }, set: { if !$0 { confirmDelete = nil } })) {
             Button("Hapus", role: .destructive) { if let a = confirmDelete { withAnimation { model.delete(a) } }; confirmDelete = nil }
             Button("Batal", role: .cancel) { confirmDelete = nil }
@@ -119,11 +131,28 @@ struct EmulatorView: View {
                         .font(.callout).foregroundStyle(.secondary)
                 }
             } else {
+                // Booted emulators get the full device card: specs, battery, storage and a live screen.
+                ForEach(model.avds.filter { model.serials[$0.name] != nil }) { avd in
+                    runningCard(avd, serial: model.serials[avd.name]!)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 260), spacing: 14)], spacing: 14) {
-                    ForEach(model.avds) { avd in avdCard(avd).transition(.scale(scale: 0.94).combined(with: .opacity)) }
+                    ForEach(model.avds.filter { model.serials[$0.name] == nil }) { avd in avdCard(avd).transition(.scale(scale: 0.94).combined(with: .opacity)) }
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.85), value: model.avds.map(\.name))
             }
+        }
+    }
+
+    private func runningCard(_ avd: AVD, serial: String) -> some View {
+        DeviceSummaryCard(backend: AndroidBackend(serial: serial), fallbackTitle: avd.displayName,
+                          fallbackSubtitle: "\(AndroidSDK.androidName(api: avd.api)) · \(serial)", live: true,
+                          connection: "Emulator", showScreen: true, onDetails: { detailSerial = serial },
+                          titleOverride: avd.displayName) {
+            Button { model.stop(avd) } label: { Label("Hentikan", systemImage: "stop.fill") }
+                .buttonStyle(SoftButtonStyle(tint: .red)).fixedSize()
+            Button { Nav.shared.page = .android } label: { Label("Cast di Djie Cast", systemImage: "rectangle.on.rectangle") }
+                .buttonStyle(GradientButtonStyle(colors: Theme.emulator)).fixedSize()
         }
     }
 
