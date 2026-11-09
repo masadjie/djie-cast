@@ -10,12 +10,13 @@ struct GuideStep: Identifiable {
 }
 
 enum SetupGuide: Identifiable {
-    case android, ios, remoteHost
+    case android, androidWifi, ios, remoteHost
     var id: Self { self }
 
     var requirement: String {
         switch self {
         case .android: return "Wajib aktifkan USB Debugging"
+        case .androidWifi: return "Sambungkan HP Android lewat Wi-Fi"
         case .ios: return "Wajib ketuk “Percayai Komputer Ini”"
         case .remoteHost: return "Wajib beri izin Perekaman Layar & Aksesibilitas"
         }
@@ -24,6 +25,7 @@ enum SetupGuide: Identifiable {
     var summary: String {
         switch self {
         case .android: return "Tanpa USB Debugging, Mac tidak bisa membaca layar HP Android. Cukup diatur sekali per HP."
+        case .androidWifi: return "Tanpa kabel setelah diatur sekali. Android 11 ke atas memakai Wireless debugging; Android 10 ke bawah perlu colok USB sekali setiap HP dinyalakan ulang."
         case .ios: return "iPhone/iPad hanya mau mengirim layarnya ke Mac yang sudah dipercaya. Cukup sekali per Mac."
         case .remoteHost: return "Di Mac yang akan dikontrol, macOS perlu mengizinkan Djie Cast merekam layar dan menggerakkan mouse/keyboard."
         }
@@ -32,16 +34,18 @@ enum SetupGuide: Identifiable {
     var title: String {
         switch self {
         case .android: return "Cara mengaktifkan USB Debugging"
+        case .androidWifi: return "Cara cast HP Android lewat Wi-Fi"
         case .ios: return "Cara mempercayai Mac ini di iPhone/iPad"
         case .remoteHost: return "Cara memberi izin Remote Desktop"
         }
     }
 
-    var tint: Color { self == .android ? Theme.android[1] : self == .ios ? Theme.ios[1] : Theme.remote[1] }
+    var tint: Color { self == .android || self == .androidWifi ? Theme.android[1] : self == .ios ? Theme.ios[1] : Theme.remote[1] }
 
     var eyebrow: String {
         switch self {
         case .android: return "ANDROID · USB"
+        case .androidWifi: return "ANDROID · WI-FI"
         case .ios: return "IPHONE & IPAD · USB"
         case .remoteHost: return "REMOTE DESKTOP · MAC YANG DIKONTROL"
         }
@@ -63,6 +67,21 @@ enum SetupGuide: Identifiable {
                           detail: "Pakai kabel yang mendukung data, bukan kabel cas saja. Jika HP bertanya mode USB, pilih “Transfer file”."),
                 GuideStep(icon: "checkmark.shield", title: "Ketuk “Izinkan” di HP",
                           detail: "Muncul dialog “Izinkan USB debugging?”. Centang “Selalu izinkan dari komputer ini”, lalu Izinkan. HP akan muncul di Djie Cast."),
+            ]
+        case .androidWifi:
+            return [
+                GuideStep(icon: "network", title: "Izinkan Jaringan Lokal untuk Djie Cast",
+                          detail: "Di Mac: Pengaturan Sistem → Privasi & Keamanan → Jaringan Lokal → nyalakan Djie Cast, lalu buka ulang Djie Cast. Tanpa ini, macOS memblokir koneksi ke HP (pesan “No route to host”)."),
+                GuideStep(icon: "wifi", title: "HP dan Mac di Wi-Fi yang sama",
+                          detail: "Sambungkan keduanya ke jaringan Wi-Fi yang sama. Wi-Fi tamu, kantor, atau kampus sering memblokir perangkat saling terhubung; kalau begitu, pakai hotspot HP lain atau kabel USB."),
+                GuideStep(icon: "hammer", title: "Android 11 ke atas: nyalakan Wireless debugging",
+                          detail: "Opsi pengembang → Wireless debugging (Debugging nirkabel) → nyalakan. HP akan muncul sendiri di bagian “HP di jaringan ini”."),
+                GuideStep(icon: "key", title: "Pertama kali: pasangkan dengan kode",
+                          detail: "Di HP ketuk “Pasangkan perangkat dengan kode pairing”. Masukkan 6 angka yang tampil ke kolom di Djie Cast, lalu tekan Pasangkan. Setelah itu cukup tekan Sambungkan."),
+                GuideStep(icon: "cable.connector", title: "Android 10 ke bawah: aktifkan lewat USB sekali",
+                          detail: "Colok kabel dengan USB Debugging aktif, buka ••• di kartu HP → Aktifkan Wi-Fi. Djie Cast membaca IP HP dan langsung menyambungkannya lewat Wi-Fi."),
+                GuideStep(icon: "play.circle", title: "Cabut kabel dan mulai cast",
+                          detail: "Setelah muncul “Kabel USB boleh dicabut”, HP tampil dengan label Wi-Fi. Tekan Mulai Cast. Preset Hemat paling lancar untuk Wi-Fi."),
             ]
         case .ios:
             return [
@@ -100,6 +119,13 @@ enum SetupGuide: Identifiable {
                 "Dialog izin tidak muncul? Cabut lalu colok lagi kabelnya, atau buka Opsi pengembang → “Cabut otorisasi USB debugging” lalu ulangi.",
                 "Status “unauthorized” di Djie Cast berarti HP belum menekan Izinkan.",
                 "Untuk Wi-Fi: colok USB dulu, lalu pilih ••• → Aktifkan Wi-Fi di kartu perangkat.",
+            ]
+        case .androidWifi:
+            return [
+                "“No route to host”: izin Jaringan Lokal untuk Djie Cast belum menyala. Nyalakan, lalu tekan Coba lagi.",
+                "“Connection refused”: HP baru dinyalakan ulang atau Wireless debugging mati. Ulangi Aktifkan Wi-Fi lewat USB, atau nyalakan lagi Wireless debugging.",
+                "HP tidak muncul di daftar: pastikan layar HP menyala dan masih di Wi-Fi yang sama. Alamat IP HP bisa berubah setelah tersambung ulang ke Wi-Fi.",
+                "Gambar patah-patah: pilih preset Hemat, dekatkan HP ke router, atau pakai Wi-Fi 5 GHz.",
             ]
         case .ios:
             return [

@@ -452,6 +452,7 @@ struct AndroidCastView: View {
     @AppStorage("extraArgs") var extraArgs = ""
     @AppStorage("wirelessIP") private var wirelessIP = ""
     @State private var showWifiHelp = false
+    @State private var showWifiGuide = false
     @State private var showManualIP = false
     @State private var pairCodes: [String: String] = [:]
     @AppStorage("androidInspector") private var showInspector = true
@@ -653,12 +654,12 @@ struct AndroidCastView: View {
                     }
                     VStack(alignment: .leading, spacing: 3) {
                         Text("HP di jaringan ini").font(.headline)
-                        Text("HP Android dengan **Wireless debugging** menyala di Wi-Fi yang sama muncul otomatis di sini.")
+                        Text("HP Android dengan **Wireless debugging** menyala di Wi-Fi yang sama muncul otomatis di sini. Baru pertama kali? Buka Panduan Wi-Fi.")
                             .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer()
-                    Button { showWifiHelp.toggle() } label: { Label("Cara menyalakan", systemImage: "questionmark.circle") }
-                        .buttonStyle(.borderless).fixedSize()
+                    Button { showWifiGuide = true } label: { Label("Panduan Wi-Fi", systemImage: "book") }
+                        .buttonStyle(SoftButtonStyle(tint: Theme.android[1])).fixedSize()
                 }
 
                 if showWifiHelp {
@@ -689,6 +690,7 @@ struct AndroidCastView: View {
                                 .buttonStyle(GradientButtonStyle(colors: [.orange, .orange])).fixedSize()
                             Button { Task { await model.retryAfterLocalNetwork(wirelessIP) } } label: { Label("Coba lagi", systemImage: "arrow.clockwise") }
                                 .buttonStyle(SoftButtonStyle(tint: .orange)).fixedSize()
+                            Button("Lihat panduan") { showWifiGuide = true }.buttonStyle(.borderless)
                         }
                     }
                     .padding(14)
@@ -739,6 +741,7 @@ struct AndroidCastView: View {
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: showWifiHelp)
+        .sheet(isPresented: $showWifiGuide) { SetupGuideSheet(guide: .androidWifi) }
         .task {
             model.primeLocalNetwork()
             while !Task.isCancelled {

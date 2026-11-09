@@ -3,9 +3,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VERSION="1.1"
-BUILD_NUMBER="4"
-DMG_NAME="DjieCast-1.1"
+VERSION="1.1.1"
+BUILD_NUMBER="5"
+DMG_NAME="DjieCast-1.1.1"
 
 APP="build/Djie Cast.app"
 
