@@ -1,6 +1,6 @@
 {
-  "latest": "1.1.1",
+  "latest": "1.2",
   "minimum": "1.0",
   "url": "https://github.com/masadjie/djie-cast/releases/latest",
-  "notes": "Panduan Wi-Fi di aplikasi, perbaikan koneksi Wi-Fi Android (izin Jaringan Lokal), sambung otomatis setelah Aktifkan Wi-Fi."
+  "notes": "Simulator iPhone, aplikasi Android sebagai jendela Mac, pairing Wi-Fi dengan QR, kirim file drag & drop."
 }

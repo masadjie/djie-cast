@@ -45,6 +45,8 @@ Every connected phone shows up as a full card: a live snapshot of the screen, An
 - USB cable or Wi-Fi. Phones with Wireless debugging on the same network appear by themselves; pair once with the 6-digit code.
 - Back, Home, Recents, volume, power, screenshot and rotation buttons.
 - **Phone camera**: show the front or back camera on your Mac (Android 12+).
+- **Apps as Mac windows**: open WhatsApp, Instagram or any app in its own window (Android 10+).
+- **QR code Wi-Fi pairing**, drag-and-drop file sending onto a phone card, and a shared Mac ↔ phone clipboard.
 - Installed apps: uninstall, or install an APK from your Mac.
 - Quality presets: Saver 1024p, Balanced 1600p, Maximum up to 120 fps. Screen recording to Movies.
 
@@ -83,6 +85,10 @@ Android storage opens like Finder: download, drag files in to upload, create fol
 </picture>
 
 No Android Studio needed. Pick which Android versions to download (straight from Google's servers, checksum-verified), create a phone or tablet emulator, and run it on your Mac's GPU. A running emulator gets the same spec card as a real phone.
+
+## iPhone Simulator
+
+Virtual iPhones and iPads from Xcode, created and run from Djie Cast. On Apple Silicon the simulator runs natively, so it's fast and smooth. Needs Xcode (free on the App Store); Djie Cast walks you through it.
 
 ## Remote Desktop
 

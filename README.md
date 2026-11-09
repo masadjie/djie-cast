@@ -45,6 +45,8 @@ Setiap HP yang tersambung muncul sebagai kartu lengkap: layar terkini, versi And
 - Lewat kabel USB atau Wi-Fi.
 - Tombol Back, Home, Recent, volume, power, screenshot, dan rotasi.
 - **Kamera HP**: tampilkan kamera depan atau belakang di Mac (Android 12+).
+- **Aplikasi sebagai jendela Mac**: buka WhatsApp, Instagram, atau aplikasi lain di jendelanya sendiri (Android 10+).
+- **Pairing Wi-Fi dengan QR**, kirim file dengan drag & drop ke kartu HP, dan clipboard bersama Mac ↔ HP.
 - Daftar aplikasi terinstal, uninstall, dan pasang APK dari Mac.
 - Preset kualitas Hemat 1024p, Seimbang 1600p, Maksimal hingga 120 fps. Rekam layar ke folder Movies.
 
@@ -83,6 +85,10 @@ Penyimpanan HP Android dibuka seperti Finder: unduh, seret file dari Mac untuk m
 </picture>
 
 Tanpa Android Studio. Pilih sendiri versi Android yang mau diunduh (langsung dari server resmi Google, dicek checksum-nya), buat emulator ponsel atau tablet, lalu jalankan dengan GPU Mac. Emulator yang sedang berjalan tampil dengan kartu spesifikasi yang sama seperti HP sungguhan.
+
+## Simulator iPhone
+
+iPhone dan iPad virtual dari Xcode, dibuat dan dijalankan langsung dari Djie Cast. Di Mac Apple Silicon simulatornya berjalan native, jadi cepat dan tidak lag. Butuh Xcode (gratis di App Store); Djie Cast memandu pemasangannya.
 
 ## Remote Desktop
 
