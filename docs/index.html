@@ -148,7 +148,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* Hero */
 .hero { padding-block: clamp(48px, 8vw, 96px) 40px; position: relative; }
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+.hero .wrap { display: block; }
 .hero-copy { display: grid; gap: 26px; justify-items: start; }
 .hero h1 .tail { display: block; color: var(--signal); }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -222,6 +222,73 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .readout .on { color: var(--live); display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
 .readout .on::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: blink 1.4s steps(2, start) infinite; }
 @keyframes blink { 50% { opacity: .25; } }
+
+
+/* Hero v2: centered headline with a rotating subject, real product shot below */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.hero .wrap.hero-center { display: grid; justify-items: center; text-align: center; gap: 24px; }
+.hero-center .lead { max-width: 46ch; margin-inline: auto; }
+.hero-center .facts, .hero-center .hero-actions { justify-content: center; }
+.hero-title { font-size: clamp(40px, 7.6vw, 108px); line-height: .95; font-weight: 880; letter-spacing: -.035em; display: grid; justify-items: center; }
+.hero-title .rot { display: inline-block; height: 1.02em; overflow: hidden; position: relative; padding-inline: .04em; }
+.hero-title .rot-word {
+  display: inline-block; white-space: nowrap;
+  color: var(--signal);
+  transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .4s ease;
+}
+.hero-title .rot-word.out { transform: translateY(-105%); opacity: 0; }
+.hero-title .rot-word.in { transform: translateY(105%); opacity: 0; transition: none; }
+.hero .hero-title .tail { display: block; color: var(--ink); }
+
+.showcase { position: relative; margin: clamp(48px, 7vw, 84px) auto 0; max-width: 1080px; perspective: 1600px; }
+.showcase .glow {
+  position: absolute; inset: -12% -6% -4%; z-index: 0; pointer-events: none; filter: blur(60px); opacity: .55;
+  background: radial-gradient(40% 50% at 30% 60%, color-mix(in srgb, var(--signal) 55%, transparent), transparent 70%),
+              radial-gradient(40% 50% at 75% 40%, color-mix(in srgb, var(--wave) 45%, transparent), transparent 70%);
+}
+.win {
+  position: relative; z-index: 1; border-radius: 14px; overflow: hidden; background: var(--panel);
+  box-shadow: 0 50px 100px -40px rgba(18,20,43,.55), 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent);
+  transform: rotateX(14deg) scale(.96); transform-origin: 50% 0;
+  animation: tilt-in 1.2s cubic-bezier(.2,.8,.2,1) .15s both;
+}
+@keyframes tilt-in { from { transform: rotateX(28deg) translateY(60px) scale(.9); opacity: 0; } to { transform: rotateX(14deg) scale(.96); opacity: 1; } }
+@supports (animation-timeline: view()) {
+  .win { animation: tilt-in 1.2s cubic-bezier(.2,.8,.2,1) .15s both, flatten linear both; animation-timeline: auto, view(); animation-range: normal, entry 20% cover 45%; }
+  @keyframes flatten { to { transform: rotateX(0) scale(1); } }
+}
+.win-bar { height: 34px; display: flex; align-items: center; gap: 7px; padding: 0 14px; background: color-mix(in srgb, var(--panel) 85%, var(--line)); border-bottom: 1px solid var(--line); }
+.win-bar i { width: 11px; height: 11px; border-radius: 50%; background: #ff5f57; } .win-bar i:nth-child(2) { background: #febc2e; } .win-bar i:nth-child(3) { background: #28c840; }
+.win-bar em { font: 500 11px/1 var(--f-mono); color: var(--ink-3); font-style: normal; margin-left: 8px; }
+.win img { width: 100%; height: auto; }
+.hphone {
+  position: absolute; z-index: 2; left: -3%; bottom: -9%; width: 19%; aspect-ratio: 9 / 19.6; border-radius: 15% / 7%;
+  background: #0d0e17; padding: 1.2%; box-shadow: 0 40px 70px -24px rgba(10,12,30,.6), inset 0 0 0 1.5px #3a3c52;
+  animation: rise 1.1s cubic-bezier(.2,.8,.2,1) .5s both;
+}
+.hphone img { width: 100%; height: 100%; object-fit: cover; border-radius: 13% / 6%; }
+@keyframes rise { from { transform: translateY(40px) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.chip {
+  position: absolute; z-index: 3; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line); font: 600 13px/1 var(--f-body); color: var(--ink);
+  box-shadow: 0 16px 34px -18px rgba(18,20,43,.45); animation: float 6s ease-in-out infinite, pop .6s cubic-bezier(.2,.8,.2,1) both;
+}
+.chip b { font-family: var(--f-display); font-weight: 800; }
+.chip .live { width: 8px; height: 8px; border-radius: 50%; background: var(--live); box-shadow: 0 0 0 4px color-mix(in srgb, var(--live) 20%, transparent); }
+.chip.c1 { right: -2%; top: 18%; animation-delay: 0s, .9s; }
+.chip.c2 { right: 8%; bottom: -4%; animation-delay: -2s, 1.1s; }
+.chip.c3 { left: 14%; top: -3%; animation-delay: -4s, 1.3s; }
+@keyframes float { 50% { transform: translateY(-8px); } }
+@keyframes pop { from { opacity: 0; scale: .8; } to { opacity: 1; scale: 1; } }
+@media (max-width: 720px) {
+  .hphone { width: 26%; left: -1%; bottom: -12%; }
+  .chip { font-size: 11.5px; padding: 7px 11px; }
+  .chip.c1 { right: 0; top: 8%; } .chip.c3 { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .win, .hphone, .chip { animation: none !important; } .win { transform: none; }
+}
 
 /* Spec strip */
 .specs { border-block: 1px solid var(--line); margin-top: 56px; }
@@ -473,51 +540,39 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
 
 <main id="top">
   <section class="hero">
-    <div class="wrap">
-      <div class="hero-copy">
-        <span class="label"><i class="dot"></i><span data-i18n="hero.label">Aplikasi macOS · gratis · open source</span></span>
-        <h1 data-i18n="hero.title">Layar HP-mu, <span class="tail">langsung di Mac.</span></h1>
-        <p class="lead" data-i18n="hero.lead">Mirror, kendalikan, dan kelola file Android &amp; iPhone dari Mac. Satu klik, tanpa terminal.</p>
-        <div class="hero-actions">
-          <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.2/DjieCast-1.2.dmg">
-            <svg><use href="#i-apple"/></svg><span data-i18n="cta.download">Download untuk Mac</span>
-          </a>
-          <a class="btn btn-line" href="https://github.com/masadjie/djie-cast" target="_blank" rel="noopener" data-i18n="cta.source">Kode sumber</a>
-        </div>
-        <div class="facts mono">
-          <span class="js-size">DMG 20 MB</span><span>macOS 14+</span><span>Apple Silicon &amp; Intel</span>
-        </div>
+    <div class="wrap hero-center">
+      <span class="label"><i class="dot"></i><span data-i18n="hero.label">Aplikasi macOS · gratis · open source</span></span>
+      <h1 class="hero-title">
+        <span class="sr-only" data-i18n="hero.sr">HP Android, iPhone, emulator, dan Mac lain, langsung di Mac.</span>
+        <span class="rot" aria-hidden="true"><span class="rot-word" id="rot-word">HP Android-mu,</span></span>
+        <span class="tail" aria-hidden="true" data-i18n="hero.tail">langsung di Mac.</span>
+      </h1>
+      <p class="lead" data-i18n="hero.lead">Mirror, kendalikan, dan kelola file Android &amp; iPhone dari Mac. Satu klik, tanpa terminal.</p>
+      <div class="hero-actions">
+        <a class="btn btn-main js-dl" href="https://github.com/masadjie/djie-cast/releases/download/v1.2/DjieCast-1.2.dmg">
+          <svg><use href="#i-apple"/></svg><span data-i18n="cta.download">Download untuk Mac</span>
+        </a>
+        <a class="btn btn-line" href="#video" data-i18n="cta.watch">Tonton 30 detik</a>
       </div>
+      <div class="facts mono">
+        <span class="js-size">DMG 47 MB</span><span>macOS 14+</span><span>Apple Silicon &amp; Intel</span>
+      </div>
+    </div>
 
-      <div class="stage" role="img" aria-label="Animasi: layar HP Android tampil di jendela Mac dan dikontrol dengan mouse" data-i18n-aria="hero.stage">
-        <div class="mac">
-          <div class="mac-bar"><i></i><i></i><i></i><em>Galaxy S24 Ultra — Djie Cast</em></div>
-          <div class="mac-body">
-            <div class="scr" aria-hidden="true">
-              <div class="sb"><span>14:05</span><span>5G ▮▮▮</span></div>
-              <div class="clock">14:05</div>
-              <div class="date" data-i18n="demo.date">Sabtu, 8 November</div>
-              <div class="apps"><b></b><b></b><b></b><b></b><b></b><b><i class="tap"></i></b><b></b><b></b></div>
-              <div class="dock"></div>
-              <div class="app"><div class="sb" style="padding:0;color:#12142b"><span>14:05</span><span>▮▮▮</span></div><h4 data-i18n="demo.gallery">Galeri</h4><div class="grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-            </div>
-            <svg class="cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2.5v17.2l4.7-4.3 2.9 6.6 3-1.3-2.9-6.5H18Z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
-          </div>
+    <div class="wrap">
+      <div class="showcase" aria-label="Djie Cast menampilkan HP Android di Mac" data-i18n-aria="hero.stage" role="img">
+        <div class="glow" aria-hidden="true"></div>
+        <div class="win">
+          <div class="win-bar"><i></i><i></i><i></i><em>Djie Cast</em></div>
+          <picture>
+            <source srcset="assets/android-dark.jpg" media="(prefers-color-scheme: dark)">
+            <img src="assets/android-light.jpg" alt="" width="1600" height="1000" fetchpriority="high">
+          </picture>
         </div>
-        <svg class="waves" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true">
-          <path d="M8 26a10 10 0 0 1 10-10"/><path d="M8 34a18 18 0 0 1 18-18"/><path d="M8 42a26 26 0 0 1 26-26" transform="translate(0 -8)"/>
-        </svg>
-        <div class="phone" aria-hidden="true">
-          <div class="scr">
-            <div class="sb"><span>14:05</span><span>5G ▮▮▮</span></div>
-            <div class="clock">14:05</div>
-            <div class="date" data-i18n="demo.date">Sabtu, 8 November</div>
-            <div class="apps"><b></b><b></b><b></b><b></b><b></b><b><i class="tap"></i></b><b></b><b></b></div>
-            <div class="dock"></div>
-            <div class="app"><div class="sb" style="padding:0;color:#12142b"><span>14:05</span><span>▮▮▮</span></div><h4 data-i18n="demo.gallery">Galeri</h4><div class="grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-          </div>
-        </div>
-        <div class="readout mono"><span class="on">LIVE</span><span>USB</span><span>1600p</span><span>60 fps</span><span>8 Mbps</span></div>
+        <div class="hphone" aria-hidden="true"><img src="assets/phone-android.jpg" alt="" width="540" height="1200"></div>
+        <div class="chip c1" aria-hidden="true"><b>60</b> fps · USB</div>
+        <div class="chip c2" aria-hidden="true"><span class="live"></span><span data-i18n="chip.wifi">Wi-Fi · pairing QR</span></div>
+        <div class="chip c3" aria-hidden="true"><span data-i18n="chip.drop">Seret file → HP</span></div>
       </div>
     </div>
 
@@ -1001,7 +1056,8 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
     "nav.live": "Live",
 
     "hero.label": "macOS app · free · open source",
-    "hero.title": 'Your phone screen, <span class="tail">right on your Mac.</span>',
+    "hero.tail": "right on your Mac.", "hero.sr": "Android, iPhone, emulators and other Macs, right on your Mac.",
+    "cta.watch": "Watch 30 seconds", "chip.wifi": "Wi-Fi · QR pairing", "chip.drop": "Drag files → phone",
     "hero.lead": "Mirror, control, and manage files on Android &amp; iPhone from your Mac. One click, no terminal.",
     "hero.stage": "Animation: an Android phone screen shown in a Mac window and controlled with the mouse",
     "cta.download": "Download for Mac", "cta.source": "Source code",
@@ -1170,6 +1226,25 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
 <script>
 (() => { const v = document.querySelector('#video video');
   if (v && matchMedia('(max-width: 640px)').matches) v.poster = 'assets/promo-poster-9x16.jpg'; })();
+</script>
+<script>
+(() => {
+  const el = document.getElementById("rot-word"); if (!el) return;
+  const words = {
+    id: ["HP Android-mu,", "iPhone-mu,", "Emulator Android,", "Simulator iPhone,", "Mac kantormu,", "Aplikasi HP-mu,"],
+    en: ["Your Android,", "Your iPhone,", "Android emulators,", "iPhone simulators,", "Your office Mac,", "Your phone apps,"]
+  };
+  const lang = () => (document.documentElement.lang || "id").startsWith("en") ? "en" : "id";
+  let i = 0;
+  const show = (next) => {
+    el.classList.add("out");
+    setTimeout(() => { el.textContent = next; el.classList.remove("out"); el.classList.add("in"); void el.offsetWidth; el.classList.remove("in"); }, 420);
+  };
+  new MutationObserver(() => { i = 0; el.textContent = words[lang()][0]; }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  el.textContent = words[lang()][0];
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  setInterval(() => { i = (i + 1) % words[lang()].length; show(words[lang()][i]); }, 2600);
+})();
 </script>
 </body>
 </html>
