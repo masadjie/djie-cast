@@ -646,5 +646,20 @@
   "Salin di Mac lalu tempel di HP (⌘V di jendela cast), dan teks yang disalin di HP langsung ada di clipboard Mac.": "Copy on the Mac and paste on the phone (⌘V in the cast window); text copied on the phone lands on the Mac clipboard.",
   "Salin teks dari HP": "Copy text from phone",
   "Djie Cast %@ sudah tersedia — klik untuk mengunduh": "Djie Cast %@ is available — click to download",
-  "Update tersedia": "Update available"
+  "Update tersedia": "Update available",
+  "Update sekarang": "Update now",
+  "Update ke %@": "Update to %@",
+  "Mengunduh… %lld%%": "Downloading… %lld%%",
+  "Memasang — Djie Cast akan dibuka ulang": "Installing — Djie Cast will reopen",
+  "Unduh manual": "Download manually",
+  "Memperbarui…": "Updating…",
+  "Memasang…": "Installing…",
+  "Djie Cast mengunduh, memasang, dan membuka ulang dirinya sendiri.": "Djie Cast downloads, installs and reopens itself.",
+  "Djie Cast %@ sudah tersedia — klik untuk memasang otomatis": "Djie Cast %@ is available — click to install automatically",
+  "File unduhan tidak cocok (checksum berbeda). Coba lagi.": "The download doesn't match (checksum differs). Try again.",
+  "Unduhan gagal. Periksa koneksi internet.": "Download failed. Check your internet connection.",
+  "Tidak bisa membuka file update: %@": "Couldn't open the update file: %@",
+  "File update bukan Djie Cast.": "The update file isn't Djie Cast.",
+  "Tanda tangan aplikasi di file update tidak valid.": "The app signature in the update file isn't valid.",
+  "Tidak bisa menyalin versi baru ke folder aplikasi.": "Couldn't copy the new version into the Applications folder."
 }

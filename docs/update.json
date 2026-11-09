@@ -2,5 +2,7 @@
   "latest": "1.2",
   "minimum": "1.0",
   "url": "https://github.com/masadjie/djie-cast/releases/latest",
-  "notes": "Simulator iPhone, aplikasi Android sebagai jendela Mac, pairing Wi-Fi dengan QR, kirim file drag & drop."
+  "dmg": "https://github.com/masadjie/djie-cast/releases/download/v1.2/DjieCast-1.2.dmg",
+  "sha256": "d96c2257109d190dea5bd63f64402631f964ad29848dc53c29cc64a72ac085fa",
+  "notes": "Simulator iPhone, aplikasi Android sebagai jendela Mac, pairing Wi-Fi dengan QR, kirim file drag & drop, update otomatis."
 }

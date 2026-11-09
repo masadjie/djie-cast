@@ -272,12 +272,18 @@ struct MainView: View {
     private var sidebarFooter: some View {
         VStack(spacing: 10) {
             if let v = updater.availableVersion {
-                Button { NSWorkspace.shared.open(updater.downloadURL) } label: {
+                Button { updater.update() } label: {
                     HStack(spacing: 8) {
-                        Image(systemName: "arrow.down.circle.fill").font(.system(size: 15))
+                        if updater.installing { ProgressView().controlSize(.small).tint(.white) }
+                        else { Image(systemName: "arrow.down.circle.fill").font(.system(size: 15)) }
                         VStack(alignment: .leading, spacing: 0) {
-                            Text("Update tersedia").font(.system(size: 12, weight: .bold))
-                            Text(verbatim: "v\(Brand.version) → v\(v)").font(.system(size: 10.5, weight: .medium).monospacedDigit()).opacity(0.85)
+                            Text(updater.installing ? "Memperbarui…" : "Update tersedia").font(.system(size: 12, weight: .bold))
+                            Group {
+                                if case .downloading(let p) = updater.install { Text(verbatim: "\(Int(p * 100))%") }
+                                else if updater.install == .installing { Text("Memasang…") }
+                                else { Text(verbatim: "v\(Brand.version) → v\(v)") }
+                            }
+                            .font(.system(size: 10.5, weight: .medium).monospacedDigit()).opacity(0.85)
                         }
                         Spacer(minLength: 0)
                         Image(systemName: "chevron.right").font(.system(size: 10, weight: .bold)).opacity(0.8)
@@ -288,7 +294,8 @@ struct MainView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .help(String(localized: "Djie Cast \(v) sudah tersedia — klik untuk mengunduh"))
+                .disabled(updater.installing)
+                .help(updater.canSelfUpdate ? String(localized: "Djie Cast \(v) sudah tersedia — klik untuk memasang otomatis") : String(localized: "Djie Cast \(v) sudah tersedia — klik untuk mengunduh"))
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         HStack(spacing: 10) {
