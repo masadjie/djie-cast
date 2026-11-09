@@ -23,6 +23,11 @@ final class Updater: ObservableObject {
     @Published var info: Info?
     @Published var dismissedOptional = false
 
+    /// The newer version on offer, if any (optional or required).
+    var availableVersion: String? {
+        switch state { case .optional(let v), .required(let v): return v; case .idle: return nil }
+    }
+
     var downloadURL: URL {
         URL(string: info?.url ?? "") ?? URL(string: "https://github.com/masadjie/djie-cast/releases/latest")!
     }

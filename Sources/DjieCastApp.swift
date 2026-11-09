@@ -95,6 +95,13 @@ struct RootView: View {
         }
         .frame(minWidth: 1040, minHeight: 660)
         .tint(Brand.start)
+        .task {
+            // check again every 6 hours for people who keep Djie Cast open
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(6 * 3600))
+                updater.check()
+            }
+        }
         .onAppear {
             updater.check()
             if let forced = Demo.env["DJIE_APPEARANCE"] {
@@ -114,6 +121,7 @@ struct MainView: View {
     @ObservedObject private var ios = IOSCastModel.shared
     @ObservedObject private var emulator = EmulatorModel.shared
     @ObservedObject private var simulators = SimulatorModel.shared
+    @ObservedObject private var updater = Updater.shared
     @State private var askRelaunch = false
 
     var body: some View {
@@ -262,6 +270,27 @@ struct MainView: View {
     @AppStorage("appearance") private var appearance = Appearance.light.rawValue
 
     private var sidebarFooter: some View {
+        VStack(spacing: 10) {
+            if let v = updater.availableVersion {
+                Button { NSWorkspace.shared.open(updater.downloadURL) } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.down.circle.fill").font(.system(size: 15))
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("Update tersedia").font(.system(size: 12, weight: .bold))
+                            Text(verbatim: "v\(Brand.version) → v\(v)").font(.system(size: 10.5, weight: .medium).monospacedDigit()).opacity(0.85)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right").font(.system(size: 10, weight: .bold)).opacity(0.8)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12).padding(.vertical, 8)
+                    .background(Brand.gradient, in: RoundedRectangle(cornerRadius: 10))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(String(localized: "Djie Cast \(v) sudah tersedia — klik untuk mengunduh"))
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         HStack(spacing: 10) {
             Image(nsImage: NSApp.applicationIconImage)
                 .resizable()
@@ -296,7 +325,9 @@ struct MainView: View {
             .fixedSize()
             .help("Bahasa: Indonesia atau English")
         }
+        }
         .padding(12)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: updater.availableVersion)
         .alert("Bahasa berubah setelah Djie Cast dibuka ulang.", isPresented: $askRelaunch) {
             Button("Buka ulang sekarang") { AppLanguage.relaunch() }
             Button("Nanti", role: .cancel) {}

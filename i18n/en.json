@@ -644,5 +644,7 @@
   "%lld gagal": "%lld failed",
   "Clipboard bersama Mac ↔ HP": "Shared clipboard Mac ↔ phone",
   "Salin di Mac lalu tempel di HP (⌘V di jendela cast), dan teks yang disalin di HP langsung ada di clipboard Mac.": "Copy on the Mac and paste on the phone (⌘V in the cast window); text copied on the phone lands on the Mac clipboard.",
-  "Salin teks dari HP": "Copy text from phone"
+  "Salin teks dari HP": "Copy text from phone",
+  "Djie Cast %@ sudah tersedia — klik untuk mengunduh": "Djie Cast %@ is available — click to download",
+  "Update tersedia": "Update available"
 }
