@@ -58,7 +58,7 @@ struct DeviceDetailSheet: View {
                 }
                 .pickerStyle(.segmented).labelsHidden().fixedSize()
                 Spacer()
-                if let toast { Text(toast).font(.callout).foregroundStyle(.secondary).transition(.opacity) }
+                if let toast { Text(L(toast)).font(.callout).foregroundStyle(.secondary).transition(.opacity) }
                 Button("Selesai") { dismiss() }.keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal, 22).padding(.vertical, 12)
@@ -125,14 +125,14 @@ struct DeviceDetailSheet: View {
                 Text(detail?.subtitle ?? " ").font(.callout).foregroundStyle(.secondary)
             }
             if let pill = detail?.storagePill, !pill.isEmpty {
-                Text(pill).font(.callout.weight(.semibold).monospacedDigit())
+                Text(L(pill)).font(.callout.weight(.semibold).monospacedDigit())
                     .padding(.horizontal, 10).padding(.vertical, 4)
                     .background(Color.primary.opacity(0.07), in: Capsule())
             }
             Spacer()
             if let d = detail, let level = d.batteryLevel {
                 HStack(spacing: 8) {
-                    if let s = d.batteryState { Text(s).font(.callout).foregroundStyle(.secondary) }
+                    if let s = d.batteryState { Text(L(s)).font(.callout).foregroundStyle(.secondary) }
                     if d.batteryState?.hasPrefix("Mengisi") == true { Image(systemName: "bolt.fill").foregroundStyle(Theme.live) }
                     BatteryGlyph(level: level)
                 }
@@ -165,9 +165,9 @@ struct DeviceDetailSheet: View {
                     VStack(spacing: 0) {
                         ForEach(Array(d.specs.enumerated()), id: \.offset) { i, row in
                             HStack(alignment: .firstTextBaseline) {
-                                Text(row.label).foregroundStyle(.primary)
+                                Text(L(row.label)).foregroundStyle(.primary)
                                 Spacer(minLength: 16)
-                                Text(row.value).foregroundStyle(.secondary).multilineTextAlignment(.trailing).textSelection(.enabled)
+                                Text(L(row.value)).foregroundStyle(.secondary).multilineTextAlignment(.trailing).textSelection(.enabled)
                                     .lineLimit(2)
                             }
                             .font(.callout)
@@ -218,7 +218,7 @@ struct DeviceDetailSheet: View {
                 Panel(padding: 16) {
                     VStack(spacing: 0) {
                         ForEach(Array((detail?.status ?? []).enumerated()), id: \.offset) { i, row in
-                            HStack { Text(row.label); Spacer(); Text(row.value).foregroundStyle(.secondary).lineLimit(1) }
+                            HStack { Text(L(row.label)); Spacer(); Text(L(row.value)).foregroundStyle(.secondary).lineLimit(1) }
                                 .font(.callout).padding(.vertical, 7)
                             if i < (detail?.status.count ?? 0) - 1 { Divider() }
                         }
@@ -315,14 +315,14 @@ private struct AppRow: View {
                 .background(Color(hue: hue, saturation: 0.5, brightness: 0.75), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    Text(app.name).font(.callout.weight(.semibold))
+                    Text(L(app.name)).font(.callout.weight(.semibold))
                     if app.system { Pill(text: "Sistem", color: .secondary) }
                 }
-                Text(app.id).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
+                Text(L(app.id)).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer()
             if !app.version.isEmpty { Text("v\(app.version)").font(.caption.monospacedDigit()).foregroundStyle(.secondary).lineLimit(1).frame(maxWidth: 160, alignment: .trailing) }
-            if !app.installed.isEmpty { Text(app.installed).font(.caption.monospacedDigit()).foregroundStyle(.tertiary).frame(width: 84, alignment: .trailing) }
+            if !app.installed.isEmpty { Text(L(app.installed)).font(.caption.monospacedDigit()).foregroundStyle(.tertiary).frame(width: 84, alignment: .trailing) }
             if busy { ProgressView().controlSize(.small).frame(width: 96) }
             else if !app.system {
                 Button("Uninstall", action: onUninstall)
@@ -349,7 +349,7 @@ struct Ring: View {
             Circle().trim(from: 0, to: shown)
                 .stroke(color, style: StrokeStyle(lineWidth: 7, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-            Text(label).font(.system(size: 17, weight: .bold).monospacedDigit())
+            Text(L(label)).font(.system(size: 17, weight: .bold).monospacedDigit())
         }
         .frame(width: 78, height: 78)
         .onAppear { withAnimation(.spring(response: 1.0, dampingFraction: 0.85).delay(0.15)) { shown = progress } }

@@ -570,12 +570,12 @@ struct AndroidCastView: View {
                              ("⌘ R", "Putar layar HP"), ("⌘ ← / →", "Putar jendela"),
                              ("⌘ V", "Tempel teks ke HP"), ("Klik kanan", "Kembali")], id: \.0) { k, v in
                         HStack(spacing: 8) {
-                            Text(k)
+                            Text(L(k))
                                 .font(.system(size: 11, weight: .semibold))
                                 .padding(.horizontal, 7).padding(.vertical, 3)
                                 .background(Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 5))
                                 .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.primary.opacity(0.12)))
-                            Text(v).font(.caption).foregroundStyle(.secondary)
+                            Text(L(v)).font(.caption).foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -611,7 +611,7 @@ struct AndroidCastView: View {
                                        "Setelah itu HP cukup diklik Sambungkan — tanpa kabel, tanpa kode lagi"].enumerated()), id: \.offset) { i, t in
                             HStack(alignment: .firstTextBaseline, spacing: 10) {
                                 Text(String(format: "%02d", i + 1)).font(.caption.monospacedDigit().weight(.semibold)).foregroundStyle(Theme.airplay[1])
-                                Text(t).font(.callout).foregroundStyle(.secondary)
+                                Text(L(t)).font(.callout).foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -707,7 +707,7 @@ struct AndroidCastView: View {
                 .padding(.leading, 46)
             }
             if let err = model.nearbyError[n.ip], !connected {
-                Label(err, systemImage: "info.circle").font(.caption).foregroundStyle(.orange)
+                Label(L(err), systemImage: "info.circle").font(.caption).foregroundStyle(.orange)
                     .fixedSize(horizontal: false, vertical: true).padding(.leading, 46)
             }
         }
@@ -772,7 +772,7 @@ struct AndroidCastView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                Text(preset.wrappedValue.hint).font(.caption).foregroundStyle(.secondary)
+                Text(L(preset.wrappedValue.hint)).font(.caption).foregroundStyle(.secondary)
                 if preset.wrappedValue == .kustom {
                     Picker("Resolusi", selection: $maxSize) {
                         Text("Asli").tag(0)
@@ -817,7 +817,7 @@ struct AndroidCastView: View {
             Section {
                 TextField("Argumen", text: $extraArgs, prompt: Text("--crop=1080:1920:0:0"))
                     .font(.system(.body, design: .monospaced))
-                LabeledContent("Mesin", value: Tools.scrcpyIsBundled ? "scrcpy \(Tools.scrcpyVersion) · bawaan" : "scrcpy sistem")
+                LabeledContent("Mesin", value: Tools.scrcpyIsBundled ? String(localized: "scrcpy \(Tools.scrcpyVersion) · bawaan") : String(localized: "scrcpy sistem"))
                     .font(.caption)
             } header: { Label("Lanjutan", systemImage: "slider.horizontal.3") }
         }
@@ -876,8 +876,8 @@ struct AndroidDeviceCard: View {
                     .fixedSize()
                 }
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(device.displayName).font(.headline).lineLimit(1)
-                    Text(device.serial).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
+                    Text(L(device.displayName)).font(.headline).lineLimit(1)
+                    Text(L(device.serial)).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
                 }
                 statusLine
                 if ready { ControlBar(serial: device.serial) }
@@ -933,7 +933,7 @@ struct ControlBar: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .help(k.help)
+                .help(L(k.help))
             }
             Divider().frame(height: 16)
             Menu {

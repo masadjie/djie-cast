@@ -173,7 +173,7 @@ struct RemoteDesktopView: View {
                     .buttonStyle(SoftButtonStyle(tint: .red)).fixedSize()
             }
         case .failed(let msg):
-            Label(msg, systemImage: "exclamationmark.triangle.fill").font(.callout).foregroundStyle(.orange)
+            Label(L(msg), systemImage: "exclamationmark.triangle.fill").font(.callout).foregroundStyle(.orange)
         case .off:
             EmptyView()
         }
@@ -184,8 +184,8 @@ struct RemoteDesktopView: View {
             Image(systemName: ok ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
                 .foregroundStyle(ok ? Theme.live : .orange)
             VStack(alignment: .leading, spacing: 1) {
-                Text(title).font(.callout.weight(.medium))
-                Text(detail).font(.caption).foregroundStyle(.secondary)
+                Text(L(title)).font(.callout.weight(.medium))
+                Text(L(detail)).font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
             if ok {
@@ -231,7 +231,7 @@ struct RemoteDesktopView: View {
                             } label: {
                                 HStack(spacing: 10) {
                                     Image(systemName: "desktopcomputer").foregroundStyle(Theme.remote[1])
-                                    Text(f.name).font(.callout.weight(.medium))
+                                    Text(L(f.name)).font(.callout.weight(.medium))
                                     Spacer()
                                     if selected == f { Image(systemName: "checkmark").foregroundStyle(Theme.remote[1]) }
                                 }
@@ -258,8 +258,8 @@ struct RemoteDesktopView: View {
                                 HStack(spacing: 10) {
                                     Image(systemName: "globe").foregroundStyle(Theme.remote[1])
                                     VStack(alignment: .leading, spacing: 1) {
-                                        Text(p.name).font(.callout.weight(.medium))
-                                        Text(p.ip).font(.caption.monospaced()).foregroundStyle(.secondary)
+                                        Text(L(p.name)).font(.callout.weight(.medium))
+                                        Text(L(p.ip)).font(.caption.monospaced()).foregroundStyle(.secondary)
                                     }
                                     Spacer()
                                     Text(p.online ? "online" : "offline").font(.caption).foregroundStyle(p.online ? Theme.live : .secondary)
@@ -294,7 +294,7 @@ struct RemoteDesktopView: View {
 
                 switch viewer.status {
                 case .failed(let msg):
-                    Label(msg, systemImage: "exclamationmark.triangle.fill").font(.callout).foregroundStyle(.orange)
+                    Label(L(msg), systemImage: "exclamationmark.triangle.fill").font(.callout).foregroundStyle(.orange)
                         .fixedSize(horizontal: false, vertical: true)
                 case .connected(let to):
                     HStack {
@@ -311,7 +311,7 @@ struct RemoteDesktopView: View {
     private func field(_ icon: String, _ prompt: String, text: Binding<String>) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon).foregroundStyle(.secondary).frame(width: 16)
-            TextField(prompt, text: text).textFieldStyle(.plain).onSubmit(connect)
+            TextField(L(prompt), text: text).textFieldStyle(.plain).onSubmit(connect)
         }
         .padding(.horizontal, 10).padding(.vertical, 9)
         .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
@@ -360,7 +360,7 @@ struct RemoteDesktopView: View {
                             Text("Terhubung\(tailnet.account.map { " sebagai \($0)" } ?? "")").font(.callout.weight(.medium))
                         }
                         LabeledContent("IP internet Mac ini") {
-                            Text(ip).font(.callout.monospaced()).textSelection(.enabled)
+                            Text(L(ip)).font(.callout.monospaced()).textSelection(.enabled)
                         }
                         .font(.callout)
                         Text("Mac lain cukup pilih “\(NetInfo.macName)” di daftar Lewat Internet, lalu masukkan kode akses.")
@@ -370,7 +370,7 @@ struct RemoteDesktopView: View {
                             Button("Keluar akun") { tailnet.stop(forget: true) }.buttonStyle(.borderless).foregroundStyle(.red)
                         }
                     case .failed(let msg):
-                        Label(msg, systemImage: "exclamationmark.triangle.fill").font(.callout).foregroundStyle(.orange)
+                        Label(L(msg), systemImage: "exclamationmark.triangle.fill").font(.callout).foregroundStyle(.orange)
                         Button("Coba lagi") { tailnet.stop(); tailnet.start(userInitiated: true) }.buttonStyle(SoftButtonStyle(tint: Theme.remote[1])).fixedSize()
                     }
                     HStack(spacing: 18) {

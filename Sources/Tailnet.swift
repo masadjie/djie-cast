@@ -81,7 +81,7 @@ final class TailnetModel: ObservableObject {
             let rc = tailscale_up(s)
             Task { @MainActor in
                 guard let self, self.sd == s else { return }
-                if rc != 0 { self.state = .failed("Gagal terhubung ke Tailscale: \(Self.errmsg(s))") }
+                if rc != 0 { self.state = .failed(String(localized: "Gagal terhubung ke Tailscale: \(Self.errmsg(s))")) }
                 else { self.onUp() }
             }
         }

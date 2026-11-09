@@ -66,10 +66,10 @@ struct DeviceSummaryCard<Actions: View>: View {
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(titleOverride ?? d?.title ?? fallbackTitle).font(.title2.weight(.bold)).lineLimit(1)
-                            Text(d?.subtitle ?? fallbackSubtitle).font(.callout).foregroundStyle(.secondary).lineLimit(1)
+                            Text(L(d?.subtitle ?? fallbackSubtitle)).font(.callout).foregroundStyle(.secondary).lineLimit(1)
                         }
                         if let pill = d?.storagePill, !pill.isEmpty {
-                            Text(pill).font(.caption.weight(.semibold).monospacedDigit())
+                            Text(L(pill)).font(.caption.weight(.semibold).monospacedDigit())
                                 .padding(.horizontal, 8).padding(.vertical, 3)
                                 .background(Color.primary.opacity(0.07), in: Capsule())
                         }
@@ -115,7 +115,7 @@ struct DeviceSummaryCard<Actions: View>: View {
                               label: d?.batteryLevel.map { "\($0)%" } ?? "–",
                               color: (d?.batteryLevel ?? 100) < 20 ? .red : Theme.live,
                               title: "Baterai",
-                              lines: [d?.batteryState, d?.batteryHealth.map { "Kondisi \($0)" }, d?.batteryCycles.map { "\($0) siklus" }].compactMap { $0 })
+                              lines: [d?.batteryState, d?.batteryHealth.map { String(localized: "Kondisi \(L($0))") }, d?.batteryCycles.map { String(localized: "\($0) siklus") }].compactMap { $0 })
                     ringBlock(progress: storageFraction, label: "\(Int(storageFraction * 100))%", color: accent[1],
                               title: "Penyimpanan",
                               lines: storageLines)
@@ -127,13 +127,13 @@ struct DeviceSummaryCard<Actions: View>: View {
     }
     private var storageLines: [String] {
         guard let t = d?.storageTotal, let u = d?.storageUsed else { return [] }
-        return ["\(Fmt.bytes(max(0, t - u))) tersedia", "dari \(Fmt.bytes(t))"]
+        return [String(localized: "\(Fmt.bytes(max(0, t - u))) tersedia"), String(localized: "dari \(Fmt.bytes(t))")]
     }
 
     private func specCell(_ r: SpecRow) -> some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text(r.label.uppercased()).font(.system(size: 9.5, weight: .semibold)).kerning(0.6).foregroundStyle(.tertiary)
-            Text(r.value).font(.callout).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+            Text(L(r.label).uppercased()).font(.system(size: 9.5, weight: .semibold)).kerning(0.6).foregroundStyle(.tertiary)
+            Text(L(r.value)).font(.callout).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -142,8 +142,8 @@ struct DeviceSummaryCard<Actions: View>: View {
         HStack(spacing: 12) {
             Ring(progress: progress, label: label, color: color).scaleEffect(0.85).frame(width: 68, height: 68)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.callout.weight(.semibold))
-                ForEach(lines, id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+                Text(L(title)).font(.callout.weight(.semibold))
+                ForEach(lines, id: \.self) { Text(L($0)).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
             }
             Spacer(minLength: 0)
         }

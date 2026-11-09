@@ -81,7 +81,7 @@ struct RequiredUpdateView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let notes = updater.info?.notes, !notes.isEmpty {
-                    Text(notes).font(.callout).lineLimit(8)
+                    Text(L(notes)).font(.callout).lineLimit(8)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
                     .padding(14)
@@ -117,7 +117,7 @@ struct OptionalUpdateBanner: View {
         HStack(spacing: 12) {
             Image(systemName: "sparkles").foregroundStyle(Brand.start)
             Text("Djie Cast \(version) sudah tersedia").font(.callout.weight(.semibold))
-            if let notes = updater.info?.notes { Text(notes).font(.callout).foregroundStyle(.secondary).lineLimit(1) }
+            if let notes = updater.info?.notes { Text(L(notes)).font(.callout).foregroundStyle(.secondary).lineLimit(1) }
             Spacer()
             Button("Nanti") { withAnimation { updater.dismissedOptional = true } }.buttonStyle(.borderless)
             Button { NSWorkspace.shared.open(updater.downloadURL) } label: { Label("Unduh", systemImage: "arrow.down.circle.fill") }

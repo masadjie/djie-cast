@@ -344,7 +344,7 @@ struct AndroidFilesView: View {
                     if model.loading && model.files.isEmpty {
                         ProgressView()
                     } else if let err = model.errorText {
-                        Label(err, systemImage: "lock.fill").foregroundStyle(.secondary).padding()
+                        Label(L(err), systemImage: "lock.fill").foregroundStyle(.secondary).padding()
                     } else if model.visibleFiles.isEmpty && !model.loading {
                         VStack(spacing: 6) {
                             Image(systemName: "folder").font(.largeTitle).foregroundStyle(.tertiary)
@@ -372,7 +372,7 @@ struct AndroidFilesView: View {
                 HStack(spacing: 2) {
                     ForEach(Array(model.breadcrumbs.enumerated()), id: \.offset) { i, c in
                         if i > 0 { Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary) }
-                        Button(c.name) { model.go(c.path) }
+                        Button(L(c.name)) { model.go(c.path) }
                             .buttonStyle(.plain)
                             .font(.callout.weight(i == model.breadcrumbs.count - 1 ? .semibold : .regular))
                             .foregroundStyle(i == model.breadcrumbs.count - 1 ? .primary : .secondary)
@@ -407,7 +407,7 @@ struct AndroidFilesView: View {
             TableColumn("Nama") { f in
                 HStack(spacing: 8) {
                     Image(systemName: f.icon).foregroundStyle(f.iconColor).frame(width: 18)
-                    Text(f.name).lineLimit(1)
+                    Text(L(f.name)).lineLimit(1)
                     if f.isLink { Image(systemName: "arrow.turn.up.right").font(.caption2).foregroundStyle(.tertiary) }
                 }
             }
@@ -418,7 +418,7 @@ struct AndroidFilesView: View {
             }
             .width(min: 70, ideal: 90)
             TableColumn("Diubah") { f in
-                Text(f.modified).foregroundStyle(.secondary).monospacedDigit()
+                Text(L(f.modified)).foregroundStyle(.secondary).monospacedDigit()
             }
             .width(min: 110, ideal: 140)
         }
@@ -447,7 +447,7 @@ struct AndroidFilesView: View {
         HStack(spacing: 8) {
             if let t = model.transfer {
                 ProgressView().controlSize(.small)
-                Text(t)
+                Text(L(t))
             } else {
                 Text("\(model.visibleFiles.count) item")
                 if !selection.isEmpty { Text("· \(selection.count) dipilih") }
@@ -466,7 +466,7 @@ struct AndroidFilesView: View {
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = true
         panel.prompt = "Unggah"
-        panel.message = "Pilih file untuk dikirim ke \(model.path)"
+        panel.message = String(localized: "Pilih file untuk dikirim ke \(model.path)")
         if panel.runModal() == .OK { Task { await model.upload(panel.urls) } }
     }
 }

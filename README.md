@@ -10,6 +10,8 @@
   Gratis, open source, tanpa terminal.
 </p>
 
+<p align="center"><b>Bahasa Indonesia</b> · <a href="README.en.md">English</a></p>
+
 <p align="center">
   <a href="https://github.com/masadjie/djie-cast/releases/latest"><b>Download untuk Mac</b></a>
   &nbsp;·&nbsp;
@@ -101,7 +103,23 @@ Kendalikan Mac lain dengan kode 6 angka. Koneksinya terenkripsi TLS, videonya H.
 xattr -dr com.apple.quarantine "/Applications/Djie Cast.app"
 ```
 
-macOS 14 Sonoma atau lebih baru, Apple Silicon dan Intel. scrcpy dan adb sudah ada di dalam app.
+scrcpy dan adb sudah ada di dalam app.
+
+### Mac yang didukung
+
+Semua Mac yang bisa menjalankan macOS 14 Sonoma atau lebih baru:
+
+| Mac | Mulai |
+|---|---|
+| MacBook Air | 2018 ke atas, semua M1–M4 |
+| MacBook Pro | 2018 ke atas, semua M1–M5 |
+| iMac | 2019 ke atas |
+| iMac Pro | 2017 |
+| Mac mini | 2018 ke atas |
+| Mac Studio | semua |
+| Mac Pro | 2019 ke atas |
+
+Info dan aplikasi iPhone butuh Mac Apple Silicon. iPhone Mirroring butuh macOS 15. Kamera iPhone butuh macOS 14 dan iOS 17. Fitur lain berjalan di Intel maupun Apple Silicon.
 
 ## Build dari source
 

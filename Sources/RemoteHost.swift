@@ -329,7 +329,7 @@ final class RemoteHostModel: ObservableObject {
                         if case .off = self.status { self.status = .waiting }
                         if case .failed = self.status { self.status = .waiting }
                     case .failed(let e):
-                        self.status = .failed("Tidak bisa membuka koneksi: \(e.localizedDescription)")
+                        self.status = .failed(String(localized: "Tidak bisa membuka koneksi: \(e.localizedDescription)"))
                     default: break
                     }
                 }
@@ -338,7 +338,7 @@ final class RemoteHostModel: ObservableObject {
             listener = l
             status = .waiting
         } catch {
-            status = .failed("Tidak bisa membuka koneksi: \(error.localizedDescription)")
+            status = .failed(String(localized: "Tidak bisa membuka koneksi: \(error.localizedDescription)"))
         }
     }
 
@@ -486,7 +486,7 @@ final class ControlledHUD {
                 PulseDot(color: .red)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Mac ini sedang dikontrol").font(.system(size: 12, weight: .semibold))
-                    Text(viewer).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                    Text(L(viewer)).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer()
                 Button("Putuskan", action: onDisconnect)

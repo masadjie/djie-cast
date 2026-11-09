@@ -17,6 +17,12 @@ enum Theme {
     }
 }
 
+// MARK: - Language
+
+/// Looks up a UI string that arrives as a plain String (component parameters, model text).
+/// Literal Text/Label/Button strings are localized by SwiftUI itself.
+func L(_ s: String) -> String { Bundle.main.localizedString(forKey: s, value: s, table: nil) }
+
 // MARK: - Debug hooks (only via environment variables; used for UI snapshots)
 
 enum Demo {
@@ -127,8 +133,8 @@ struct PageHeader<Trailing: View>: View {
         HStack(alignment: .center, spacing: 14) {
             IconBadge(icon: icon, colors: colors, size: 48)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.system(size: 26, weight: .bold)).kerning(-0.3)
-                Text(subtitle).font(.callout).foregroundStyle(.secondary)
+                Text(L(title)).font(.system(size: 26, weight: .bold)).kerning(-0.3)
+                Text(L(subtitle)).font(.callout).foregroundStyle(.secondary)
             }
             Spacer()
             trailing
@@ -147,12 +153,12 @@ struct SectionTitle: View {
     var detail: String? = nil
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(title.uppercased())
+            Text(L(title).uppercased())
                 .font(.caption.weight(.semibold))
                 .kerning(0.8)
                 .foregroundStyle(.secondary)
             if let detail {
-                Text(detail).font(.caption).foregroundStyle(.tertiary)
+                Text(L(detail)).font(.caption).foregroundStyle(.tertiary)
             }
             Spacer()
         }
@@ -188,7 +194,7 @@ struct Pill: View {
     var body: some View {
         HStack(spacing: 4) {
             if let icon { Image(systemName: icon).font(.system(size: 9, weight: .bold)) }
-            Text(text).font(.caption2.weight(.semibold))
+            Text(L(text)).font(.caption2.weight(.semibold))
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
@@ -223,7 +229,7 @@ struct StatusPill: View {
     var body: some View {
         HStack(spacing: 7) {
             Circle().fill(count > 0 ? Theme.live : Color.secondary.opacity(0.5)).frame(width: 8, height: 8)
-            Text(count > 0 ? "\(count) \(noun) terhubung" : "Belum ada \(noun)")
+            Text(count > 0 ? "\(count) \(L(noun)) terhubung" : "Belum ada \(L(noun))")
                 .font(.callout.weight(.medium))
                 .lineLimit(1)
                 .fixedSize()
@@ -250,7 +256,7 @@ struct EmptyStateView: View {
                     Image(systemName: icon).font(.system(size: 42, weight: .light)).foregroundStyle(.secondary)
                 }
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(title).font(.title3.weight(.semibold))
+                    Text(L(title)).font(.title3.weight(.semibold))
                     ForEach(Array(steps.enumerated()), id: \.offset) { i, s in
                         HStack(alignment: .top, spacing: 10) {
                             Text("\(i + 1)")
@@ -258,7 +264,7 @@ struct EmptyStateView: View {
                                 .frame(width: 20, height: 20)
                                 .background(Color.accentColor.opacity(0.15), in: Circle())
                                 .foregroundStyle(Color.accentColor)
-                            Text(s).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                            Text(L(s)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }

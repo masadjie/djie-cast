@@ -131,8 +131,8 @@ struct RequirementBanner: View {
                 .foregroundStyle(.orange)
                 .background(Color.orange.opacity(0.14), in: RoundedRectangle(cornerRadius: 5))
             VStack(alignment: .leading, spacing: 2) {
-                Text(guide.requirement).font(.callout.weight(.semibold))
-                Text(guide.summary).font(.caption).foregroundStyle(.secondary)
+                Text(L(guide.requirement)).font(.callout.weight(.semibold))
+                Text(L(guide.summary)).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 12)
@@ -161,10 +161,10 @@ struct GuideStepsList: View {
                         .frame(width: 26, height: 26)
                         .background(guide.tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
                     VStack(alignment: .leading, spacing: 3) {
-                        Label(step.title, systemImage: step.icon)
+                        Label(L(step.title), systemImage: step.icon)
                             .font(.callout.weight(.semibold))
                             .labelStyle(TitleOnlyWithIconAfter())
-                        Text(step.detail).font(.callout).foregroundStyle(.secondary)
+                        Text(L(step.detail)).font(.callout).foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: 0)
@@ -193,12 +193,12 @@ struct SetupGuideSheet: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(guide.eyebrow)
+                    Text(L(guide.eyebrow))
                         .font(.system(size: 10.5, weight: .medium, design: .monospaced))
                         .kerning(1.2)
                         .foregroundStyle(.secondary)
-                    Text(guide.title).font(.title2.weight(.bold))
-                    Text(guide.summary).foregroundStyle(.secondary)
+                    Text(L(guide.title)).font(.title2.weight(.bold))
+                    Text(L(guide.summary)).foregroundStyle(.secondary)
                 }
                 Spacer()
             }
@@ -212,7 +212,7 @@ struct SetupGuideSheet: View {
                         ForEach(guide.troubleshooting, id: \.self) { t in
                             HStack(alignment: .top, spacing: 8) {
                                 Text("—").foregroundStyle(.tertiary)
-                                Text(t).font(.callout).foregroundStyle(.secondary)
+                                Text(L(t)).font(.callout).foregroundStyle(.secondary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }

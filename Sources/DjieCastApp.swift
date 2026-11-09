@@ -20,6 +20,27 @@ enum Brand {
     }
 }
 
+/// App language: follows macOS, or forced to Indonesian / English (applied on next launch).
+enum AppLanguage {
+    static var current: String {
+        guard let langs = UserDefaults.standard.object(forKey: "AppleLanguages") as? [String],
+              UserDefaults.standard.persistentDomain(forName: Bundle.main.bundleIdentifier ?? "")?["AppleLanguages"] != nil,
+              let first = langs.first else { return "system" }
+        return first.hasPrefix("en") ? "en" : first.hasPrefix("id") ? "id" : "system"
+    }
+    static func set(_ lang: String) {
+        if lang == "system" { UserDefaults.standard.removeObject(forKey: "AppleLanguages") }
+        else { UserDefaults.standard.set([lang], forKey: "AppleLanguages") }
+    }
+    static func relaunch() {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/bin/sh")
+        p.arguments = ["-c", "sleep 1; /usr/bin/open -n \"\(Bundle.main.bundlePath)\""]
+        try? p.run()
+        NSApp.terminate(nil)
+    }
+}
+
 /// Light / dark / follow-system, stored per user and applied app-wide.
 enum Appearance: String, CaseIterable, Identifiable {
     case system, light, dark
@@ -92,6 +113,7 @@ struct MainView: View {
     @ObservedObject private var android = LauncherModel.shared
     @ObservedObject private var ios = IOSCastModel.shared
     @ObservedObject private var emulator = EmulatorModel.shared
+    @State private var askRelaunch = false
 
     var body: some View {
         Group {
@@ -110,7 +132,7 @@ struct MainView: View {
                 } detail: { detailView }
             }
         }
-        .navigationTitle(title)
+        .navigationTitle(L(title))
         .task {
             // Keep both device lists fresh so sidebar badges are always right.
             ios.refresh()
@@ -207,13 +229,13 @@ struct MainView: View {
         .background(Color(nsColor: .underPageBackgroundColor).opacity(0.55))
     }
     private func flatHeader(_ t: String) -> some View {
-        Text(t).font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
+        Text(L(t)).font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
             .padding(.horizontal, 8).padding(.top, 14).padding(.bottom, 4)
     }
     private func flatRow(_ p: Page, _ label: String, _ icon: String, _ colors: [Color], _ badge: Int) -> some View {
         HStack(spacing: 10) {
             IconBadge(icon: icon, colors: colors, size: 24)
-            Text(label).font(.system(size: 13))
+            Text(L(label)).font(.system(size: 13))
             Spacer()
             if badge > 0 { Text("\(badge)").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary) }
         }
@@ -224,7 +246,7 @@ struct MainView: View {
     private func sidebarRow(_ p: Page, _ label: String, _ icon: String, _ colors: [Color], badge: Int = 0) -> some View {
         HStack(spacing: 10) {
             IconBadge(icon: icon, colors: colors, size: 24)
-            Text(label)
+            Text(L(label))
         }
         .padding(.vertical, 2)
         .badge(badge)
@@ -240,13 +262,13 @@ struct MainView: View {
                 .resizable()
                 .frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 1) {
-                Text(Brand.name).font(.callout.weight(.semibold))
+                Text(L(Brand.name)).font(.callout.weight(.semibold))
                 Text("v\(Brand.version)").font(.caption2.monospaced()).foregroundStyle(.secondary)
             }
             Spacer()
             Menu {
                 Picker("Tampilan", selection: $appearance) {
-                    ForEach(Appearance.allCases) { a in Label(a.label, systemImage: a.icon).tag(a.rawValue) }
+                    ForEach(Appearance.allCases) { a in Label(L(a.label), systemImage: a.icon).tag(a.rawValue) }
                 }
                 .pickerStyle(.inline)
             } label: {
@@ -256,8 +278,24 @@ struct MainView: View {
             .menuIndicator(.hidden)
             .fixedSize()
             .help("Tampilan: terang, gelap, atau ikuti sistem")
+            Menu {
+                Picker("Bahasa", selection: Binding(get: { AppLanguage.current }, set: { AppLanguage.set($0); askRelaunch = true })) {
+                    Text("Ikuti sistem").tag("system")
+                    Text(verbatim: "Bahasa Indonesia").tag("id")
+                    Text(verbatim: "English").tag("en")
+                }
+                .pickerStyle(.inline)
+            } label: { Image(systemName: "globe") }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("Bahasa: Indonesia atau English")
         }
         .padding(12)
+        .alert("Bahasa berubah setelah Djie Cast dibuka ulang.", isPresented: $askRelaunch) {
+            Button("Buka ulang sekarang") { AppLanguage.relaunch() }
+            Button("Nanti", role: .cancel) {}
+        }
     }
 }
 
@@ -433,12 +471,12 @@ struct HomeView: View {
                         PlatformCard(icon: "smartphone", title: "Android", colors: Theme.android,
                                      description: "Mirror dan kontrol penuh HP Android dari Mac.",
                                      features: ["USB & Wi-Fi", "Kontrol mouse & keyboard", "Audio, rekam & file manager"],
-                                     status: android.readyCount > 0 ? "\(android.readyCount) perangkat siap" : nil,
+                                     status: android.readyCount > 0 ? String(localized: "\(android.readyCount) perangkat siap") : nil,
                                      live: !android.running.isEmpty) { page = .android }
                         PlatformCard(icon: "iphone", title: "iPhone & iPad", colors: Theme.ios,
                                      description: "Tampilkan layar iPhone/iPad lewat kabel atau wireless.",
                                      features: ["USB tanpa install", "iPhone Mirroring", "AirPlay"],
-                                     status: ios.devices.isEmpty ? nil : "\(ios.devices.count) perangkat siap",
+                                     status: ios.devices.isEmpty ? nil : String(localized: "\(ios.devices.count) perangkat siap"),
                                      live: !ios.mirroring.isEmpty) { page = .ios }
                     }
                     .fixedSize(horizontal: false, vertical: true)
@@ -530,8 +568,8 @@ struct HomeView: View {
                         .contentTransition(.numericText())
                         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: n)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(title).font(.callout.weight(.semibold))
-                        Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        Text(L(title)).font(.callout.weight(.semibold))
+                        Text(L(detail)).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -555,8 +593,8 @@ struct HomeView: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: 560, alignment: .leading)
                         HStack(spacing: 8) {
-                            Pill(text: "Versi \(Brand.version)", color: Brand.start)
-                            Pill(text: "Lisensi \(Brand.license)", color: .secondary)
+                            Pill(text: String(localized: "Versi \(Brand.version)"), color: Brand.start)
+                            Pill(text: String(localized: "Lisensi \(Brand.license)"), color: .secondary)
                             Pill(text: "Buatan Indonesia", color: Theme.live)
                         }
                         .padding(.top, 2)
@@ -573,7 +611,7 @@ struct HomeView: View {
                                 .background(Brand.gradient, in: Circle())
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("DIKEMBANGKAN OLEH").font(.system(size: 9.5, weight: .semibold)).kerning(0.8).foregroundStyle(.tertiary)
-                                Text(Brand.author).font(.headline)
+                                Text(L(Brand.author)).font(.headline)
                                 Text("Developer · Indonesia").font(.caption).foregroundStyle(.secondary)
                             }
                         }
@@ -601,11 +639,11 @@ struct HomeView: View {
                            ("Privasi", "100% lokal"), ("Lisensi", "\(Brand.license) · open source")].enumerated()), id: \.offset) { i, item in
                 if i > 0 { Divider().frame(height: 30) }
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(item.0.uppercased())
+                    Text(L(item.0).uppercased())
                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                         .kerning(1)
                         .foregroundStyle(.tertiary)
-                    Text(item.1).font(.callout.weight(.medium))
+                    Text(L(item.1)).font(.callout.weight(.medium))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, i == 0 ? 0 : 18)
@@ -640,14 +678,14 @@ struct PlatformCard: View {
                     }
                     .frame(height: 52, alignment: .top)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(title).font(.system(size: 20, weight: .bold))
-                        Text(description).font(.callout).foregroundStyle(.secondary)
+                        Text(L(title)).font(.system(size: 20, weight: .bold))
+                        Text(L(description)).font(.callout).foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     VStack(alignment: .leading, spacing: 7) {
                         ForEach(features, id: \.self) { f in
                             Label {
-                                Text(f).font(.callout)
+                                Text(L(f)).font(.callout)
                             } icon: {
                                 Image(systemName: "checkmark.circle.fill").foregroundStyle(colors[0])
                             }
@@ -687,8 +725,8 @@ struct InfoTile: View {
                     .frame(width: 34, height: 34)
                     .background(Brand.start.opacity(0.12), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(title).font(.callout.weight(.semibold))
-                    Text(detail).font(.caption).foregroundStyle(.secondary)
+                    Text(L(title)).font(.callout.weight(.semibold))
+                    Text(L(detail)).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
             }

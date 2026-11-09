@@ -55,7 +55,7 @@ struct EmulatorView: View {
 
                 if let d = model.download { downloadBar(d).transition(.move(edge: .top).combined(with: .opacity)) }
                 if let e = model.errorText {
-                    Label(e, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout)
+                    Label(L(e), systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout)
                 }
 
                 myEmulators.appearIn(0.05)
@@ -177,7 +177,7 @@ struct EmulatorView: View {
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
                 }
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(avd.displayName).font(.headline).lineLimit(1)
+                    Text(L(avd.displayName)).font(.headline).lineLimit(1)
                     Text("\(AndroidSDK.androidName(api: avd.api)) · \(avd.ramMB / 1024) GB RAM · \(avd.cores) core")
                         .font(.caption).foregroundStyle(.secondary)
                 }
@@ -218,7 +218,7 @@ struct EmulatorView: View {
                             GridRow {
                                 Text("Perangkat").foregroundStyle(.secondary)
                                 Picker("", selection: $profile) {
-                                    ForEach(DeviceProfile.all) { p in Label(p.title, systemImage: p.icon).tag(p) }
+                                    ForEach(DeviceProfile.all) { p in Label(L(p.title), systemImage: p.icon).tag(p) }
                                 }
                                 .pickerStyle(.segmented).labelsHidden().fixedSize()
                             }
@@ -248,7 +248,7 @@ struct EmulatorView: View {
                                 } catch { createError = error.localizedDescription }
                             } label: { Label("Buat emulator", systemImage: "plus") }
                             .buttonStyle(GradientButtonStyle(colors: Theme.emulator)).fixedSize()
-                            if let createError { Text(createError).font(.callout).foregroundStyle(.orange) }
+                            if let createError { Text(L(createError)).font(.callout).foregroundStyle(.orange) }
                         }
                     }
                 }
@@ -267,7 +267,7 @@ struct EmulatorView: View {
                     if let state = model.catalogState {
                         HStack(spacing: 10) {
                             if state.hasPrefix("Memuat") { ProgressView().controlSize(.small) }
-                            Text(state).font(.callout).foregroundStyle(.secondary)
+                            Text(L(state)).font(.callout).foregroundStyle(.secondary)
                             Spacer()
                             if !state.hasPrefix("Memuat") { Button("Coba lagi") { Task { await model.loadCatalog() } } }
                         }
@@ -329,7 +329,7 @@ struct EmulatorView: View {
         return HStack(spacing: 14) {
             IconBadge(icon: img.playStore ? "bag" : "square.stack.3d.up", colors: Theme.android, size: 34)
             VStack(alignment: .leading, spacing: 2) {
-                Text(img.title).font(.callout.weight(.semibold))
+                Text(L(img.title)).font(.callout.weight(.semibold))
                 Text("\(img.subtitle) · \(img.abi)").font(.caption).foregroundStyle(.secondary)
             }
             Spacer()

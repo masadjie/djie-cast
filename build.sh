@@ -3,9 +3,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VERSION="1.0"
-BUILD_NUMBER="3"
-DMG_NAME="DjieCast-1.0"
+VERSION="1.1"
+BUILD_NUMBER="4"
+DMG_NAME="DjieCast-1.1"
 
 APP="build/Djie Cast.app"
 
@@ -36,6 +36,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>CFBundleDevelopmentRegion</key><string>id</string>
+  <key>CFBundleLocalizations</key><array><string>id</string><string>en</string></array>
   <key>CFBundleName</key><string>Djie Cast</string>
   <key>CFBundleDisplayName</key><string>Djie Cast</string>
   <key>CFBundleIdentifier</key><string>local.djiecast.app</string>
@@ -64,6 +66,7 @@ cp vendor/scrcpy/scrcpy-server vendor/scrcpy/scrcpy.png vendor/scrcpy/disconnect
 cp vendor/tailscale/LICENSE "$APP/Contents/Resources/tailscale-LICENSE"
 
 cp Resources/qris.png "$APP/Contents/Resources/"
+python3 scripts/gen-strings.py "$APP/Contents/Resources"
 
 # iOS info & aplikasi: bundel libimobiledevice (LGPL) + ideviceinstaller (GPL) dari Homebrew bila ada.
 # Pasang sekali di Mac build: brew install libimobiledevice ideviceinstaller dylibbundler

@@ -52,7 +52,7 @@ struct SystemImageOption: Identifiable, Hashable {
     var relDir: String { path.split(separator: ";").joined(separator: "/") }
     var playStore: Bool { tag.contains("playstore") }
     var title: String { "\(AndroidSDK.androidName(api: api)) · API \(api)" }
-    var subtitle: String { (playStore ? "Google Play" : "Google APIs") + (tag.contains("ps16k") ? " · halaman 16 KB" : "") }
+    var subtitle: String { (playStore ? "Google Play" : "Google APIs") + (tag.contains("ps16k") ? " · " + L("halaman 16 KB") : "") }
 }
 
 struct EmulatorPackage: Hashable {
@@ -352,7 +352,7 @@ final class EmulatorModel: NSObject, ObservableObject, URLSessionDownloadDelegat
         guard let error, (error as NSError).code != NSURLErrorCancelled else { return }
         MainActor.assumeIsolated {
             self.task = nil; pending = nil; download = nil
-            errorText = "Unduhan gagal: \(error.localizedDescription)"
+            errorText = String(localized: "Unduhan gagal: \(error.localizedDescription)")
         }
     }
 
@@ -487,7 +487,7 @@ final class EmulatorModel: NSObject, ObservableObject, URLSessionDownloadDelegat
             processes[avd.name] = p
             running.insert(avd.name)
         } catch {
-            errorText = "Gagal menjalankan emulator: \(error.localizedDescription)"
+            errorText = String(localized: "Gagal menjalankan emulator: \(error.localizedDescription)")
         }
     }
 

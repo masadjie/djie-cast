@@ -203,7 +203,7 @@ extension IOSFilesModel: ICCameraDeviceDelegate {
                 if text.contains("unlock") || text.contains("lock") || text.contains("trust") {
                     self.state = .locked(name)
                 } else {
-                    self.state = .failed("Tidak bisa membuka \(name): \(error.localizedDescription)")
+                    self.state = .failed(String(localized: "Tidak bisa membuka \(name): \(error.localizedDescription)"))
                 }
                 self.scheduleRetry(device)
             } else {
@@ -323,7 +323,7 @@ struct IOSFilesView: View {
         case .failed(let msg):
             centered {
                 Image(systemName: "exclamationmark.triangle").font(.system(size: 40, weight: .light)).foregroundStyle(.orange)
-                Text(msg).font(.callout).multilineTextAlignment(.center).frame(maxWidth: 420)
+                Text(L(msg)).font(.callout).multilineTextAlignment(.center).frame(maxWidth: 420)
                 Button("Lihat panduan") { showGuide = true }.buttonStyle(SoftButtonStyle(tint: Theme.ios[1])).fixedSize()
             }
         }
@@ -384,7 +384,7 @@ struct IOSFilesView: View {
             HStack(spacing: 8) {
                 if let t = model.transfer {
                     if let p = model.progress { ProgressView(value: p).frame(width: 120) } else { ProgressView().controlSize(.small) }
-                    Text(t)
+                    Text(L(t))
                 } else {
                     Image(systemName: "iphone").foregroundStyle(.secondary)
                     Text("\(name) · \(model.items.count) item")

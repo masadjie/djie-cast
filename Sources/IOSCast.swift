@@ -278,7 +278,7 @@ struct IOSCastView: View {
                     RequirementBanner(guide: .ios) { showGuide = true }
                 }
                 if let infoError {
-                    Label(infoError, systemImage: "info.circle").font(.callout).foregroundStyle(.orange)
+                    Label(L(infoError), systemImage: "info.circle").font(.callout).foregroundStyle(.orange)
                 }
 
                 Panel {
@@ -418,7 +418,7 @@ extension IOSCastView {
                                 .frame(width: 34, height: 34)
                                 .background(Theme.ios[1].opacity(0.12), in: RoundedRectangle(cornerRadius: 9))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(p.name).font(.callout.weight(.semibold))
+                                Text(L(p.name)).font(.callout.weight(.semibold))
                                 Label("Wi-Fi", systemImage: "wifi").font(.caption).foregroundStyle(.secondary)
                             }
                             Spacer()
@@ -463,7 +463,7 @@ extension IOSCastView {
                                            "Letakkan iPhone dalam posisi diam, layar terkunci"].enumerated()), id: \.offset) { i, step in
                                 HStack(alignment: .firstTextBaseline, spacing: 10) {
                                     Text(String(format: "%02d", i + 1)).font(.caption.monospacedDigit().weight(.semibold)).foregroundStyle(Theme.ios[1])
-                                    Text(step).font(.callout).foregroundStyle(.secondary)
+                                    Text(L(step)).font(.callout).foregroundStyle(.secondary)
                                 }
                             }
                         }
@@ -471,7 +471,7 @@ extension IOSCastView {
                         ForEach(model.cameras, id: \.uniqueID) { cam in
                             HStack(spacing: 12) {
                                 Image(systemName: "iphone.rear.camera").foregroundStyle(Theme.ios[1])
-                                Text(cam.localizedName).font(.callout.weight(.medium))
+                                Text(L(cam.localizedName)).font(.callout.weight(.medium))
                                 if model.mirroring.contains(cam.uniqueID) { LiveBadge() }
                                 Spacer()
                                 if model.mirroring.contains(cam.uniqueID) {
@@ -513,7 +513,7 @@ struct IOSDeviceCard: View {
                         .buttonStyle(.borderless).help("Info perangkat & aplikasi")
                 }
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(name).font(.headline).lineLimit(1)
+                    Text(L(name)).font(.headline).lineLimit(1)
                     Text(isPad ? "iPad" : "iPhone").font(.caption).foregroundStyle(.secondary)
                 }
                 if running {
@@ -558,8 +558,8 @@ struct WirelessCard: View {
                     Pill(text: tag, color: colors[0])
                 }
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title).font(.system(size: 18, weight: .bold))
-                    Text(description).font(.callout).foregroundStyle(.secondary)
+                    Text(L(title)).font(.system(size: 18, weight: .bold))
+                    Text(L(description)).font(.callout).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 VStack(alignment: .leading, spacing: 8) {
@@ -570,12 +570,12 @@ struct WirelessCard: View {
                                 .frame(width: 18, height: 18)
                                 .background(colors[0].opacity(0.15), in: Circle())
                                 .foregroundStyle(colors[0])
-                            Text(s).font(.callout).fixedSize(horizontal: false, vertical: true)
+                            Text(L(s)).font(.callout).fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }
                 Spacer(minLength: 0)
-                Button(action: action) { Label(buttonTitle, systemImage: buttonIcon) }
+                Button(action: action) { Label(L(buttonTitle), systemImage: buttonIcon) }
                     .buttonStyle(GradientButtonStyle(colors: colors))
                     .disabled(!enabled)
             }

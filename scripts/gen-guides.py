@@ -130,6 +130,124 @@ GUIDES = [
     },
 ]
 
+GUIDES_EN = [
+    {
+        "slug": "scrcpy-mac", "shot": "android",
+        "title": "scrcpy for Mac without the terminal — free GUI",
+        "h1": "scrcpy on Mac, no terminal.",
+        "desc": "Use scrcpy on macOS with one click: Djie Cast bundles scrcpy and adb in a free Mac app. No Homebrew, no commands, with quality presets and device info.",
+        "lead": "scrcpy is the best way to show and control an Android phone from a computer, but on a Mac it usually means Homebrew and the terminal. Djie Cast ships scrcpy and adb inside the app, so you plug in a cable and press one button.",
+        "steps": [
+            ("Download Djie Cast", "Get the latest DMG from the GitHub releases page and drag Djie Cast to Applications. scrcpy and adb are already inside."),
+            ("Turn on USB Debugging", "On the phone: Settings → About phone → tap Build number 7 times, then open Developer options and turn on USB Debugging."),
+            ("Plug in and allow", "Connect the phone to the Mac and tap Allow on the “Allow USB debugging?” prompt."),
+            ("Press Start Cast", "The phone appears as a card on the Android page. One click and its window opens, ready for mouse and keyboard."),
+        ],
+        "body": [
+            ("Every scrcpy option, no flags to remember", "Quality, bitrate, fps, audio, screen off, stay awake, show touches, always on top, fullscreen and recording are switches and buttons. Power users can still add their own arguments."),
+            ("More than mirroring", "Device cards show the phone's specs, battery health and cycles, and free storage. There's also an Android file manager, an app list with uninstall, and a phone-camera mode."),
+        ],
+        "faq": [
+            ("Do I need to install scrcpy with Homebrew?", "No. Djie Cast bundles the official scrcpy and adb."),
+            ("Does it work over Wi-Fi?", "Yes. Phones with Wireless debugging on the same network show up automatically; pair once with the 6-digit code."),
+            ("Is Djie Cast free?", "Yes, free and open source under the MIT license."),
+        ],
+    },
+    {
+        "slug": "mirror-android-ke-mac", "shot": "android",
+        "title": "How to mirror an Android phone to a Mac (USB & Wi-Fi) — free",
+        "h1": "Mirror your Android phone to your Mac.",
+        "desc": "Show and control your Android phone's screen on a MacBook or iMac over USB or Wi-Fi with the free Djie Cast app. Click, type and record the screen.",
+        "lead": "With Djie Cast your Android screen appears on your Mac in seconds and you control it with the Mac's mouse and keyboard. Handy for presentations, app demos, live streaming, or just answering chats without picking up the phone.",
+        "steps": [
+            ("Install Djie Cast", "Download the DMG and drag it to Applications. First launch: right-click → Open."),
+            ("Turn on USB Debugging", "Settings → About phone → tap Build number 7 times → Developer options → USB Debugging. On Xiaomi also enable “USB debugging (Security settings)”."),
+            ("Plug in the cable", "Use a data cable and tap Allow on the phone. Tick “Always allow from this computer”."),
+            ("Start casting", "Open the Android page and press Start Cast. For Wi-Fi, turn on Wireless debugging and pick the phone under Phones on this network."),
+        ],
+        "body": [
+            ("Your Mac keyboard becomes a remote", "⌘B back, ⌘H home, ⌘S recent apps, ⌘↑ and ⌘↓ volume, ⌘R rotate, ⌘V paste text from the Mac to the phone. Right-click also works as back."),
+            ("For OBS and live streaming", "OBS, Streamlabs or Ecamm Live can capture the cast window with Window Capture. Turn on Borderless window for a clean picture."),
+        ],
+        "faq": [
+            ("My phone isn't detected — why?", "Usually USB Debugging is off, the cable is charge-only, or the permission prompt on the phone wasn't tapped. Djie Cast has a step-by-step guide on the Android page."),
+            ("Is the audio forwarded?", "Yes, on Android 11 and later the phone's audio plays on the Mac."),
+            ("Does the phone need root?", "No root and nothing to install on the phone."),
+        ],
+    },
+    {
+        "slug": "mirror-iphone-ke-mac", "shot": "ios",
+        "title": "How to show your iPhone screen on a Mac — USB, AirPlay, iPhone Mirroring",
+        "h1": "Your iPhone on your Mac, three ways.",
+        "desc": "Show your iPhone or iPad on a Mac over USB (with audio), AirPlay, or iPhone Mirroring for full control. Plus iPhone camera and photo gallery with Djie Cast.",
+        "lead": "Apple offers several routes to get an iPhone screen onto a Mac, each with its own limits. Djie Cast puts them on one page so you can pick the one that fits.",
+        "steps": [
+            ("Plug in a USB cable", "Connect the iPhone to the Mac with a data cable and unlock it."),
+            ("Tap “Trust”", "When the iPhone asks “Trust This Computer?”, tap Trust and enter your passcode."),
+            ("Allow Camera for Djie Cast", "macOS reads the iPhone screen as a video source, so allow Camera access when asked."),
+            ("Press Start Cast", "The iPhone's screen and audio appear in a Mac window that turns when the iPhone does."),
+        ],
+        "body": [
+            ("Want to control the iPhone from the Mac?", "Apple only allows control through iPhone Mirroring (macOS 15 and iOS 18 or later, same Apple ID). Djie Cast opens it from the iPhone page."),
+            ("iPhone camera and gallery", "With Continuity Camera, the iPhone's back camera shows on the Mac without a cable. Over the cable you can browse and download the photo and video gallery, with battery and storage info."),
+        ],
+        "faq": [
+            ("Do I need to install an app on the iPhone?", "No. Every route uses built-in iOS and macOS features."),
+            ("Why doesn't my iPhone show up?", "Check that the cable supports data, the iPhone is unlocked, and you tapped Trust."),
+            ("Does it work over Wi-Fi?", "Yes, with AirPlay (view only) or iPhone Mirroring (full control)."),
+        ],
+    },
+    {
+        "slug": "emulator-android-mac", "shot": "emulator",
+        "title": "Lightweight Android emulator for Mac without Android Studio — free",
+        "h1": "Android emulator on Mac, no Android Studio.",
+        "desc": "Create and run Android emulators on Apple Silicon Macs without Android Studio. Choose your Android version from Google's official servers and run it fast on the Mac GPU. Free with Djie Cast.",
+        "lead": "Android Studio is a big download if all you need is an emulator to try an app or game. Djie Cast downloads only the parts you choose, creates the emulator, and runs it with hardware acceleration.",
+        "steps": [
+            ("Open the Android Emulator page", "Under Components, download Android Emulator and one system image, for example Android 15 with Google Play."),
+            ("Set up the device", "Pick a phone, small phone or tablet, then choose RAM, cores and storage."),
+            ("Create the emulator", "Press Create emulator. Its configuration is stored in Android's standard location, so Android Studio can read it too."),
+            ("Run it", "Press Run. Once booted, the emulator gets a spec card and can be cast right away."),
+        ],
+        "body": [
+            ("Downloads you can trust", "Everything comes from Google's official repository, is checksum-verified, and shows its license before download. Downloads are cached so you don't fetch them twice."),
+            ("Made for Apple Silicon", "arm64 system images run natively on M-series chips, with the Mac GPU and Quick Boot, so they start in seconds."),
+        ],
+        "faq": [
+            ("Can I get the Play Store?", "Yes, choose a Google Play system image."),
+            ("How much space does it need?", "About 2 to 3 GB per Android version, plus the emulator storage you choose."),
+            ("Can I use it alongside Android Studio?", "Yes. Djie Cast uses the same SDK location, ~/Library/Android/sdk."),
+        ],
+    },
+    {
+        "slug": "remote-desktop-mac", "shot": "remote",
+        "title": "Free Mac to Mac remote desktop — an AnyDesk alternative",
+        "h1": "Mac to Mac remote desktop, free.",
+        "desc": "Control another Mac from anywhere with a 6-digit code. TLS-encrypted, no third-party server, and over the internet with built-in Tailscale. Free in Djie Cast.",
+        "lead": "Need to help family or reach your office Mac from home? Djie Cast has a Mac to Mac remote desktop that works like AnyDesk, without an account, without a relay server, and for free.",
+        "steps": [
+            ("On the Mac to be controlled", "Open Remote Desktop, turn on Allow this Mac to be accessed, and grant Screen Recording and Accessibility."),
+            ("Share the code", "A 6-digit code appears. You can change it any time."),
+            ("On the controlling Mac", "Macs on the same network appear automatically. Pick one, enter the code, and connect."),
+            ("Over the internet", "Sign in to Tailscale once on both Macs. After that, Macs on any network can connect."),
+        ],
+        "body": [
+            ("Secure from the start", "The connection is TLS-encrypted with a key derived from the access code, and wrong codes are rejected. A controlled Mac always shows a red panel with a Disconnect button."),
+            ("Feels local", "Video is H.264-encoded by the Mac's hardware. Mouse, right-click, scrolling, keyboard and ⌘ shortcuts go straight to the other Mac."),
+        ],
+        "faq": [
+            ("Can I connect from Windows?", "Not yet — Mac to Mac only for now."),
+            ("Does it go through a Djie Cast server?", "There is no Djie Cast server. On a local network the connection is direct; over the internet it uses your private Tailscale network."),
+            ("Why does it keep asking for permission?", "macOS asks for Screen Recording and Accessibility once. If it still says Not yet after allowing, use Reset permissions on the Remote Desktop page."),
+        ],
+    },
+]
+
+UI = {
+    "id": {"guides": "Panduan", "steps": "Langkah-langkahnya", "faq": "Pertanyaan umum", "more": "Panduan lain", "dl": "Download untuk Mac", "dlfree": "Download gratis", "all": "Lihat semua fitur", "alt": "dengan Djie Cast", "foot": "Djie Cast gratis dan open source (MIT)", "locale": "id_ID", "tool": "Djie Cast untuk macOS"},
+    "en": {"guides": "Guides", "steps": "Step by step", "faq": "Questions", "more": "More guides", "dl": "Download for Mac", "dlfree": "Free download", "all": "See all features", "alt": "with Djie Cast", "foot": "Djie Cast is free and open source (MIT)", "locale": "en_US", "tool": "Djie Cast for macOS"},
+}
+
 ALL = [g["slug"] for g in GUIDES]
 LINKS = {g["slug"]: g["h1"].rstrip(".") for g in GUIDES}
 
@@ -168,37 +286,45 @@ footer{border-top:1px solid var(--line);margin-top:80px;padding-block:28px;color
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Instrument+Sans:wght@400..700&family=Martian+Mono:wght@500;600&display=swap">'
 
 
-def page(g):
-    url = SITE + g["slug"] + "/"
+def page(g, lang="id", guides=None):
+    guides = guides or GUIDES
+    t = UI[lang]
+    base = "../" if lang == "id" else "../../"
+    url = SITE + ("" if lang == "id" else "en/") + g["slug"] + "/"
+    alt_id, alt_en = SITE + g["slug"] + "/", SITE + "en/" + g["slug"] + "/"
+    links = {x["slug"]: x["h1"].rstrip(".") for x in guides}
     e = html.escape
     howto = {"@context": "https://schema.org", "@type": "HowTo", "name": g["h1"].rstrip("."), "description": g["desc"],
-             "image": SITE + f"assets/{g['shot']}-light.jpg", "tool": [{"@type": "HowToTool", "name": "Djie Cast untuk macOS"}],
+             "image": SITE + f"assets/{g['shot']}-light.jpg", "tool": [{"@type": "HowToTool", "name": t["tool"]}],
              "step": [{"@type": "HowToStep", "position": i + 1, "name": n, "text": t} for i, (n, t) in enumerate(g["steps"])]}
     faq = {"@context": "https://schema.org", "@type": "FAQPage",
            "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in g["faq"]]}
     crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Djie Cast", "item": SITE},
+        {"@type": "ListItem", "position": 1, "name": "Djie Cast", "item": SITE if lang == "id" else SITE + "?lang=en"},
         {"@type": "ListItem", "position": 2, "name": g["h1"].rstrip("."), "item": url}]}
     ld = "".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in (howto, faq, crumbs))
     steps = "".join(f"<li><div><h3>{e(n)}</h3><p>{e(t)}</p></div></li>" for n, t in g["steps"])
     body = "".join(f"<div><h3>{e(h)}</h3><p>{e(t)}</p></div>" for h, t in g["body"])
     faqs = "".join(f"<dt>{e(q)}</dt><dd>{e(a)}</dd>" for q, a in g["faq"])
-    more = "".join(f'<a href="../{s}/">{e(LINKS[s])} →</a>' for s in ALL if s != g["slug"])
+    more = "".join(f'<a href="../{x}/">{e(links[x])} →</a>' for x in ALL if x != g["slug"])
     return f"""<!doctype html>
-<html lang="id">
+<html lang="{lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{e(g['title'])} | Djie Cast</title>
 <meta name="description" content="{e(g['desc'])}">
 <link rel="canonical" href="{url}">
+<link rel="alternate" hreflang="id" href="{alt_id}">
+<link rel="alternate" hreflang="en" href="{alt_en}">
+<link rel="alternate" hreflang="x-default" href="{alt_id}">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#4f45e6">
-<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
-<link rel="apple-touch-icon" href="../assets/icon.png">
+<link rel="icon" type="image/svg+xml" href="{base}assets/logo.svg">
+<link rel="apple-touch-icon" href="{base}assets/icon.png">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Djie Cast">
-<meta property="og:locale" content="id_ID">
+<meta property="og:locale" content="{t['locale']}">
 <meta property="og:title" content="{e(g['title'])}">
 <meta property="og:description" content="{e(g['desc'])}">
 <meta property="og:url" content="{url}">
@@ -209,22 +335,22 @@ def page(g):
 <style>{CSS}</style>
 </head>
 <body>
-<header><div class="wrap"><a class="logo" href="../"><img src="../assets/icon.png" alt="" width="28" height="28">Djie Cast</a><a class="btn" href="{DMG}">Download gratis</a></div></header>
+<header><div class="wrap"><a class="logo" href="{base}{'' if lang == 'id' else '?lang=en'}"><img src="{base}assets/icon.png" alt="" width="28" height="28">Djie Cast</a><a class="btn" href="{DMG}">{t['dlfree']}</a></div></header>
 <main class="wrap">
-<nav class="crumbs" aria-label="Breadcrumb"><a href="../">Djie Cast</a> / Panduan</nav>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="{base}">Djie Cast</a> / {t['guides']} · <a href="{alt_en if lang == 'id' else alt_id}">{'English' if lang == 'id' else 'Bahasa Indonesia'}</a></nav>
 <h1>{e(g['h1'])}</h1>
 <p class="lead">{e(g['lead'])}</p>
-<div class="cta"><a class="btn" href="{DMG}">Download untuk Mac</a><a class="btn line" href="../">Lihat semua fitur</a></div>
-<figure><picture><source media="(prefers-color-scheme: dark)" srcset="../assets/{g['shot']}-dark.jpg"><img src="../assets/{g['shot']}-light.jpg" alt="{e(g['h1'].rstrip('.'))} dengan Djie Cast" width="1600" height="1000" loading="eager"></picture></figure>
-<h2>Langkah-langkahnya</h2>
+<div class="cta"><a class="btn" href="{DMG}">{t['dl']}</a><a class="btn line" href="{base}{'' if lang == 'id' else '?lang=en'}">{t['all']}</a></div>
+<figure><picture><source media="(prefers-color-scheme: dark)" srcset="{base}assets/{g['shot']}-dark.jpg"><img src="{base}assets/{g['shot']}-light.jpg" alt="{e(g['h1'].rstrip('.'))} {t['alt']}" width="1600" height="1000" loading="eager"></picture></figure>
+<h2>{t['steps']}</h2>
 <ol class="steps">{steps}</ol>
 <div class="pair">{body}</div>
-<h2>Pertanyaan umum</h2>
+<h2>{t['faq']}</h2>
 <dl class="faq">{faqs}</dl>
-<h2>Panduan lain</h2>
+<h2>{t['more']}</h2>
 <div class="more">{more}</div>
 </main>
-<footer><div class="wrap">© 2026 Adjie Kurniawan · Djie Cast gratis dan open source (MIT) · <a href="https://github.com/masadjie/djie-cast">GitHub</a></div></footer>
+<footer><div class="wrap">© 2026 Adjie Kurniawan · {t['foot']} · <a href="https://github.com/masadjie/djie-cast">GitHub</a></div></footer>
 </body>
 </html>
 """
@@ -235,7 +361,11 @@ def main():
         d = ROOT / g["slug"]
         d.mkdir(exist_ok=True)
         (d / "index.html").write_text(page(g), encoding="utf-8")
-    urls = [("", "1.0", "weekly")] + [(g["slug"] + "/", "0.8", "monthly") for g in GUIDES]
+    for g in GUIDES_EN:
+        d = ROOT / "en" / g["slug"]
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "index.html").write_text(page(g, "en", GUIDES_EN), encoding="utf-8")
+    urls = [("", "1.0", "weekly")] + [(g["slug"] + "/", "0.8", "monthly") for g in GUIDES] + [("en/" + g["slug"] + "/", "0.7", "monthly") for g in GUIDES_EN]
     items = "\n".join(f"""  <url>
     <loc>{SITE}{u}</loc>
     <lastmod>{TODAY}</lastmod>
@@ -243,7 +373,7 @@ def main():
     <priority>{p}</priority>{'''
     <xhtml:link rel="alternate" hreflang="id" href="''' + SITE + '''"/>
     <xhtml:link rel="alternate" hreflang="en" href="''' + SITE + '''?lang=en"/>''' if not u else ''}
-    <image:image><image:loc>{SITE}assets/{'home' if not u else next(g['shot'] for g in GUIDES if g['slug'] + '/' == u)}-light.jpg</image:loc></image:image>
+    <image:image><image:loc>{SITE}assets/{'home' if not u else next(g['shot'] for g in GUIDES if u.endswith(g['slug'] + '/'))}-light.jpg</image:loc></image:image>
   </url>""" for u, p, f in urls)
     (ROOT / "sitemap.xml").write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">

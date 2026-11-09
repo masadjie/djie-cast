@@ -20,7 +20,7 @@ struct DonateView: View {
                                 HStack(spacing: 10) {
                                     IconBadge(icon: "chevron.left.forwardslash.chevron.right", colors: Brand.colors, size: 36)
                                     Text("Open Source").font(.title3.weight(.bold))
-                                    Pill(text: "Lisensi \(Brand.license)", color: Brand.start)
+                                    Pill(text: String(localized: "Lisensi \(Brand.license)"), color: Brand.start)
                                 }
                                 Text("Djie Cast bebas dipakai, dipelajari, diubah, dan dibagikan. Kode sumbernya terbuka untuk siapa saja yang ingin ikut mengembangkan.")
                                     .foregroundStyle(.secondary)
@@ -47,7 +47,7 @@ struct DonateView: View {
                                             .frame(width: 20, height: 20)
                                             .background(Theme.donate[0].opacity(0.15), in: Circle())
                                             .foregroundStyle(Theme.donate[1])
-                                        Text(s).fixedSize(horizontal: false, vertical: true)
+                                        Text(L(s)).fixedSize(horizontal: false, vertical: true)
                                     }
                                 }
                                 Text("Terima kasih banyak atas dukunganmu! 🙏")
@@ -127,7 +127,7 @@ struct ConfirmDonationPanel: View {
                         Text("Kirim bukti transfer ke \(Brand.author)").font(.caption).foregroundStyle(.secondary)
                     }
                 }
-                Text(Brand.donationPhoneDisplay)
+                Text(L(Brand.donationPhoneDisplay))
                     .font(.system(size: 26, weight: .bold))
                     .monospacedDigit()
                     .textSelection(.enabled)
