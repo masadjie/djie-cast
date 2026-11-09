@@ -1,4 +1,5 @@
 import SwiftUI
+import Network
 import AppKit
 
 // MARK: - Tool lookup (GUI apps don't inherit the shell PATH)
@@ -109,6 +110,10 @@ final class LauncherModel: ObservableObject {
     @Published var nearby: [NearbyDevice] = []
     @Published var nearbyBusy: String?          // ip being connected / paired
     @Published var nearbyError: [String: String] = [:]
+    /// adb said "No route to host" while the phone is on the network: macOS is blocking Local Network for Djie Cast.
+    @Published var localNetworkBlocked = false
+    @Published var wirelessMessage: String?
+    private var lanProbe: NWBrowser?
     @Published var selected: String?
     @Published var running: [String: Process] = [:]
     @Published var log: String = ""
@@ -153,9 +158,50 @@ final class LauncherModel: ObservableObject {
         busy = true
         let target = address.contains(":") ? address : address + ":5555"
         append("→ adb connect \(target)\n")
-        append(await Tools.run(adb, ["connect", target]))
+        let out = await Tools.run(adb, ["connect", target])
+        append(out)
+        interpretConnect(out, target: target)
         busy = false
         await refresh()
+    }
+
+    /// Turns adb's terse connect output into something a person can act on.
+    private func interpretConnect(_ out: String, target: String) {
+        if out.contains("connected to") && !out.contains("failed") {
+            localNetworkBlocked = false
+            wirelessMessage = nil
+        } else if out.localizedCaseInsensitiveContains("No route to host") {
+            localNetworkBlocked = true
+            wirelessMessage = nil
+        } else if out.localizedCaseInsensitiveContains("Connection refused") {
+            wirelessMessage = String(localized: "HP menolak koneksi di \(target). Colok USB sekali, pilih ••• → Aktifkan Wi-Fi, lalu coba lagi. HP yang di-restart perlu diaktifkan ulang.")
+        } else if out.localizedCaseInsensitiveContains("timed out") || out.localizedCaseInsensitiveContains("Operation timed out") {
+            wirelessMessage = String(localized: "HP tidak menjawab. Pastikan HP dan Mac di Wi-Fi yang sama, layar HP menyala, dan alamat IP-nya benar.")
+        } else {
+            wirelessMessage = out.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+    }
+
+    /// Asks macOS for Local Network access on Djie Cast's own behalf (adb runs as our child process,
+    /// so without this permission every Wi-Fi connect fails with "No route to host").
+    func primeLocalNetwork() {
+        guard lanProbe == nil, !Demo.enabled else { return }
+        let b = NWBrowser(for: .bonjour(type: "_adb-tls-connect._tcp", domain: nil), using: .tcp)
+        b.start(queue: .main)
+        lanProbe = b
+    }
+
+    /// After Local Network is allowed, adb's background server still carries the old denial: restart it.
+    func retryAfterLocalNetwork(_ address: String) async {
+        guard let adb = adbPath else { return }
+        _ = await Tools.run(adb, ["kill-server"])
+        _ = await Tools.run(adb, ["start-server"])
+        localNetworkBlocked = false
+        if !address.isEmpty { await connectWireless(address) }
+    }
+
+    func openLocalNetworkSettings() {
+        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork")!)
     }
 
     // MARK: Nearby (mDNS)
@@ -199,7 +245,8 @@ final class LauncherModel: ObservableObject {
         nearbyBusy = n.ip; nearbyError[n.ip] = nil
         let out = await Tools.run(adb, ["connect", "\(n.ip):\(port)"])
         append("→ adb connect \(n.ip):\(port)\n" + out)
-        if !out.contains("connected to") || out.contains("failed") {
+        if out.localizedCaseInsensitiveContains("No route to host") { localNetworkBlocked = true }
+        else if !out.contains("connected to") || out.contains("failed") {
             nearbyError[n.ip] = "Belum dipasangkan. Di HP buka Wireless debugging → Pasangkan perangkat dengan kode pairing."
         }
         nearbyBusy = nil
@@ -228,13 +275,24 @@ final class LauncherModel: ObservableObject {
     func enableTcpip(_ serial: String) async {
         guard let adb = adbPath else { return }
         busy = true
+        // read the Wi-Fi IP first: after `tcpip` the USB link restarts for a moment
+        let ipOut = await Tools.run(adb, ["-s", serial, "shell", "ip", "route"])
+        let ip = ipOut.split(separator: " ").drop(while: { $0 != "src" }).dropFirst().first.map(String.init)
         append("→ adb -s \(serial) tcpip 5555\n")
         append(await Tools.run(adb, ["-s", serial, "tcpip", "5555"]))
-        let ipOut = await Tools.run(adb, ["-s", serial, "shell", "ip", "route"])
-        if let ip = ipOut.split(separator: " ").drop(while: { $0 != "src" }).dropFirst().first {
-            append("ℹ️ IP HP: \(ip) — cabut kabel lalu klik Connect.\n")
-        }
         busy = false
+        guard let ip else {
+            wirelessMessage = String(localized: "HP belum tersambung ke Wi-Fi. Sambungkan HP ke Wi-Fi yang sama dengan Mac, lalu coba lagi.")
+            return
+        }
+        UserDefaults.standard.set(ip, forKey: "wirelessIP")
+        append("ℹ️ IP HP: \(ip)\n")
+        // connect straight away so the cable can be unplugged
+        try? await Task.sleep(for: .seconds(2))
+        await connectWireless(ip)
+        if devices.contains(where: { $0.serial == ip + ":5555" && $0.state == "device" }) {
+            wirelessMessage = String(localized: "Wi-Fi aktif di \(ip). Kabel USB boleh dicabut.")
+        }
     }
 
     func disconnect(_ serial: String) async {
@@ -620,12 +678,35 @@ struct AndroidCastView: View {
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
 
+                if model.localNetworkBlocked {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("macOS memblokir akses jaringan lokal untuk Djie Cast", systemImage: "exclamationmark.shield.fill")
+                            .font(.callout.weight(.semibold)).foregroundStyle(.orange)
+                        Text("HP-nya terjangkau, tapi macOS belum mengizinkan Djie Cast memakai jaringan lokal. Buka Pengaturan Sistem → Privasi & Keamanan → Jaringan Lokal, nyalakan Djie Cast, lalu tekan Coba lagi.")
+                            .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                        HStack(spacing: 8) {
+                            Button { model.openLocalNetworkSettings() } label: { Label("Buka pengaturan Jaringan Lokal", systemImage: "gearshape.fill") }
+                                .buttonStyle(GradientButtonStyle(colors: [.orange, .orange])).fixedSize()
+                            Button { Task { await model.retryAfterLocalNetwork(wirelessIP) } } label: { Label("Coba lagi", systemImage: "arrow.clockwise") }
+                                .buttonStyle(SoftButtonStyle(tint: .orange)).fixedSize()
+                        }
+                    }
+                    .padding(14)
+                    .background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.orange.opacity(0.3)))
+                } else if let msg = model.wirelessMessage {
+                    Label(L(msg), systemImage: "info.circle").font(.callout).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 if model.nearby.isEmpty {
                     HStack(spacing: 10) {
                         ProgressView().controlSize(.small)
                         Text("Mencari HP di jaringan…").font(.callout).foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
+                    Text("Android 10 ke bawah tidak punya Wireless debugging: colok USB sekali, pilih ••• → Aktifkan Wi-Fi di kartu HP, dan Djie Cast langsung menyambungkannya lewat Wi-Fi.")
+                        .font(.caption).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
                 } else {
                     VStack(spacing: 8) {
                         ForEach(model.nearby) { n in nearbyRow(n) }
@@ -659,6 +740,7 @@ struct AndroidCastView: View {
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: showWifiHelp)
         .task {
+            model.primeLocalNetwork()
             while !Task.isCancelled {
                 await model.scanNearby()
                 try? await Task.sleep(for: .seconds(3))

@@ -543,5 +543,13 @@
   "2019 ke atas": "2019 and later",
   "2018 ke atas": "2018 and later",
   "Semua (2022 ke atas)": "All (2022 and later)",
-  "Info & aplikasi iPhone butuh Mac Apple Silicon (M1 ke atas). iPhone Mirroring butuh macOS 15 Sequoia. Kamera iPhone butuh macOS 14 dan iOS 17. Fitur lain berjalan di Mac Intel maupun Apple Silicon.": "iPhone info & apps need an Apple Silicon Mac (M1 or later). iPhone Mirroring needs macOS 15 Sequoia. iPhone camera needs macOS 14 and iOS 17. Everything else runs on both Intel and Apple Silicon Macs."
+  "Info & aplikasi iPhone butuh Mac Apple Silicon (M1 ke atas). iPhone Mirroring butuh macOS 15 Sequoia. Kamera iPhone butuh macOS 14 dan iOS 17. Fitur lain berjalan di Mac Intel maupun Apple Silicon.": "iPhone info & apps need an Apple Silicon Mac (M1 or later). iPhone Mirroring needs macOS 15 Sequoia. iPhone camera needs macOS 14 and iOS 17. Everything else runs on both Intel and Apple Silicon Macs.",
+  "HP menolak koneksi di %@. Colok USB sekali, pilih ••• → Aktifkan Wi-Fi, lalu coba lagi. HP yang di-restart perlu diaktifkan ulang.": "The phone refused the connection at %@. Plug in USB once, choose ••• → Enable Wi-Fi, then try again. A restarted phone needs this again.",
+  "HP tidak menjawab. Pastikan HP dan Mac di Wi-Fi yang sama, layar HP menyala, dan alamat IP-nya benar.": "The phone isn't answering. Make sure the phone and Mac are on the same Wi-Fi, the phone's screen is on, and the IP address is right.",
+  "HP belum tersambung ke Wi-Fi. Sambungkan HP ke Wi-Fi yang sama dengan Mac, lalu coba lagi.": "The phone isn't on Wi-Fi. Connect it to the same Wi-Fi as the Mac and try again.",
+  "Wi-Fi aktif di %@. Kabel USB boleh dicabut.": "Wi-Fi is on at %@. You can unplug the USB cable.",
+  "macOS memblokir akses jaringan lokal untuk Djie Cast": "macOS is blocking local network access for Djie Cast",
+  "HP-nya terjangkau, tapi macOS belum mengizinkan Djie Cast memakai jaringan lokal. Buka Pengaturan Sistem → Privasi & Keamanan → Jaringan Lokal, nyalakan Djie Cast, lalu tekan Coba lagi.": "The phone is reachable, but macOS hasn't allowed Djie Cast to use the local network. Open System Settings → Privacy & Security → Local Network, turn on Djie Cast, then press Try again.",
+  "Buka pengaturan Jaringan Lokal": "Open Local Network settings",
+  "Android 10 ke bawah tidak punya Wireless debugging: colok USB sekali, pilih ••• → Aktifkan Wi-Fi di kartu HP, dan Djie Cast langsung menyambungkannya lewat Wi-Fi.": "Android 10 and older have no Wireless debugging: plug in USB once, choose ••• → Enable Wi-Fi on the phone's card, and Djie Cast connects it over Wi-Fi right away."
 }
