@@ -1,80 +1,109 @@
 <p align="center">
-  <img src="docs/icon.png" width="128" alt="Djie Cast">
+  <img src="docs/icon.png" width="112" alt="">
 </p>
 
 <h1 align="center">Djie Cast</h1>
-<p align="center"><b>Cast Android & iOS ke Mac — cepat, jernih, tanpa ribet.</b><br>
-Aplikasi macOS gratis & open source karya <b>Adjie Kurniawan</b>, dibangun di atas <a href="https://github.com/Genymobile/scrcpy">scrcpy</a>.</p>
 
 <p align="center">
-  🌐 <a href="https://masadjie.github.io/djie-cast/"><b>masadjie.github.io/djie-cast</b></a>
+  Layar HP-mu, langsung di Mac.<br>
+  Mirror dan kendalikan Android, tampilkan iPhone, kelola file, jalankan emulator, dan remote Mac lain.<br>
+  Gratis, open source, tanpa terminal.
 </p>
 
 <p align="center">
-  <img alt="Versi" src="https://img.shields.io/badge/versi-1.0-6366f1">
-  <img alt="macOS" src="https://img.shields.io/badge/macOS-14%2B-black">
-  <img alt="Lisensi" src="https://img.shields.io/badge/lisensi-MIT-green">
+  <a href="https://github.com/masadjie/djie-cast/releases/latest"><b>Download untuk Mac</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://masadjie.github.io/djie-cast/">Website</a>
+  &nbsp;·&nbsp;
+  <a href="https://masadjie.github.io/djie-cast/#video">Video 30 detik</a>
 </p>
 
----
+<p align="center">
+  <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-111?style=flat-square">
+  <img alt="Apple Silicon & Intel" src="https://img.shields.io/badge/Apple%20Silicon%20%26%20Intel-universal-111?style=flat-square">
+  <img alt="Lisensi MIT" src="https://img.shields.io/badge/lisensi-MIT-4f45e6?style=flat-square">
+</p>
 
-## ✨ Fitur
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/home-dark.jpg">
+  <img src="docs/assets/home-light.jpg" alt="Beranda Djie Cast: jumlah perangkat yang terhubung dan pintasan cast Android & iPhone">
+</picture>
 
-### Android
-- **Mirror + kontrol penuh** — klik, scroll, drag & ketik langsung dari Mac, tanpa menyentuh HP.
-- **USB atau Wi-Fi** — aktifkan mode wireless dengan satu klik.
-- **Info perangkat** — spesifikasi lengkap, baterai, penyimpanan, RAM, layar, plus tangkapan layar terkini; Restart / Matikan HP.
-- **Aplikasi terinstal** — cari, uninstall, dan pasang APK.
-- **Panduan bawaan** — langkah mengaktifkan USB Debugging langsung di aplikasi.
-- **Kontrol cepat** — Back, Home, Recent, volume, power & screenshot.
-- **Rotasi layar** — paksa HP ke portrait / landscape / otomatis, atau putar tampilan jendela (⌘R, ⌘← / ⌘→).
-- **File Android** — jelajahi, unduh, unggah (drag & drop), ganti nama & hapus file di HP.
-- **Preset kualitas** — Hemat / Seimbang / Maksimal / Kustom, plus audio, rekam layar, selalu di atas, dll.
-- **Tanpa install apa pun** — scrcpy & adb sudah dibundel di dalam app.
+Djie Cast berawal dari kebiasaan menjalankan `scrcpy` lewat terminal setiap kali mau menampilkan HP di Mac. Sekarang cukup colok kabel dan klik satu tombol. Semuanya berjalan di Mac-mu sendiri: tidak ada akun, server, atau iklan.
 
-### 📱 Emulator Android
-- **Pilih sendiri bahan yang diunduh**: mesin emulator dan versi Android (Google Play / Google APIs), langsung dari server resmi Google, dicek SHA-1.
-- **Buat emulator** (ponsel, ponsel kecil, tablet) dengan RAM, core, dan penyimpanan sesuai kebutuhan.
-- **Jalan cepat**: `-gpu host -accel on -cores N -no-boot-anim -qemu -m RAM`, Quick Boot, atau tanpa jendela.
-- Memakai lokasi SDK yang sama dengan Android Studio (`~/Library/Android/sdk`).
+## Android
 
-### 🖥️ Remote Desktop (Mac ke Mac)
-- **Kendalikan Mac lain** seperti AnyDesk: lihat layarnya, gerakkan mouse, ketik, scroll, dan pakai shortcut ⌘.
-- **Kode akses 6 angka** + koneksi **terenkripsi TLS**. Kode salah langsung ditolak.
-- **Mac terdeteksi otomatis** di jaringan yang sama, atau ketik alamat IP-nya.
-- **Lewat internet dengan Tailscale bawaan**: tidak perlu pasang app lain, cukup masuk akun Tailscale (gratis) yang sama di kedua Mac.
-- Mac yang dikontrol menampilkan panel merah **"Mac ini sedang dikontrol"** dengan tombol Putuskan.
-- Butuh izin **Perekaman Layar** dan **Aksesibilitas** di Mac yang dikontrol (ada panduannya di app).
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/android-dark.jpg">
+  <img src="docs/assets/android-light.jpg" alt="Halaman Android: kartu perangkat dengan spesifikasi, baterai, penyimpanan dan tombol kontrol">
+</picture>
 
-### 🎥 Untuk live streaming
-Jendela cast bisa ditangkap software live di Mac seperti **OBS Studio**, **Streamlabs**, **Ecamm Live**, dan **TikTok LIVE Studio** (bila versi Mac tersedia) lewat *Window Capture*. Nyalakan "Tanpa bingkai jendela" untuk gambar yang bersih. HP tetap bisa dikontrol dari Mac selama siaran.
+Setiap HP yang tersambung muncul sebagai kartu lengkap: layar terkini, versi Android, chipset, RAM, kondisi dan siklus baterai, sisa penyimpanan. Tekan **Mulai Cast**, jendela HP terbuka di Mac dan langsung bisa diklik, di-scroll, dan diketik.
 
-### iPhone & iPad
-- **Info iPhone** — model, iOS, serial, IMEI, kesehatan & siklus baterai, penyimpanan; Restart / Matikan iPhone.
-- **Aplikasi iPhone** — daftar aplikasi terinstal dan uninstall (lewat libimobiledevice, sudah dibundel untuk Apple Silicon).
-- **File iPhone** — lihat galeri foto & video iPhone/iPad, unduh ke Mac (satu, beberapa, atau semua).
-- **Panduan Trust** — langkah “Percayai Komputer Ini” langsung di aplikasi.
-- **USB** — tampilkan layar + audio langsung di Mac (hanya lihat). Jendela mengikuti rotasi iPhone otomatis, bisa diputar manual (⌘← / ⌘→).
-- **iPhone Mirroring** — kontrol penuh lewat fitur resmi Apple (macOS Sequoia + iOS 18).
-- **AirPlay** — mirror wireless.
+- Lewat kabel USB atau Wi-Fi.
+- Tombol Back, Home, Recent, volume, power, screenshot, dan rotasi.
+- **Kamera HP**: tampilkan kamera depan atau belakang di Mac (Android 12+).
+- Daftar aplikasi terinstal, uninstall, dan pasang APK dari Mac.
+- Preset kualitas Hemat 1024p, Seimbang 1600p, Maksimal hingga 120 fps. Rekam layar ke folder Movies.
 
-> Apple tidak mengizinkan aplikasi pihak ketiga mengontrol iPhone lewat USB/AirPlay, jadi kontrol iOS hanya tersedia lewat iPhone Mirroring.
+Keyboard Mac jadi remote HP: `⌘B` kembali, `⌘H` home, `⌘S` aplikasi terbaru, `⌘↑/↓` volume, `⌘R` putar layar, `⌘V` tempel teks.
 
-## 📥 Install
+## iPhone & iPad
 
-1. Unduh file DMG terbaru dari halaman [**Releases**](https://github.com/masadjie/djie-cast/releases).
-2. Seret **Djie Cast** ke folder **Applications**.
-3. Pembukaan pertama: **klik kanan → Open → Open** (app belum dinotarisasi Apple).
-   Jika muncul pesan *"damaged"*:
-   ```bash
-   xattr -dr com.apple.quarantine "/Applications/Djie Cast.app"
-   ```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/ios-dark.jpg">
+  <img src="docs/assets/ios-light.jpg" alt="Halaman iPhone & iPad di Djie Cast">
+</picture>
 
-**Syarat:** macOS 14 (Sonoma) atau lebih baru — Apple Silicon & Intel.
+| Jalur | Bisa apa | Butuh |
+|---|---|---|
+| USB | Lihat layar + audio | Kabel, ketuk "Percayai" di iPhone |
+| iPhone Mirroring | Kontrol penuh | macOS 15 + iOS 18, Apple ID sama |
+| AirPlay | Lihat layar | Wi-Fi sama, AirPlay Receiver aktif |
+| Continuity Camera | Kamera iPhone di Mac | macOS 14 + iOS 17, Apple ID sama |
 
-## 🛠 Build dari source
+Apple hanya mengizinkan kontrol iPhone lewat iPhone Mirroring, jadi Djie Cast membukakannya dari halaman yang sama. Info iPhone (model, iOS, kesehatan dan siklus baterai, penyimpanan) dan daftar aplikasi terbaca lewat kabel.
 
-Butuh Xcode Command Line Tools (`xcode-select --install`).
+## File
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/files-dark.jpg">
+  <img src="docs/assets/files-light.jpg" alt="File manager Android di Djie Cast">
+</picture>
+
+Penyimpanan HP Android dibuka seperti Finder: unduh, seret file dari Mac untuk mengunggah, buat folder, ganti nama, hapus. Untuk iPhone, galeri foto dan video tampil lengkap dengan thumbnail dan bisa diunduh sekaligus.
+
+## Emulator Android
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/emulator-dark.jpg">
+  <img src="docs/assets/emulator-light.jpg" alt="Halaman Emulator Android di Djie Cast">
+</picture>
+
+Tanpa Android Studio. Pilih sendiri versi Android yang mau diunduh (langsung dari server resmi Google, dicek checksum-nya), buat emulator ponsel atau tablet, lalu jalankan dengan GPU Mac. Emulator yang sedang berjalan tampil dengan kartu spesifikasi yang sama seperti HP sungguhan.
+
+## Remote Desktop
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/remote-dark.jpg">
+  <img src="docs/assets/remote-light.jpg" alt="Halaman Remote Desktop di Djie Cast">
+</picture>
+
+Kendalikan Mac lain dengan kode 6 angka. Koneksinya terenkripsi TLS, videonya H.264 dari hardware Mac. Mac di jaringan yang sama langsung terdeteksi. Untuk lewat internet, Tailscale sudah tertanam: masuk sekali, sesi tersimpan. Mac yang sedang dikontrol selalu menampilkan panel merah dengan tombol Putuskan.
+
+## Install
+
+1. Unduh DMG dari [Releases](https://github.com/masadjie/djie-cast/releases/latest).
+2. Seret **Djie Cast** ke **Applications**.
+3. Pembukaan pertama: klik kanan → **Open** → **Open** (app belum dinotarisasi Apple). Kalau muncul pesan *rusak*:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Djie Cast.app"
+```
+
+macOS 14 Sonoma atau lebih baru, Apple Silicon dan Intel. scrcpy dan adb sudah ada di dalam app.
+
+## Build dari source
 
 ```bash
 git clone https://github.com/masadjie/djie-cast.git
@@ -82,40 +111,22 @@ cd djie-cast
 ./build.sh
 ```
 
-Hasil: `build/Djie Cast.app` dan file DMG di folder `build/`.
-Saat build pertama, `scripts/fetch-scrcpy.sh` otomatis mengunduh scrcpy resmi (dicek SHA-256) dan `scripts/build-tailscale.sh` membangun libtailscale (butuh Go: `brew install go`).
+Butuh Xcode Command Line Tools dan Go (`brew install go`) untuk membangun libtailscale. Build pertama mengunduh scrcpy resmi dan mengecek SHA-256-nya. Hasilnya ada di `build/`.
 
-### Struktur
-| File | Isi |
-|---|---|
-| `Sources/DjieCastApp.swift` | App, splash, sidebar, Beranda |
-| `Sources/AndroidCast.swift` | Cast Android, kontrol, pengaturan |
-| `Sources/AndroidFiles.swift` | File manager Android |
-| `Sources/IOSCast.swift` | Cast iPhone/iPad |
-| `Sources/Remote*.swift` | Remote Desktop: protokol, host, viewer, halaman |
-| `Sources/Tailnet.swift` | Tailscale bawaan (libtailscale) |
-| `Sources/Emulator*.swift` | Emulator Android: katalog, unduh, AVD, jalankan |
-| `Sources/IOSFiles.swift` | File iPhone (ImageCaptureCore) |
-| `Sources/Donate.swift` | Halaman donasi |
-| `Sources/About.swift` | Halaman Tentang |
-| `Sources/UI.swift` | Komponen UI bersama |
-| `make_icon.swift` | Generator ikon app |
+## Dibangun di atas
 
-## 🤝 Kontribusi
+- [scrcpy](https://github.com/Genymobile/scrcpy) dan adb untuk Android (Apache 2.0)
+- [libimobiledevice](https://libimobiledevice.org) untuk info dan aplikasi iPhone (LGPL)
+- [libtailscale](https://github.com/tailscale/libtailscale) untuk Remote Desktop lewat internet (BSD)
 
-Pull request, laporan bug, dan ide fitur sangat diterima! Buka *Issue* atau kirim *PR*.
+## Dukung proyek ini
 
-## ❤️ Donasi
+Djie Cast gratis. Kalau membantu pekerjaanmu, traktir kopi lewat QRIS di bawah, lalu kabari ke WhatsApp **0812-6949-4591**.
 
-Djie Cast gratis selamanya. Kalau aplikasi ini membantu, kamu bisa traktir kopi lewat QRIS:
+<p align="center"><img src="Resources/qris.png" width="240" alt="QRIS donasi Djie Cast"></p>
 
-<p align="center"><img src="Resources/qris.png" width="280" alt="QRIS Donasi Djie Cast"></p>
+Bug, ide, dan pull request sangat diterima lewat [Issues](https://github.com/masadjie/djie-cast/issues).
 
-Scan dengan aplikasi bank / e-wallet apa pun yang mendukung QRIS (GoPay, OVO, DANA, ShopeePay, m-banking, dll).
+## Lisensi
 
-Setelah donasi, mohon konfirmasi ke **0812-6949-4591** (WhatsApp). Terima kasih! 🙏
-
-## 📄 Lisensi
-
-[MIT](LICENSE) © 2026 **Adjie Kurniawan**.
-scrcpy & adb dilisensikan di bawah Apache License 2.0.
+[MIT](LICENSE) © 2026 Adjie Kurniawan.
