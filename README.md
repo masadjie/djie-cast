@@ -5,6 +5,7 @@
 <h1 align="center">Djie Cast</h1>
 
 <p align="center">
+  <b>Android &amp; iPhone Mirroring untuk Mac</b><br>
   Layar HP-mu, langsung di Mac.<br>
   Mirror dan kendalikan Android, tampilkan iPhone, kelola file, jalankan emulator, dan remote Mac lain.<br>
   Gratis, open source, tanpa terminal.

@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://masadjie.github.io/djie-cast/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="id" href="https://masadjie.github.io/djie-cast/"/>
@@ -11,70 +11,70 @@
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/scrcpy-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/android-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/mirror-android-ke-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/android-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/mirror-iphone-ke-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/ios-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/emulator-android-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/emulator-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/remote-desktop-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/remote-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/en/scrcpy-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/android-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/en/mirror-android-ke-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/android-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/en/mirror-iphone-ke-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/ios-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/en/emulator-android-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/emulator-light.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://masadjie.github.io/djie-cast/en/remote-desktop-mac/</loc>
-    <lastmod>2026-11-09</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://masadjie.github.io/djie-cast/assets/remote-light.jpg</image:loc></image:image>

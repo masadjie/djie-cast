@@ -5,6 +5,7 @@
 <h1 align="center">Djie Cast</h1>
 
 <p align="center">
+  <b>Android &amp; iPhone Mirroring for Mac</b><br>
   Your phone's screen, right on your Mac.<br>
   Mirror and control Android, show your iPhone, manage files, run emulators, and control another Mac.<br>
   Free, open source, no terminal.

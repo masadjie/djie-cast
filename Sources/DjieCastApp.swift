@@ -3,6 +3,8 @@ import AppKit
 
 enum Brand {
     static let name = "Djie Cast"
+    /// Descriptor that always travels with the name: "Djie Cast — Android & iPhone Mirroring".
+    static let tagline = "Android & iPhone Mirroring"
     static var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0 Beta"
     }
@@ -395,6 +397,12 @@ struct SplashView: View {
 
                 wordmark(t).padding(.top, 8)
 
+                Text(verbatim: Brand.tagline.uppercased())
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .kerning(2.2)
+                    .foregroundStyle(Brand.end)
+                    .padding(.top, 10)
+                    .opacity(ease((t - 0.75) / 0.4))
                 Text("Layar HP-mu, langsung di Mac.")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(.white.opacity(0.62))

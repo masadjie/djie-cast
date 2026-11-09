@@ -335,7 +335,7 @@ def page(g, lang="id", guides=None):
 <style>{CSS}</style>
 </head>
 <body>
-<header><div class="wrap"><a class="logo" href="{base}{'' if lang == 'id' else '?lang=en'}"><img src="{base}assets/icon.png" alt="" width="28" height="28">Djie Cast</a><a class="btn" href="{DMG}">{t['dlfree']}</a></div></header>
+<header><div class="wrap"><a class="logo" href="{base}{'' if lang == 'id' else '?lang=en'}"><img src="{base}assets/icon.png" alt="" width="28" height="28">Djie Cast<small style="font:500 11px/1 Instrument Sans,sans-serif;color:var(--ink-3);margin-left:4px">Android &amp; iPhone Mirroring</small></a><a class="btn" href="{DMG}">{t['dlfree']}</a></div></header>
 <main class="wrap">
 <nav class="crumbs" aria-label="Breadcrumb"><a href="{base}">Djie Cast</a> / {t['guides']} · <a href="{alt_en if lang == 'id' else alt_id}">{'English' if lang == 'id' else 'Bahasa Indonesia'}</a></nav>
 <h1>{e(g['h1'])}</h1>

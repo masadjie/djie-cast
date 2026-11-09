@@ -72,7 +72,7 @@ struct AboutView: View {
                 .frame(width: 112, height: 112)
                 .shadow(color: Brand.start.opacity(0.35), radius: 16, y: 8)
             Text(L(Brand.name)).font(.system(size: 34, weight: .heavy))
-            Text("Cast Android & iOS ke Mac").font(.title3).foregroundStyle(.secondary)
+            Text(verbatim: Brand.tagline).font(.title3).foregroundStyle(.secondary)
             HStack(spacing: 8) {
                 Pill(text: "v\(Brand.version)", color: Brand.start)
                 Pill(text: "Open Source", icon: "chevron.left.forwardslash.chevron.right", color: Theme.android[1])
