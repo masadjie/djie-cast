@@ -35,6 +35,19 @@ enum IMD {
         return list
     }
 
+    /// iPhones reachable over Wi-Fi (paired before, with "Show this iPhone when on Wi-Fi" on in Finder).
+    static func networkDevices() async -> [(udid: String, name: String)] {
+        let usb = Set((await run("idevice_id", ["-l"])).split(whereSeparator: \.isNewline).map(String.init))
+        let ids = (await run("idevice_id", ["-n"])).split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty && !usb.contains($0) }
+        var list: [(String, String)] = []
+        for id in ids {
+            let n = (await run("ideviceinfo", ["-n", "-u", id, "-k", "DeviceName"])).trimmingCharacters(in: .whitespacesAndNewlines)
+            list.append((id, n.isEmpty || n.contains("ERROR") ? "iPhone" : n))
+        }
+        return list
+    }
+
     static let models: [String: String] = [
         "iPhone12,1": "iPhone 11", "iPhone12,3": "iPhone 11 Pro", "iPhone12,5": "iPhone 11 Pro Max", "iPhone12,8": "iPhone SE (2nd gen)",
         "iPhone13,1": "iPhone 12 mini", "iPhone13,2": "iPhone 12", "iPhone13,3": "iPhone 12 Pro", "iPhone13,4": "iPhone 12 Pro Max",
@@ -49,15 +62,18 @@ enum IMD {
 
 struct IOSBackend: DeviceBackend {
     let udid: String
+    /// Talk to the device over Wi-Fi instead of USB.
+    var network = false
+    private var target: [String] { network ? ["-n", "-u", udid] : ["-u", udid] }
     var id: String { udid }
     let supportsApps = true, supportsPower = true
     var accent: [Color] { Theme.ios }
 
     func detail() async -> DeviceDetail {
-        async let basicP = IMD.plist("ideviceinfo", ["-u", udid, "-x"])
-        async let batP = IMD.plist("ideviceinfo", ["-u", udid, "-q", "com.apple.mobile.battery", "-x"])
-        async let diskP = IMD.plist("ideviceinfo", ["-u", udid, "-q", "com.apple.disk_usage", "-x"])
-        async let gaugeP = IMD.plist("idevicediagnostics", ["-u", udid, "ioregentry", "AppleSmartBattery"])
+        async let basicP = IMD.plist("ideviceinfo", target + ["-x"])
+        async let batP = IMD.plist("ideviceinfo", target + ["-q", "com.apple.mobile.battery", "-x"])
+        async let diskP = IMD.plist("ideviceinfo", target + ["-q", "com.apple.disk_usage", "-x"])
+        async let gaugeP = IMD.plist("idevicediagnostics", target + ["ioregentry", "AppleSmartBattery"])
         let basic = (await basicP as? [String: Any]) ?? [:]
         let bat = (await batP as? [String: Any]) ?? [:]
         let disk = (await diskP as? [String: Any]) ?? [:]
@@ -114,21 +130,21 @@ struct IOSBackend: DeviceBackend {
             SpecRow(label: "Warna", value: s("DeviceColor").map { $0 == "1" ? "Hitam" : $0 == "2" ? "Putih" : $0 } ?? "-"),
             SpecRow(label: "Kode wilayah", value: s("RegionInfo") ?? "-"),
             SpecRow(label: "Zona waktu", value: s("TimeZone") ?? "-"),
-            SpecRow(label: "Koneksi", value: "USB"),
+            SpecRow(label: "Koneksi", value: network ? "Wi-Fi" : "USB"),
         ]
         return d
     }
 
     /// iOS has no public screenshot API over USB; grab one frame from the screen-capture device instead.
     func screenshot() async -> NSImage? {
-        let name = (await IMD.run("ideviceinfo", ["-u", udid, "-k", "DeviceName"])).trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = (await IMD.run("ideviceinfo", target + ["-k", "DeviceName"])).trimmingCharacters(in: .whitespacesAndNewlines)
         let dev = await MainActor.run { IOSCastModel.shared.devices.first { $0.uniqueID == udid || $0.localizedName == name } }
         guard let dev else { return nil }
         return await FrameGrabber.grab(dev)
     }
 
     func apps(includeSystem: Bool) async -> [InstalledApp] {
-        guard let arr = await IMD.plist("ideviceinstaller", ["-u", udid, "list", includeSystem ? "--all" : "--user", "--xml"]) as? [[String: Any]] else { return [] }
+        guard let arr = await IMD.plist("ideviceinstaller", target + ["list", includeSystem ? "--all" : "--user", "--xml"]) as? [[String: Any]] else { return [] }
         return arr.compactMap { a in
             guard let id = a["CFBundleIdentifier"] as? String else { return nil }
             let name = (a["CFBundleDisplayName"] as? String) ?? (a["CFBundleName"] as? String) ?? id
@@ -139,13 +155,13 @@ struct IOSBackend: DeviceBackend {
     }
 
     func uninstall(_ id: String) async -> String {
-        let out = await IMD.run("ideviceinstaller", ["-u", udid, "uninstall", id])
+        let out = await IMD.run("ideviceinstaller", target + ["uninstall", id])
         return out.localizedCaseInsensitiveContains("complete") ? "Success" : out
     }
 
     func install(_ file: URL) async -> String { "Tidak didukung" }
 
-    func power(off: Bool) async { _ = await IMD.run("idevicediagnostics", ["-u", udid, off ? "shutdown" : "restart"]) }
+    func power(off: Bool) async { _ = await IMD.run("idevicediagnostics", target + [off ? "shutdown" : "restart"]) }
 }
 
 /// Captures a single frame from an iOS screen-capture AVCaptureDevice.

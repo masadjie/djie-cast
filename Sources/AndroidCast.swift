@@ -83,14 +83,32 @@ struct Device: Identifiable, Hashable {
     let state: String
     let model: String
     var id: String { serial }
-    var isWireless: Bool { serial.contains(":") }
+    var isWireless: Bool { serial.contains(":") || serial.contains("._adb-tls") }
     var displayName: String { model.isEmpty ? serial : model.replacingOccurrences(of: "_", with: " ") }
+}
+
+/// An Android phone advertising adb on the local network (Wireless debugging or `adb tcpip`).
+struct NearbyDevice: Identifiable, Equatable {
+    let ip: String
+    var instance: String            // e.g. adb-R5CT30ABCDE-xY12zz
+    var connectPort: Int?           // _adb-tls-connect (already paired) or _adb (tcpip)
+    var pairPort: Int?              // _adb-tls-pairing: shown while "Pair with code" is open on the phone
+    var legacy = false              // found via _adb._tcp (adb tcpip mode)
+    var id: String { ip }
+    /// The hardware serial is embedded in the service name.
+    var serialHint: String {
+        let parts = instance.split(separator: "-")
+        return parts.count >= 2 && parts[0] == "adb" ? String(parts[1]) : instance
+    }
 }
 
 @MainActor
 final class LauncherModel: ObservableObject {
     static let shared = LauncherModel()
     @Published var devices: [Device] = []
+    @Published var nearby: [NearbyDevice] = []
+    @Published var nearbyBusy: String?          // ip being connected / paired
+    @Published var nearbyError: [String: String] = [:]
     @Published var selected: String?
     @Published var running: [String: Process] = [:]
     @Published var log: String = ""
@@ -138,6 +156,73 @@ final class LauncherModel: ObservableObject {
         append(await Tools.run(adb, ["connect", target]))
         busy = false
         await refresh()
+    }
+
+    // MARK: Nearby (mDNS)
+
+    /// Phones on this network that advertise adb. Needs no setup beyond Wireless debugging on the phone.
+    func scanNearby() async {
+        guard let adb = adbPath else { return }
+        if Demo.enabled {
+            nearby = [NearbyDevice(ip: "192.168.1.31", instance: "adb-RFCX20KQ9LM-a1b2c3", connectPort: 41827, pairPort: nil),
+                      NearbyDevice(ip: "192.168.1.44", instance: "adb-2B151FDH300ABC-k9", connectPort: nil, pairPort: 37115)]
+            return
+        }
+        let out = await Tools.run(adb, ["mdns", "services"])
+        var byIP: [String: NearbyDevice] = [:]
+        for line in out.split(whereSeparator: \.isNewline) {
+            let cols = line.split(whereSeparator: { $0 == "\t" || $0 == " " }).map(String.init).filter { !$0.isEmpty }
+            guard cols.count >= 3, let hp = cols.last, let colon = hp.lastIndex(of: ":"), let port = Int(hp[hp.index(after: colon)...]) else { continue }
+            let ip = String(hp[..<colon]), type = cols[1], name = cols[0]
+            var d = byIP[ip] ?? NearbyDevice(ip: ip, instance: name)
+            if type.contains("_adb-tls-pairing") { d.pairPort = port }
+            else if type.contains("_adb-tls-connect") { d.connectPort = port; d.instance = name }
+            else if type.contains("_adb._tcp") { d.connectPort = port; d.legacy = true; d.instance = name }
+            byIP[ip] = d
+        }
+        let list = byIP.values.sorted { $0.ip < $1.ip }
+        if list != nearby { withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { nearby = list } }
+    }
+
+    /// True when this nearby phone is already in the adb device list.
+    func isConnected(_ n: NearbyDevice) -> Bool {
+        devices.contains { $0.state == "device" && ($0.serial.hasPrefix(n.ip + ":") || $0.serial.hasPrefix(n.instance)) }
+    }
+
+    /// Friendly name: the model once connected, otherwise the serial from the service name.
+    func name(of n: NearbyDevice) -> String {
+        devices.first { $0.serial.hasPrefix(n.ip + ":") || $0.serial.hasPrefix(n.instance) }?.displayName ?? "HP Android · \(n.serialHint)"
+    }
+
+    func connectNearby(_ n: NearbyDevice) async {
+        guard let adb = adbPath, let port = n.connectPort else { return }
+        nearbyBusy = n.ip; nearbyError[n.ip] = nil
+        let out = await Tools.run(adb, ["connect", "\(n.ip):\(port)"])
+        append("→ adb connect \(n.ip):\(port)\n" + out)
+        if !out.contains("connected to") || out.contains("failed") {
+            nearbyError[n.ip] = "Belum dipasangkan. Di HP buka Wireless debugging → Pasangkan perangkat dengan kode pairing."
+        }
+        nearbyBusy = nil
+        await refresh()
+    }
+
+    /// `adb pair` with the 6-digit code shown on the phone, then connect.
+    func pairNearby(_ n: NearbyDevice, code: String) async {
+        guard let adb = adbPath, let port = n.pairPort else { return }
+        nearbyBusy = n.ip; nearbyError[n.ip] = nil
+        let out = await Tools.run(adb, ["pair", "\(n.ip):\(port)", code.trimmingCharacters(in: .whitespaces)])
+        append("→ adb pair \(n.ip):\(port)\n" + out)
+        nearbyBusy = nil
+        guard out.localizedCaseInsensitiveContains("successfully paired") else {
+            nearbyError[n.ip] = "Kode salah atau sudah kedaluwarsa. Buka lagi dialog pairing di HP dan coba kode yang baru."
+            return
+        }
+        // the connect service appears a moment after pairing
+        for _ in 0..<6 {
+            try? await Task.sleep(for: .seconds(1))
+            await scanNearby()
+            if let fresh = nearby.first(where: { $0.ip == n.ip }), fresh.connectPort != nil { await connectNearby(fresh); return }
+        }
     }
 
     func enableTcpip(_ serial: String) async {
@@ -308,6 +393,9 @@ struct AndroidCastView: View {
     @AppStorage("record") var record = false
     @AppStorage("extraArgs") var extraArgs = ""
     @AppStorage("wirelessIP") private var wirelessIP = ""
+    @State private var showWifiHelp = false
+    @State private var showManualIP = false
+    @State private var pairCodes: [String: String] = [:]
     @AppStorage("androidInspector") private var showInspector = true
     @State private var showConsole = false
     @State private var showGuide = false
@@ -351,6 +439,7 @@ struct AndroidCastView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                if Demo.env["DJIE_FOCUS"] == "wireless" { wirelessPanel }   // snapshot aid
                 PageHeader(icon: "smartphone", colors: Theme.android, title: "Android",
                            subtitle: "Mirror & kontrol HP Android lewat USB atau Wi-Fi") {
                     StatusPill(count: model.readyCount, noun: "perangkat")
@@ -497,39 +586,133 @@ struct AndroidCastView: View {
     // MARK: Wireless
 
     private var wirelessPanel: some View {
-        Panel {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .center, spacing: 14) {
-                    IconBadge(icon: "wifi", colors: Theme.airplay, size: 40)
+        Panel(padding: 20) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top, spacing: 14) {
+                    ZStack {
+                        IconBadge(icon: "wifi", colors: Theme.airplay, size: 44)
+                        RadarRings(color: Theme.airplay[1]).frame(width: 44, height: 44).allowsHitTesting(false)
+                    }
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Hubungkan lewat Wi-Fi").font(.headline)
-                        Text("Colok via USB dulu, pilih ••• → \"Aktifkan Wi-Fi\" di kartu perangkat, lalu masukkan IP HP.")
-                            .font(.caption).foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        Text("HP di jaringan ini").font(.headline)
+                        Text("HP Android dengan **Wireless debugging** menyala di Wi-Fi yang sama muncul otomatis di sini.")
+                            .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    Button { showWifiHelp.toggle() } label: { Label("Cara menyalakan", systemImage: "questionmark.circle") }
+                        .buttonStyle(.borderless).fixedSize()
+                }
+
+                if showWifiHelp {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(Array(["Mac dan HP tersambung ke Wi-Fi yang sama",
+                                       "Di HP: Opsi pengembang → Wireless debugging → nyalakan",
+                                       "Pertama kali: ketuk “Pasangkan perangkat dengan kode pairing”, lalu masukkan kodenya di sini",
+                                       "Setelah itu HP cukup diklik Sambungkan — tanpa kabel, tanpa kode lagi"].enumerated()), id: \.offset) { i, t in
+                            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                Text(String(format: "%02d", i + 1)).font(.caption.monospacedDigit().weight(.semibold)).foregroundStyle(Theme.airplay[1])
+                                Text(t).font(.callout).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .padding(12)
+                    .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 10))
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
+                if model.nearby.isEmpty {
+                    HStack(spacing: 10) {
+                        ProgressView().controlSize(.small)
+                        Text("Mencari HP di jaringan…").font(.callout).foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                } else {
+                    VStack(spacing: 8) {
+                        ForEach(model.nearby) { n in nearbyRow(n) }
                     }
                 }
-                HStack(spacing: 10) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "network").foregroundStyle(.secondary)
-                        TextField("Alamat IP HP, mis. 192.168.1.10", text: $wirelessIP)
-                            .textFieldStyle(.plain)
-                            .onSubmit { Task { await model.connectWireless(wirelessIP) } }
+
+                DisclosureGroup(isExpanded: $showManualIP) {
+                    HStack(spacing: 10) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "network").foregroundStyle(.secondary)
+                            TextField("Alamat IP HP, mis. 192.168.1.10 atau 192.168.1.10:5555", text: $wirelessIP)
+                                .textFieldStyle(.plain)
+                                .onSubmit { Task { await model.connectWireless(wirelessIP) } }
+                        }
+                        .padding(.horizontal, 10).padding(.vertical, 8)
+                        .frame(maxWidth: 380)
+                        .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.primary.opacity(0.12)))
+                        Button { Task { await model.connectWireless(wirelessIP) } } label: {
+                            if model.busy { ProgressView().controlSize(.small) } else { Label("Sambungkan", systemImage: "link") }
+                        }
+                        .buttonStyle(SoftButtonStyle(tint: Theme.airplay[1])).fixedSize()
+                        .disabled(wirelessIP.isEmpty || model.busy)
+                        Spacer(minLength: 0)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 8)
-                    .frame(maxWidth: 360)
-                    .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
-                    .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.primary.opacity(0.12)))
-                    Button { Task { await model.connectWireless(wirelessIP) } } label: {
-                        if model.busy { ProgressView().controlSize(.small) } else { Label("Connect", systemImage: "link") }
-                    }
-                    .buttonStyle(GradientButtonStyle(colors: Theme.airplay))
-                    .frame(width: 120)
-                    .disabled(wirelessIP.isEmpty || model.busy)
-                    Spacer(minLength: 0)
+                    .padding(.top, 8)
+                } label: {
+                    Text("Masukkan IP manual").font(.callout).foregroundStyle(.secondary)
                 }
             }
         }
+        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: showWifiHelp)
+        .task {
+            while !Task.isCancelled {
+                await model.scanNearby()
+                try? await Task.sleep(for: .seconds(3))
+            }
+        }
+    }
+
+    @ViewBuilder private func nearbyRow(_ n: NearbyDevice) -> some View {
+        let connected = model.isConnected(n)
+        let busy = model.nearbyBusy == n.ip
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                Image(systemName: "smartphone")
+                    .font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.android[1])
+                    .frame(width: 34, height: 34)
+                    .background(Theme.android[1].opacity(0.12), in: RoundedRectangle(cornerRadius: 9))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(model.name(of: n)).font(.callout.weight(.semibold))
+                    Text(n.ip + (n.connectPort.map { ":\($0)" } ?? "")).font(.caption.monospaced()).foregroundStyle(.secondary)
+                }
+                Spacer()
+                if connected {
+                    Label("Terhubung", systemImage: "checkmark.circle.fill").font(.caption.weight(.semibold)).foregroundStyle(Theme.live)
+                } else if n.pairPort != nil && (n.connectPort == nil || model.nearbyError[n.ip] != nil) {
+                    Pill(text: "Minta pairing", color: .orange)
+                } else if n.connectPort != nil {
+                    Button { Task { await model.connectNearby(n) } } label: {
+                        if busy { ProgressView().controlSize(.small) } else { Label("Sambungkan", systemImage: "link") }
+                    }
+                    .buttonStyle(GradientButtonStyle(colors: Theme.airplay)).fixedSize()
+                    .disabled(busy)
+                }
+            }
+            if !connected, n.pairPort != nil, n.connectPort == nil || model.nearbyError[n.ip] != nil {
+                HStack(spacing: 8) {
+                    Text("Kode pairing di HP").font(.caption).foregroundStyle(.secondary)
+                    TextField("123456", text: Binding(get: { pairCodes[n.ip] ?? "" }, set: { pairCodes[n.ip] = String($0.filter(\.isNumber).prefix(6)) }))
+                        .textFieldStyle(.roundedBorder).font(.body.monospacedDigit()).frame(width: 110)
+                        .onSubmit { Task { await model.pairNearby(n, code: pairCodes[n.ip] ?? "") } }
+                    Button { Task { await model.pairNearby(n, code: pairCodes[n.ip] ?? "") } } label: {
+                        if busy { ProgressView().controlSize(.small) } else { Label("Pasangkan", systemImage: "key.fill") }
+                    }
+                    .buttonStyle(GradientButtonStyle(colors: Theme.airplay)).fixedSize()
+                    .disabled((pairCodes[n.ip] ?? "").count != 6 || busy)
+                }
+                .padding(.leading, 46)
+            }
+            if let err = model.nearbyError[n.ip], !connected {
+                Label(err, systemImage: "info.circle").font(.caption).foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true).padding(.leading, 46)
+            }
+        }
+        .padding(12)
+        .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: Console
@@ -782,3 +965,22 @@ struct ControlBar: View {
 }
 
 struct SerialItem: Identifiable { let id: String }
+
+
+/// Two soft rings expanding from an icon: "searching the network".
+struct RadarRings: View {
+    let color: Color
+    var body: some View {
+        TimelineView(.animation) { ctx in
+            let t = ctx.date.timeIntervalSinceReferenceDate
+            ZStack {
+                ForEach(0..<2, id: \.self) { i in
+                    let p = ((t / 2.2) + Double(i) * 0.5).truncatingRemainder(dividingBy: 1)
+                    RoundedRectangle(cornerRadius: 12 + 10 * p)
+                        .stroke(color.opacity(0.45 * (1 - p)), lineWidth: 1.5)
+                        .scaleEffect(1 + 0.55 * p)
+                }
+            }
+        }
+    }
+}

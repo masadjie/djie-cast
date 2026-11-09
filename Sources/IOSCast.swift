@@ -13,6 +13,16 @@ final class IOSCastModel: ObservableObject {
     @Published var mirroring: Set<String> = []
     /// iPhones offered by Continuity Camera (wireless, iOS 17+ / macOS 14+).
     @Published var cameras: [AVCaptureDevice] = []
+    /// iPhones/iPads reachable over Wi-Fi via libimobiledevice.
+    @Published var networkPhones: [NetPhone] = []
+    struct NetPhone: Identifiable, Equatable { let udid: String; let name: String; var id: String { udid } }
+
+    func scanNetwork() async {
+        if Demo.enabled { networkPhones = [NetPhone(udid: "00008120-001A2B3C4D5E6F70", name: "iPhone Rina")]; return }
+        guard IMD.available else { return }
+        let list = await IMD.networkDevices().map { NetPhone(udid: $0.udid, name: $0.name) }
+        if list != networkPhones { withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { networkPhones = list } }
+    }
     @Published var permissionDenied = false
     private var windows: [String: MirrorWindow] = [:]
     private var observers: [NSObjectProtocol] = []
@@ -242,6 +252,7 @@ struct IOSCastView: View {
     @ObservedObject var model = IOSCastModel.shared
     @State private var showGuide = false
     @State private var detailUDID: String?
+    @State private var networkUDID: String?
     @State private var infoError: String?
 
     /// Finds the libimobiledevice UDID for a device (by name), or the first connected one.
@@ -257,6 +268,7 @@ struct IOSCastView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                if Demo.env["DJIE_FOCUS"] == "wireless" { networkPanel; cameraSection }   // snapshot aid
                 PageHeader(icon: "iphone", colors: Theme.ios, title: "iPhone & iPad",
                            subtitle: "Tampilkan layar iOS lewat kabel USB atau wireless") {
                     StatusPill(count: model.devices.count, noun: "perangkat")
@@ -314,6 +326,7 @@ struct IOSCastView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     SectionTitle(title: "Wireless")
+                    networkPanel
                     HStack(alignment: .top, spacing: 16) {
                         WirelessCard(icon: "hand.tap.fill", colors: Theme.mirroring, title: "iPhone Mirroring",
                                      tag: "Kontrol penuh",
@@ -343,6 +356,15 @@ struct IOSCastView: View {
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: model.devices.map(\.uniqueID))
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .ios) }
+        .sheet(item: Binding(get: { networkUDID.map { SerialItem(id: $0) } }, set: { networkUDID = $0?.id })) { item in
+            DeviceDetailSheet(backend: IOSBackend(udid: item.id, network: true))
+        }
+        .task {
+            while !Task.isCancelled {
+                await model.scanNetwork()
+                try? await Task.sleep(for: .seconds(5))
+            }
+        }
         .sheet(item: Binding(get: { detailUDID.map { SerialItem(id: $0) } }, set: { detailUDID = $0?.id })) { item in
             DeviceDetailSheet(backend: IOSBackend(udid: item.id))
         }
@@ -364,6 +386,58 @@ struct IOSCastView: View {
 }
 
 extension IOSCastView {
+    /// iPhones found on this Wi-Fi network, with what can be done wirelessly.
+    var networkPanel: some View {
+        Panel(padding: 20) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
+                    ZStack {
+                        IconBadge(icon: "wifi", colors: Theme.ios, size: 44)
+                        RadarRings(color: Theme.ios[1]).frame(width: 44, height: 44).allowsHitTesting(false)
+                    }
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("iPhone di jaringan ini").font(.headline)
+                        Text("iPhone yang pernah dicolok ke Mac ini dan menyalakan sinkron Wi-Fi muncul otomatis — info dan aplikasinya bisa dibuka tanpa kabel.")
+                            .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                if model.networkPhones.isEmpty {
+                    HStack(alignment: .top, spacing: 10) {
+                        ProgressView().controlSize(.small)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Mencari iPhone di jaringan…").font(.callout).foregroundStyle(.secondary)
+                            Text("Belum muncul? Colok iPhone sekali, buka Finder → pilih iPhone → centang “Tampilkan iPhone ini saat tersambung ke Wi-Fi”. Mac dan iPhone harus di Wi-Fi yang sama.")
+                                .font(.caption).foregroundStyle(.tertiary).fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                } else {
+                    ForEach(model.networkPhones) { p in
+                        HStack(spacing: 12) {
+                            Image(systemName: "iphone")
+                                .font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.ios[1])
+                                .frame(width: 34, height: 34)
+                                .background(Theme.ios[1].opacity(0.12), in: RoundedRectangle(cornerRadius: 9))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(p.name).font(.callout.weight(.semibold))
+                                Label("Wi-Fi", systemImage: "wifi").font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if model.hasMirroringApp {
+                                Button { model.openMirroringApp() } label: { Label("Kontrol", systemImage: "hand.tap.fill") }
+                                    .buttonStyle(SoftButtonStyle(tint: Theme.ios[1])).fixedSize()
+                                    .help("Buka iPhone Mirroring")
+                            }
+                            Button { networkUDID = p.udid } label: { Label("Info & aplikasi", systemImage: "info.circle") }
+                                .buttonStyle(GradientButtonStyle(colors: Theme.ios)).fixedSize()
+                        }
+                        .padding(12)
+                        .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+            }
+        }
+    }
+
     /// Uses the iPhone's own camera as a live view on the Mac (Continuity Camera).
     @ViewBuilder var cameraSection: some View {
         VStack(alignment: .leading, spacing: 12) {
