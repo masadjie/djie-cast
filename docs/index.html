@@ -252,7 +252,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   transform: rotateX(14deg) scale(.96); transform-origin: 50% 0;
   animation: tilt-in 1.2s cubic-bezier(.2,.8,.2,1) .15s both;
 }
-@keyframes tilt-in { from { transform: rotateX(28deg) translateY(60px) scale(.9); opacity: 0; } to { transform: rotateX(14deg) scale(.96); opacity: 1; } }
+@keyframes tilt-in { from { transform: rotateX(28deg) translateY(60px) scale(.9); } to { transform: rotateX(14deg) scale(.96); } }
 @supports (animation-timeline: view()) {
   .win { animation: tilt-in 1.2s cubic-bezier(.2,.8,.2,1) .15s both, flatten linear both; animation-timeline: auto, view(); animation-range: normal, entry 20% cover 45%; }
   @keyframes flatten { to { transform: rotateX(0) scale(1); } }
@@ -267,7 +267,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   animation: rise 1.1s cubic-bezier(.2,.8,.2,1) .5s both;
 }
 .hphone img { width: 100%; height: 100%; object-fit: cover; border-radius: 13% / 6%; }
-@keyframes rise { from { transform: translateY(40px) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes rise { from { transform: translateY(40px) rotate(-6deg); } to { transform: none; } }
 .chip {
   position: absolute; z-index: 3; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px;
   background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -280,7 +280,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .chip.c2 { right: 8%; bottom: -4%; animation-delay: -2s, 1.1s; }
 .chip.c3 { left: 14%; top: -3%; animation-delay: -4s, 1.3s; }
 @keyframes float { 50% { transform: translateY(-8px); } }
-@keyframes pop { from { opacity: 0; scale: .8; } to { opacity: 1; scale: 1; } }
+@keyframes pop { from { scale: .8; } to { scale: 1; } }
 @media (max-width: 720px) {
   .hphone { width: 26%; left: -1%; bottom: -12%; }
   .chip { font-size: 11.5px; padding: 7px 11px; }
@@ -289,6 +289,31 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @media (prefers-reduced-motion: reduce) {
   .win, .hphone, .chip { animation: none !important; } .win { transform: none; }
 }
+
+
+/* Hero v3: feature tour — headline, screenshot, labels and tabs move together */
+.tiltbox { position: relative; transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .25s ease-out; }
+.shots { position: relative; aspect-ratio: 16 / 10; background: var(--panel); }
+.shots .shot { position: absolute; inset: 0; opacity: 0; transform: scale(1.015); transition: opacity .6s ease, transform .9s cubic-bezier(.2,.8,.2,1); }
+.shots .shot.on { opacity: 1; transform: none; }
+.shots .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.hphone { transition: opacity .5s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+.hphone.away { opacity: 0; transform: translateY(30px) rotate(-4deg); }
+.chip { transition: opacity .35s ease; }
+.chip.swap { opacity: 0; }
+.ftabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin: 34px auto 0; padding: 6px; width: fit-content; max-width: 100%;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--panel); position: relative; z-index: 2; }
+.ftab { position: relative; overflow: hidden; border: 0; background: transparent; color: var(--ink-2); font: 600 14px/1 var(--f-body);
+  padding: 10px 16px; border-radius: 999px; cursor: pointer; transition: color .2s, background .2s; }
+.ftab:hover { color: var(--ink); }
+.ftab.on { color: var(--signal-ink); background: var(--signal); }
+.ftab span { position: relative; z-index: 1; }
+.ftab i { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: color-mix(in srgb, var(--signal-ink) 60%, transparent); }
+.ftab.on i { animation: fill var(--dur, 3.6s) linear forwards; }
+.showcase.paused ~ .ftabs .ftab.on i, .ftabs.paused .ftab.on i { animation-play-state: paused; }
+@keyframes fill { to { width: 100%; } }
+@media (max-width: 720px) { .ftab { padding: 8px 11px; font-size: 12.5px; } .ftabs { border-radius: 18px; } }
+@media (prefers-reduced-motion: reduce) { .tiltbox { transition: none; transform: none; } .ftab.on i { animation: none; width: 100%; } }
 
 /* Spec strip */
 .specs { border-block: 1px solid var(--line); margin-top: 56px; }
@@ -560,19 +585,33 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
     </div>
 
     <div class="wrap">
-      <div class="showcase" aria-label="Djie Cast menampilkan HP Android di Mac" data-i18n-aria="hero.stage" role="img">
+      <div class="showcase" id="showcase" aria-label="Djie Cast menampilkan HP Android di Mac" data-i18n-aria="hero.stage" role="img">
         <div class="glow" aria-hidden="true"></div>
-        <div class="win">
-          <div class="win-bar"><i></i><i></i><i></i><em>Djie Cast</em></div>
-          <picture>
-            <source srcset="assets/android-dark.jpg" media="(prefers-color-scheme: dark)">
-            <img src="assets/android-light.jpg" alt="" width="1600" height="1000" fetchpriority="high">
-          </picture>
+        <div class="tiltbox" id="tiltbox">
+          <div class="win">
+            <div class="win-bar"><i></i><i></i><i></i><em id="win-title">Djie Cast — Android</em></div>
+            <div class="shots">
+            <picture class="shot on" data-i="0"><source srcset="assets/android-dark.jpg" media="(prefers-color-scheme: dark)"><img src="assets/android-light.jpg" alt="" width="1600" height="1000" fetchpriority="high"></picture>
+            <picture class="shot" data-i="1"><source srcset="assets/ios-dark.jpg" media="(prefers-color-scheme: dark)"><img src="assets/ios-light.jpg" alt="" width="1600" height="1000" fetchpriority="low"></picture>
+            <picture class="shot" data-i="2"><source srcset="assets/emulator-dark.jpg" media="(prefers-color-scheme: dark)"><img src="assets/emulator-light.jpg" alt="" width="1600" height="1000" fetchpriority="low"></picture>
+            <picture class="shot" data-i="3"><source srcset="assets/simulator-dark.jpg" media="(prefers-color-scheme: dark)"><img src="assets/simulator-light.jpg" alt="" width="1600" height="1000" fetchpriority="low"></picture>
+            <picture class="shot" data-i="4"><source srcset="assets/remote-dark.jpg" media="(prefers-color-scheme: dark)"><img src="assets/remote-light.jpg" alt="" width="1600" height="1000" fetchpriority="low"></picture>
+            <picture class="shot" data-i="5"><source srcset="assets/files-dark.jpg" media="(prefers-color-scheme: dark)"><img src="assets/files-light.jpg" alt="" width="1600" height="1000" fetchpriority="low"></picture>
+            </div>
+          </div>
+          <div class="hphone" aria-hidden="true"><img src="assets/phone-android.jpg" alt="" width="540" height="1200"></div>
+          <div class="chip c1" aria-hidden="true"></div>
+          <div class="chip c2" aria-hidden="true"></div>
+          <div class="chip c3" aria-hidden="true"></div>
         </div>
-        <div class="hphone" aria-hidden="true"><img src="assets/phone-android.jpg" alt="" width="540" height="1200"></div>
-        <div class="chip c1" aria-hidden="true"><b>60</b> fps · USB</div>
-        <div class="chip c2" aria-hidden="true"><span class="live"></span><span data-i18n="chip.wifi">Wi-Fi · pairing QR</span></div>
-        <div class="chip c3" aria-hidden="true"><span data-i18n="chip.drop">Seret file → HP</span></div>
+      </div>
+      <div class="ftabs" role="tablist" aria-label="Fitur">
+        <button type="button" class="ftab on" data-i="0" role="tab" aria-selected="true"><span>Android</span><i></i></button>
+        <button type="button" class="ftab" data-i="1" role="tab" aria-selected="false"><span>iPhone</span><i></i></button>
+        <button type="button" class="ftab" data-i="2" role="tab" aria-selected="false"><span>Emulator</span><i></i></button>
+        <button type="button" class="ftab" data-i="3" role="tab" aria-selected="false"><span>Simulator</span><i></i></button>
+        <button type="button" class="ftab" data-i="4" role="tab" aria-selected="false"><span>Remote</span><i></i></button>
+        <button type="button" class="ftab" data-i="5" role="tab" aria-selected="false"><span>File</span><i></i></button>
       </div>
     </div>
 
@@ -1229,21 +1268,68 @@ footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
 </script>
 <script>
 (() => {
-  const el = document.getElementById("rot-word"); if (!el) return;
-  const words = {
-    id: ["HP Android-mu,", "iPhone-mu,", "Emulator Android,", "Simulator iPhone,", "Mac kantormu,", "Aplikasi HP-mu,"],
-    en: ["Your Android,", "Your iPhone,", "Android emulators,", "iPhone simulators,", "Your office Mac,", "Your phone apps,"]
+  // Feature tour: one index drives the headline word, the screenshot, the phone, the labels and the tabs.
+  const word = document.getElementById("rot-word"), title = document.getElementById("win-title");
+  const shots = [...document.querySelectorAll(".shots .shot")], tabs = [...document.querySelectorAll(".ftab")];
+  const phone = document.querySelector(".hphone"), chips = [...document.querySelectorAll(".showcase .chip")];
+  const show = document.getElementById("showcase"), tilt = document.getElementById("tiltbox"), tabBar = document.querySelector(".ftabs");
+  if (!word || !shots.length) return;
+  const T = {
+    id: {
+      words: ["HP Android-mu,", "iPhone-mu,", "Emulator Android,", "Simulator iPhone,", "Mac kantormu,", "File HP-mu,"],
+      pages: ["Android", "iPhone & iPad", "Emulator Android", "Simulator iPhone", "Remote Desktop", "File Android"],
+      chips: [["<b>60</b> fps · USB", "Wi-Fi · pairing QR", "Seret file → HP"], ["USB + audio", "iPhone Mirroring", "Kamera iPhone"],
+              ["Android 13–17", "GPU Mac", "Tanpa Android Studio"], ["Native Apple Silicon", "Boot <b>&lt;1</b> detik", "Pasang .app"],
+              ["Kode <b>6</b> angka", "Terenkripsi TLS", "Tailscale bawaan"], ["Unduh & unggah", "Aplikasi di jendela Mac", "Clipboard bersama"]],
+      tabs: ["Android", "iPhone", "Emulator", "Simulator", "Remote", "File"]
+    },
+    en: {
+      words: ["Your Android,", "Your iPhone,", "Android emulators,", "iPhone simulators,", "Your office Mac,", "Your phone's files,"],
+      pages: ["Android", "iPhone & iPad", "Android Emulator", "iPhone Simulator", "Remote Desktop", "Android Files"],
+      chips: [["<b>60</b> fps · USB", "Wi-Fi · QR pairing", "Drag files → phone"], ["USB + audio", "iPhone Mirroring", "iPhone camera"],
+              ["Android 13–17", "Mac GPU", "No Android Studio"], ["Native Apple Silicon", "Boots in <b>&lt;1</b> s", "Install .app"],
+              ["<b>6</b>-digit code", "TLS encrypted", "Built-in Tailscale"], ["Download & upload", "Apps in Mac windows", "Shared clipboard"]],
+      tabs: ["Android", "iPhone", "Emulator", "Simulator", "Remote", "Files"]
+    }
   };
+  const phoneOn = [true, false, true, false, false, true];
   const lang = () => (document.documentElement.lang || "id").startsWith("en") ? "en" : "id";
-  let i = 0;
-  const show = (next) => {
-    el.classList.add("out");
-    setTimeout(() => { el.textContent = next; el.classList.remove("out"); el.classList.add("in"); void el.offsetWidth; el.classList.remove("in"); }, 420);
-  };
-  new MutationObserver(() => { i = 0; el.textContent = words[lang()][0]; }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  el.textContent = words[lang()][0];
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  setInterval(() => { i = (i + 1) % words[lang()].length; show(words[lang()][i]); }, 2600);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const DUR = 3600;
+  let i = 0, timer = null, paused = false;
+
+  function render(n, animate) {
+    const t = T[lang()];
+    i = n;
+    shots.forEach((s, k) => s.classList.toggle("on", k === n));
+    tabs.forEach((b, k) => { b.classList.toggle("on", k === n); b.setAttribute("aria-selected", k === n); b.querySelector("span").textContent = t.tabs[k];
+      const bar = b.querySelector("i"); bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = ""; });
+    phone.classList.toggle("away", !phoneOn[n]);
+    title.textContent = "Djie Cast — " + t.pages[n];
+    chips.forEach(c => c.classList.add("swap"));
+    setTimeout(() => chips.forEach((c, k) => { c.innerHTML = t.chips[n][k]; c.classList.remove("swap"); }), animate ? 300 : 0);
+    if (!animate) { word.textContent = t.words[n]; return; }
+    word.classList.add("out");
+    setTimeout(() => { word.textContent = t.words[n]; word.classList.remove("out"); word.classList.add("in"); void word.offsetWidth; word.classList.remove("in"); }, 380);
+  }
+  function schedule() { clearTimeout(timer); if (reduce || paused) return; timer = setTimeout(() => { render((i + 1) % shots.length, true); schedule(); }, DUR); }
+
+  tabs.forEach((b, k) => b.addEventListener("click", () => { render(k, true); schedule(); }));
+  // pause while the visitor is looking at the screenshot
+  show.addEventListener("pointerenter", () => { paused = true; clearTimeout(timer); tabBar.classList.add("paused"); });
+  show.addEventListener("pointerleave", () => { paused = false; tabBar.classList.remove("paused"); tilt.style.setProperty("--rx", "0deg"); tilt.style.setProperty("--ry", "0deg"); schedule(); });
+  // gentle tilt that follows the mouse
+  if (!reduce && matchMedia("(pointer: fine)").matches) {
+    show.addEventListener("pointermove", e => {
+      const r = show.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      tilt.style.setProperty("--ry", (x * 6).toFixed(2) + "deg");
+      tilt.style.setProperty("--rx", (-y * 5).toFixed(2) + "deg");
+    });
+  }
+  new MutationObserver(() => render(i, false)).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+  render(0, false);
+  schedule();
 })();
 </script>
 </body>
