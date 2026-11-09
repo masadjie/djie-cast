@@ -57,7 +57,7 @@ enum Appearance: String, CaseIterable, Identifiable {
     }
 }
 
-enum Page: String, Hashable { case home, android, ios, files, iosFiles, emulator, remote, donate, about }
+enum Page: String, Hashable { case home, android, ios, files, iosFiles, emulator, simulator, remote, donate, about }
 
 /// Shared navigation so any view can jump to another page.
 @MainActor
@@ -113,6 +113,7 @@ struct MainView: View {
     @ObservedObject private var android = LauncherModel.shared
     @ObservedObject private var ios = IOSCastModel.shared
     @ObservedObject private var emulator = EmulatorModel.shared
+    @ObservedObject private var simulators = SimulatorModel.shared
     @State private var askRelaunch = false
 
     var body: some View {
@@ -153,6 +154,7 @@ struct MainView: View {
                 case .files: AndroidFilesView()
                 case .iosFiles: IOSFilesView()
                 case .emulator: EmulatorView()
+                case .simulator: IOSSimulatorView()
                 case .remote: RemoteDesktopView()
                 case .donate: DonateView()
                 case .about: AboutView()
@@ -173,6 +175,7 @@ struct MainView: View {
         case .files: return "File Android"
         case .iosFiles: return "File iPhone"
         case .emulator: return "Emulator Android"
+        case .simulator: return "Simulator iPhone"
         case .remote: return "Remote Desktop"
         case .donate: return "Donasi"
         case .about: return "Tentang"
@@ -197,6 +200,7 @@ struct MainView: View {
                 sidebarRow(.files, "File Android", "folder.fill", Theme.files)
                 sidebarRow(.iosFiles, "File iPhone", "photo.on.rectangle.angled", Theme.ios)
                 sidebarRow(.emulator, "Emulator Android", "apps.iphone", Theme.emulator, badge: emulator.running.count)
+                sidebarRow(.simulator, "Simulator iPhone", "iphone.gen3", Theme.ios, badge: simulators.bootedCount)
                 sidebarRow(.remote, "Remote Desktop", "display.2", Theme.remote)
             }
             Section("Komunitas") {
@@ -218,6 +222,7 @@ struct MainView: View {
                 flatRow(.files, "File Android", "folder.fill", Theme.files, 0)
                 flatRow(.iosFiles, "File iPhone", "photo.on.rectangle.angled", Theme.ios, 0)
                 flatRow(.emulator, "Emulator Android", "apps.iphone", Theme.emulator, emulator.running.count)
+                flatRow(.simulator, "Simulator iPhone", "iphone.gen3", Theme.ios, simulators.bootedCount)
                 flatRow(.remote, "Remote Desktop", "display.2", Theme.remote, 0)
                 flatHeader("Komunitas")
                 flatRow(.donate, "Donasi", "heart.fill", Theme.donate, 0)
@@ -457,6 +462,7 @@ struct HomeView: View {
     @ObservedObject private var android = LauncherModel.shared
     @ObservedObject private var ios = IOSCastModel.shared
     @ObservedObject private var emu = EmulatorModel.shared
+    @ObservedObject private var sims = SimulatorModel.shared
 
     private var connected: Int { android.readyCount + ios.devices.count }
 
@@ -494,6 +500,7 @@ struct HomeView: View {
             // emulators started anywhere (Djie Cast or Android Studio) count on the home page too
             while !Task.isCancelled {
                 await emu.refreshSerials()
+                await sims.refresh(shots: false)
                 try? await Task.sleep(for: .seconds(4))
             }
         }
@@ -546,7 +553,7 @@ struct HomeView: View {
             HStack(spacing: 14) {
                 countTile(android.readyCount, "Android", "HP Android siap", "smartphone", Theme.android) { page = .android }
                 countTile(ios.devices.count, "iPhone & iPad", "Lewat kabel USB", "iphone", Theme.ios) { page = .ios }
-                countTile(emu.running.count, "Emulator", "Sedang berjalan", "apps.iphone", Theme.emulator) { page = .emulator }
+                countTile(emu.running.count + sims.bootedCount, "Emulator", "Android & iPhone berjalan", "apps.iphone", Theme.emulator) { page = sims.bootedCount > emu.running.count ? .simulator : .emulator }
                 countTile(android.running.count + ios.mirroring.count, "Sedang cast", "Jendela mirror terbuka", "rectangle.on.rectangle", Theme.remote) { page = .android }
             }
             .fixedSize(horizontal: false, vertical: true)
