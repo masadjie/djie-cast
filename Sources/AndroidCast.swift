@@ -456,6 +456,7 @@ struct AndroidCastView: View {
     @State private var showWifiGuide = false
     @State private var showQRPair = false
     @State private var appWindowsFor: Device?
+    @State private var remoteSetupFor: Device?
     @ObservedObject private var appWindows = AppWindows.shared
     @State private var showManualIP = false
     @State private var pairCodes: [String: String] = [:]
@@ -463,6 +464,13 @@ struct AndroidCastView: View {
     @State private var showConsole = false
     @State private var showGuide = false
     @State private var detailSerial: String?
+
+    /// Over the internet the stream is lighter so it stays smooth on slow links.
+    func castArgs(for serial: String) -> [String] {
+        guard RemoteADB.shared.isRemote(serial) else { return scrcpyArgs() }
+        let keys = ["--max-size", "--video-bit-rate", "--max-fps"]
+        return scrcpyArgs().filter { a in !keys.contains { a.hasPrefix($0) } && a != "--no-audio" } + RemoteADB.internetArgs
+    }
 
     func scrcpyArgs() -> [String] {
         var a: [String] = []
@@ -531,13 +539,13 @@ struct AndroidCastView: View {
                                     let running = model.running[d.serial] != nil
                                     DeviceSummaryCard(backend: AndroidBackend(serial: d.serial), fallbackTitle: d.displayName,
                                                       fallbackSubtitle: d.serial, live: running,
-                                                      connection: d.isWireless ? "Wi-Fi" : "USB", showScreen: true,
+                                                      connection: RemoteADB.shared.isRemote(d.serial) ? "Internet" : d.isWireless ? "Wi-Fi" : "USB", showScreen: true,
                                                       onDetails: { detailSerial = d.serial }) {
                                         if running {
                                             Button { model.stop(d.serial) } label: { Label("Hentikan", systemImage: "stop.fill") }
                                                 .buttonStyle(SoftButtonStyle(tint: .red)).fixedSize()
                                         } else {
-                                            Button { model.start(serial: d.serial, args: scrcpyArgs()) } label: { Label("Mulai Cast", systemImage: "play.fill") }
+                                            Button { model.start(serial: d.serial, args: castArgs(for: d.serial)) } label: { Label("Mulai Cast", systemImage: "play.fill") }
                                                 .buttonStyle(GradientButtonStyle(colors: Theme.android)).fixedSize()
                                         }
                                         ControlBar(serial: d.serial).frame(width: 290)
@@ -560,6 +568,7 @@ struct AndroidCastView: View {
                                         Menu {
                                             if !d.isWireless {
                                                 Button("Aktifkan Wi-Fi", systemImage: "wifi") { Task { await model.enableTcpip(d.serial) } }
+                                                Button("Siapkan remote internet…", systemImage: "globe.asia.australia") { remoteSetupFor = d }
                                             } else {
                                                 Button("Putuskan", systemImage: "xmark.circle") { Task { await model.disconnect(d.serial) } }
                                             }
@@ -595,6 +604,7 @@ struct AndroidCastView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     SectionTitle(title: "Wireless")
                     wirelessPanel
+                    RemotePhonesPanel()
                 }
 
                 consolePanel
@@ -605,6 +615,7 @@ struct AndroidCastView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: Array(model.running.keys))
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .android) }
         .sheet(item: $appWindowsFor) { d in AppWindowsSheet(serial: d.serial, device: d.displayName) }
+        .sheet(item: $remoteSetupFor) { d in RemoteSetupSheet(serial: d.serial, name: d.displayName) }
         .sheet(item: Binding(get: { detailSerial.map { SerialItem(id: $0) } }, set: { detailSerial = $0?.id })) { item in
             DeviceDetailSheet(backend: AndroidBackend(serial: item.id))
         }
@@ -761,6 +772,9 @@ struct AndroidCastView: View {
         .sheet(isPresented: $showQRPair) { QRPairSheet() }
         .onAppear {   // snapshot aid: DJIE_SHEET=qr | apps
             if Demo.env["DJIE_SHEET"] == "qr" { showQRPair = true }
+            if Demo.env["DJIE_SHEET"] == "remote" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { remoteSetupFor = model.devices.first { $0.state == "device" } }
+            }
             if Demo.env["DJIE_SHEET"] == "apps" {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { appWindowsFor = model.devices.first { $0.state == "device" } }
             }

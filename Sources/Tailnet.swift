@@ -22,6 +22,10 @@ final class TailnetModel: ObservableObject {
 
     @Published var state: State = .off
     @Published var peers: [Peer] = []
+    /// Every device on the tailnet (phones included), for remote ADB.
+    struct Device: Identifiable, Hashable { let id: String; let name: String; let ip: String; let os: String; let online: Bool }
+    @Published var devices: [Device] = []
+    private var adbTunnels: [String: (fd: Int32, port: UInt16)] = [:]
     @Published var account: String?
 
     @Published var enabled: Bool = UserDefaults.standard.bool(forKey: "tailnetEnabled") {
@@ -163,6 +167,14 @@ final class TailnetModel: ObservableObject {
            let uid = selfNode["UserID"] as? Int, let u = users[String(uid)] as? [String: Any] {
             account = u["LoginName"] as? String
         }
+        var all: [Device] = []
+        for (key, value) in obj["Peer"] as? [String: Any] ?? [:] {
+            guard let p = value as? [String: Any],
+                  let ip = (p["TailscaleIPs"] as? [String])?.first(where: { !$0.contains(":") }) else { continue }
+            let name = (p["HostName"] as? String) ?? ((p["DNSName"] as? String ?? "").split(separator: ".").first.map(String.init) ?? ip)
+            all.append(Device(id: key, name: name, ip: ip, os: (p["OS"] as? String ?? "").lowercased(), online: p["Online"] as? Bool ?? false))
+        }
+        devices = all.sorted { ($0.online ? 0 : 1, $0.name) < ($1.online ? 0 : 1, $1.name) }
         var list: [Peer] = []
         for (key, value) in obj["Peer"] as? [String: Any] ?? [:] {
             guard let p = value as? [String: Any], let host = p["HostName"] as? String, host.hasPrefix("djiecast-"),
@@ -213,6 +225,35 @@ final class TailnetModel: ObservableObject {
     }
 }
 
+extension TailnetModel {
+    /// A long-lived local port that forwards every connection to `ip:port` over the tailnet.
+    /// adb connects to 127.0.0.1:<local> and reaches the phone's adbd wherever it is.
+    func adbTunnel(to ip: String, port remotePort: UInt16 = 5555) -> UInt16? {
+        if let t = adbTunnels[ip] { return t.port }
+        guard sd >= 0, let (server, port) = Bridge.listenLocal(backlog: 8) else { return nil }
+        let s = sd
+        adbTunnels[ip] = (server, port)
+        Thread.detachNewThread {
+            while true {
+                let client = accept(server, nil, nil)
+                guard client >= 0 else { break }        // closed by closeAdbTunnel
+                var conn: tailscale_conn = -1
+                guard tailscale_dial(s, "tcp", "\(ip):\(remotePort)", &conn) == 0 else { close(client); continue }
+                Thread.detachNewThread { Bridge.pump(conn, client) }
+            }
+        }
+        return port
+    }
+
+    func closeAdbTunnel(to ip: String) {
+        guard let t = adbTunnels.removeValue(forKey: ip) else { return }
+        close(t.fd)
+    }
+
+    /// The tailnet IP whose tunnel ends at this local port, if any.
+    func tunnelIP(forLocalPort port: UInt16) -> String? { adbTunnels.first { $0.value.port == port }?.key }
+}
+
 // MARK: - Socket plumbing
 
 enum Bridge {
@@ -231,7 +272,7 @@ enum Bridge {
         return fd
     }
 
-    static func listenLocal() -> (Int32, UInt16)? {
+    static func listenLocal(backlog: Int32 = 1) -> (Int32, UInt16)? {
         let fd = socket(AF_INET, SOCK_STREAM, 0)
         guard fd >= 0 else { return nil }
         var addr = sockaddr_in()
@@ -240,7 +281,7 @@ enum Bridge {
         addr.sin_addr.s_addr = inet_addr("127.0.0.1")
         var len = socklen_t(MemoryLayout<sockaddr_in>.size)
         let bound = withUnsafeMutablePointer(to: &addr) {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { bind(fd, $0, len) == 0 && listen(fd, 1) == 0 && getsockname(fd, $0, &len) == 0 }
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { bind(fd, $0, len) == 0 && listen(fd, backlog) == 0 && getsockname(fd, $0, &len) == 0 }
         }
         guard bound else { close(fd); return nil }
         return (fd, UInt16(bigEndian: addr.sin_port))

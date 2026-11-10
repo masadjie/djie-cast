@@ -75,7 +75,8 @@ struct DeviceSummaryCard<Actions: View>: View {
                         }
                         Spacer()
                         if live { LiveBadge() }
-                        Pill(text: connection, icon: connection == "Wi-Fi" ? "wifi" : connection == "Emulator" ? "cpu" : "cable.connector", color: connection == "Wi-Fi" ? .blue : .secondary)
+                        Pill(text: connection, icon: connection == "Wi-Fi" ? "wifi" : connection == "Emulator" ? "cpu" : connection == "Internet" ? "globe" : "cable.connector",
+                             color: connection == "Wi-Fi" ? .blue : connection == "Internet" ? Theme.android[1] : .secondary)
                     }
                     if let d {
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 18, alignment: .leading), count: specColumns),
