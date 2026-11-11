@@ -253,9 +253,19 @@ struct IOSCastView: View {
     @State private var showGuide = false
     @State private var detailUDID: String?
     @State private var networkUDID: String?
+    @State private var cleaner: IMDDevice?
+    struct IMDDevice: Identifiable { let id: String; let name: String }
     @State private var infoError: String?
 
     /// Finds the libimobiledevice UDID for a device (by name), or the first connected one.
+    private func openCleaner() {
+        guard IMD.available else { infoError = "Info iPhone butuh komponen libimobiledevice (sudah termasuk di Djie Cast untuk Apple Silicon)."; return }
+        Task {
+            if let hit = await IMD.devices().first { cleaner = IMDDevice(id: hit.udid, name: hit.name); infoError = nil }
+            else { infoError = "iPhone belum terbaca. Buka kunci iPhone dan pastikan sudah “Percayai Komputer Ini”." }
+        }
+    }
+
     private func openInfo(name: String?) {
         guard IMD.available else { infoError = "Info iPhone butuh komponen libimobiledevice (sudah termasuk di Djie Cast untuk Apple Silicon)."; return }
         Task {
@@ -356,6 +366,7 @@ struct IOSCastView: View {
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: model.devices.map(\.uniqueID))
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .ios) }
+        .sheet(item: $cleaner) { d in IOSCleanerSheet(udid: d.id, name: d.name) }
         .sheet(item: Binding(get: { networkUDID.map { SerialItem(id: $0) } }, set: { networkUDID = $0?.id })) { item in
             DeviceDetailSheet(backend: IOSBackend(udid: item.id, network: true))
         }
@@ -369,6 +380,10 @@ struct IOSCastView: View {
             DeviceDetailSheet(backend: IOSBackend(udid: item.id))
         }
         .toolbar {
+            ToolbarItem {
+                Button { openCleaner() } label: { Label("Bersihkan iPhone", systemImage: "sparkles") }
+                    .help("Bersihkan log crash dan lihat aplikasi yang paling makan ruang")
+            }
             ToolbarItem {
                 Button { openInfo(name: nil) } label: { Label("Info & aplikasi iPhone", systemImage: "info.circle") }
                     .help("Spesifikasi, baterai & aplikasi iPhone yang tersambung")

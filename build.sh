@@ -76,7 +76,7 @@ if [ -x "$BREW_BIN/ideviceinfo" ] && [ -x "$BREW_BIN/ideviceinstaller" ] && comm
   IMD_DIR="$APP/Contents/MacOS/imd"; IMD_LIB="$APP/Contents/Frameworks/imd"
   mkdir -p "$IMD_DIR" "$IMD_LIB" "$APP/Contents/Resources/licenses"
   XARGS=()
-  for t in idevice_id ideviceinfo idevicediagnostics ideviceinstaller; do
+  for t in idevice_id ideviceinfo idevicediagnostics ideviceinstaller idevicecrashreport; do
     cp -L "$BREW_BIN/$t" "$IMD_DIR/$t"; chmod u+w "$IMD_DIR/$t"; XARGS+=(-x "$IMD_DIR/$t")
   done
   dylibbundler -of -b "${XARGS[@]}" -d "$IMD_LIB" -p "@executable_path/../../Frameworks/imd/" >/dev/null

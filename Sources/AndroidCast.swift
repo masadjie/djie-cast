@@ -457,6 +457,7 @@ struct AndroidCastView: View {
     @State private var showQRPair = false
     @State private var appWindowsFor: Device?
     @State private var remoteSetupFor: Device?
+    @State private var cleanerFor: Device?
     @ObservedObject private var appWindows = AppWindows.shared
     @State private var showManualIP = false
     @State private var pairCodes: [String: String] = [:]
@@ -549,6 +550,9 @@ struct AndroidCastView: View {
                                                 .buttonStyle(GradientButtonStyle(colors: Theme.android)).fixedSize()
                                         }
                                         ControlBar(serial: d.serial).frame(width: 290)
+                                        Button { cleanerFor = d } label: { Label("Bersihkan", systemImage: "sparkles") }
+                                            .buttonStyle(SoftButtonStyle(tint: Theme.android[1])).fixedSize()
+                                            .help("Bersihkan cache dan file sampah di HP")
                                         Button { appWindowsFor = d } label: {
                                             let n = appWindows.count(for: d.serial)
                                             Label(n > 0 ? "Aplikasi di jendela · \(n)" : "Aplikasi di jendela", systemImage: "macwindow.on.rectangle")
@@ -616,6 +620,7 @@ struct AndroidCastView: View {
         .sheet(isPresented: $showGuide) { SetupGuideSheet(guide: .android) }
         .sheet(item: $appWindowsFor) { d in AppWindowsSheet(serial: d.serial, device: d.displayName) }
         .sheet(item: $remoteSetupFor) { d in RemoteSetupSheet(serial: d.serial, name: d.displayName) }
+        .sheet(item: $cleanerFor) { d in AndroidCleanerSheet(serial: d.serial, name: d.displayName) }
         .sheet(item: Binding(get: { detailSerial.map { SerialItem(id: $0) } }, set: { detailSerial = $0?.id })) { item in
             DeviceDetailSheet(backend: AndroidBackend(serial: item.id))
         }
@@ -772,6 +777,9 @@ struct AndroidCastView: View {
         .sheet(isPresented: $showQRPair) { QRPairSheet() }
         .onAppear {   // snapshot aid: DJIE_SHEET=qr | apps
             if Demo.env["DJIE_SHEET"] == "qr" { showQRPair = true }
+            if Demo.env["DJIE_SHEET"] == "clean" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { cleanerFor = model.devices.first { $0.state == "device" } }
+            }
             if Demo.env["DJIE_SHEET"] == "remote" {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { remoteSetupFor = model.devices.first { $0.state == "device" } }
             }
