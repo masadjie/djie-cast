@@ -701,5 +701,9 @@
   "Memasang Tailscale di HP…": "Installing Tailscale on the phone…",
   "Unduhan gagal.": "Download failed.",
   "Di HP: ketuk OK pada izin VPN, lalu masuk dengan akun yang sama: %@": "On the phone: tap OK on the VPN prompt, then sign in with the same account: %@",
-  "Di HP: ketuk OK pada izin VPN, lalu masuk dengan akun yang sama dengan Mac ini": "On the phone: tap OK on the VPN prompt, then sign in with the same account as this Mac"
+  "Di HP: ketuk OK pada izin VPN, lalu masuk dengan akun yang sama dengan Mac ini": "On the phone: tap OK on the VPN prompt, then sign in with the same account as this Mac",
+  "Membaca galeri… %lld%% · %lld item": "Reading gallery… %lld%% · %lld items",
+  "Muat lebih banyak · %lld lagi": "Load more · %lld left",
+  "Semua %lld item sudah tampil": "All %lld items shown",
+  "Lewat kabel hanya foto yang benar-benar tersimpan di iPhone yang terbaca. Kalau **Foto iCloud → Optimalkan Penyimpanan iPhone** aktif, sebagian besar foto ada di iCloud dan tidak muncul di sini — buka icloud.com/photos untuk foto-foto itu.": "Over a cable only photos actually stored on the iPhone can be read. If **iCloud Photos → Optimise iPhone Storage** is on, most photos live in iCloud and won't show here — open icloud.com/photos for those."
 }

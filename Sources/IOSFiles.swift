@@ -35,6 +35,8 @@ final class IOSFilesModel: NSObject, ObservableObject {
     @Published var thumbs: [String: NSImage] = [:]
     @Published var transfer: String?
     @Published var progress: Double?
+    /// 0…1 while the iPhone is still sending its photo list.
+    @Published var catalogProgress: Double?
 
     var canDelete: Bool {
         Demo.enabled || (current?.capabilities.contains(ICDeviceCapability.cameraDeviceCanDeleteOneFile.rawValue) ?? false)
@@ -43,7 +45,13 @@ final class IOSFilesModel: NSObject, ObservableObject {
     private let browser = ICDeviceBrowser()
     private var started = false
     private var thumbRequested = Set<String>()
+    private var thumbFailures: [String: Int] = [:]
+    private var thumbQueue: [PhoneMedia] = []
+    private var thumbsInFlight = 0
+    private let maxThumbsInFlight = 6
     private var retry: Task<Void, Never>?
+    private var reloadPending = false
+    private var catalogWatch: Task<Void, Never>?
 
     static let downloadsDir: URL = {
         let dir = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
@@ -78,10 +86,42 @@ final class IOSFilesModel: NSObject, ObservableObject {
     func select(_ device: ICCameraDevice) {
         if let current, current !== device { current.requestCloseSession() }
         current = device
-        items = []; thumbs = [:]; thumbRequested = []
+        items = []; thumbs = [:]; thumbRequested = []; thumbQueue = []; thumbFailures = [:]; catalogProgress = nil
         device.delegate = self
         state = .opening(device.name ?? "iPhone")
         device.requestOpenSession()
+    }
+
+    /// The iPhone sends its list in bursts; rebuild at most every 0.4 s instead of on every burst.
+    private func scheduleReload() {
+        guard !reloadPending else { return }
+        reloadPending = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            guard let self else { return }
+            self.reloadPending = false
+            self.reloadItems()
+        }
+    }
+
+    /// Shows how far the iPhone is with listing its library, and finishes when it reaches 100 %.
+    private func watchCatalog(_ cam: ICCameraDevice) {
+        catalogWatch?.cancel()
+        catalogWatch = Task { @MainActor in
+            // Poll until the list is complete; never rely on a single delegate callback to leave "loading".
+            for _ in 0..<1200 {          // up to 10 minutes for very large libraries
+                if Task.isCancelled { return }
+                let pct = Double(cam.contentCatalogPercentCompleted)
+                if Demo.env["DJIE_DEBUG"] != nil { FileHandle.standardError.write("catalog \(pct)% media=\(cam.mediaFiles?.count ?? -1) items=\(self.items.count)\n".data(using: .utf8)!) }
+                self.catalogProgress = pct >= 100 ? nil : pct / 100
+                if (cam.mediaFiles?.count ?? 0) != self.items.count { self.reloadItems() }
+                if pct >= 100 {
+                    self.reloadItems()
+                    switch self.state { case .loading, .opening: self.state = .ready(cam.name ?? "iPhone"); default: break }
+                    return
+                }
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+        }
     }
 
     private func reloadItems() {
@@ -96,12 +136,34 @@ final class IOSFilesModel: NSObject, ObservableObject {
         .sorted { ($0.date ?? .distantPast) > ($1.date ?? .distantPast) }
     }
 
+    /// Thumbnails go through a small queue: asking the iPhone for hundreds at once makes it drop requests.
+    /// The most recently scrolled-to tiles are served first, and failures are retried a few times.
     func thumbnail(for item: PhoneMedia) {
-        guard thumbs[item.id] == nil, !thumbRequested.contains(item.id), let file = item.file else { return }
+        guard thumbs[item.id] == nil, !thumbRequested.contains(item.id), item.file != nil else { return }
         thumbRequested.insert(item.id)
-        file.requestThumbnailData(options: [.imageSourceThumbnailMaxPixelSize: 320]) { data, _ in
-            guard let data, let img = NSImage(data: data) else { return }
-            Task { @MainActor in self.thumbs[item.id] = img }
+        thumbQueue.append(item)
+        pumpThumbs()
+    }
+
+    private func pumpThumbs() {
+        while thumbsInFlight < maxThumbsInFlight, let item = thumbQueue.popLast(), let file = item.file {
+            thumbsInFlight += 1
+            file.requestThumbnailData(options: [.imageSourceThumbnailMaxPixelSize: 320]) { data, _ in
+                let img = data.flatMap { NSImage(data: $0) }
+                Task { @MainActor in
+                    self.thumbsInFlight -= 1
+                    if let img { self.thumbs[item.id] = img; self.thumbFailures[item.id] = nil }
+                    else {
+                        let n = (self.thumbFailures[item.id] ?? 0) + 1
+                        self.thumbFailures[item.id] = n
+                        if n < 4 {
+                            // let it be requested again after a short pause
+                            DispatchQueue.main.asyncAfter(deadline: .now() + Double(n)) { self.thumbRequested.remove(item.id); self.thumbnail(for: item) }
+                        }
+                    }
+                    self.pumpThumbs()
+                }
+            }
         }
     }
 
@@ -209,19 +271,20 @@ extension IOSFilesModel: ICCameraDeviceDelegate {
             } else {
                 self.retry?.cancel()
                 self.state = .loading(name)
+                if let cam = device as? ICCameraDevice { self.watchCatalog(cam) }
             }
         }
     }
     nonisolated func device(_ device: ICDevice, didCloseSessionWithError error: Error?) {}
     nonisolated func didRemove(_ device: ICDevice) {}
     nonisolated func deviceDidBecomeReady(withCompleteContentCatalog device: ICCameraDevice) {
-        Task { @MainActor in self.reloadItems(); self.state = .ready(device.name ?? "iPhone") }
+        Task { @MainActor in self.catalogProgress = nil; self.reloadItems(); self.state = .ready(device.name ?? "iPhone") }
     }
     nonisolated func cameraDevice(_ camera: ICCameraDevice, didAdd items: [ICCameraItem]) {
-        Task { @MainActor in self.reloadItems() }
+        Task { @MainActor in self.scheduleReload() }
     }
     nonisolated func cameraDevice(_ camera: ICCameraDevice, didRemove items: [ICCameraItem]) {
-        Task { @MainActor in self.reloadItems() }
+        Task { @MainActor in self.scheduleReload() }
     }
     nonisolated func cameraDevice(_ camera: ICCameraDevice, didReceiveThumbnail thumbnail: CGImage?, for item: ICCameraItem, error: Error?) {}
     nonisolated func cameraDevice(_ camera: ICCameraDevice, didReceiveMetadata metadata: [AnyHashable: Any]?, for item: ICCameraItem, error: Error?) {}
@@ -231,7 +294,7 @@ extension IOSFilesModel: ICCameraDeviceDelegate {
     nonisolated func cameraDeviceDidRemoveAccessRestriction(_ device: ICDevice) {
         Task { @MainActor in
             self.state = .loading(device.name ?? "iPhone")
-            if let cam = device as? ICCameraDevice, cam.contentCatalogPercentCompleted >= 100 { self.reloadItems(); self.state = .ready(device.name ?? "iPhone") }
+            if let cam = device as? ICCameraDevice { self.watchCatalog(cam) }
         }
     }
     nonisolated func cameraDeviceDidEnableAccessRestriction(_ device: ICDevice) {
@@ -247,6 +310,9 @@ struct IOSFilesView: View {
     @State private var selection = Set<String>()
     @State private var confirmDelete = false
     @State private var showGuide = false
+    /// How many tiles are on screen; grows by a page when the end is reached.
+    @State private var limit = IOSFilesView.pageSize
+    static let pageSize = 120
 
     private var visible: [PhoneMedia] {
         model.items.filter { filter == 0 || (filter == 1 ? !$0.isVideo : $0.isVideo) }
@@ -307,6 +373,8 @@ struct IOSFilesView: View {
                 limitsNote.padding(.top, 14)
             }
             .padding(.horizontal, 28)
+        case .loading(let name) where !model.items.isEmpty:
+            gallery(name)
         case .opening(let name), .loading(let name):
             centered {
                 ProgressView().controlSize(.large)
@@ -363,9 +431,24 @@ struct IOSFilesView: View {
             }
             .padding(.horizontal, 28).padding(.bottom, 14)
 
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "icloud").foregroundStyle(Theme.ios[1])
+                Text("Lewat kabel hanya foto yang benar-benar tersimpan di iPhone yang terbaca. Kalau **Foto iCloud → Optimalkan Penyimpanan iPhone** aktif, sebagian besar foto ada di iCloud dan tidak muncul di sini — buka icloud.com/photos untuk foto-foto itu.")
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 28).padding(.bottom, 10)
+            if let p = model.catalogProgress {
+                HStack(spacing: 10) {
+                    ProgressView(value: p).tint(Theme.ios[1]).frame(width: 160)
+                    Text("Membaca galeri… \(Int(p * 100))% · \(model.items.count) item").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 28).padding(.bottom, 10)
+            }
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 132, maximum: 180), spacing: 10)], spacing: 10) {
-                    ForEach(visible) { item in
+                    ForEach(visible.prefix(limit)) { item in
                         MediaTile(item: item, image: model.thumbs[item.id], selected: selection.contains(item.id))
                             .onAppear { model.thumbnail(for: item) }
                             .onTapGesture(count: 2) { model.open(item) }
@@ -374,12 +457,24 @@ struct IOSFilesView: View {
                                     if selection.contains(item.id) { selection.remove(item.id) } else { selection.insert(item.id) }
                                 }
                             }
-                            .transition(.scale(scale: 0.9).combined(with: .opacity))
                     }
                 }
-                .padding(.horizontal, 28).padding(.bottom, 16)
-                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: visible.map(\.id))
+                .padding(.horizontal, 28).padding(.bottom, 12)
+
+                if visible.count > limit {
+                    let left = visible.count - limit
+                    Button { limit += IOSFilesView.pageSize } label: {
+                        Label("Muat lebih banyak · \(left) lagi", systemImage: "arrow.down.circle")
+                    }
+                    .buttonStyle(SoftButtonStyle(tint: Theme.ios[1])).fixedSize()
+                    .padding(.bottom, 20)
+                    // scrolling to the bottom loads the next page by itself
+                    .onAppear { limit += IOSFilesView.pageSize }
+                } else if visible.count > IOSFilesView.pageSize {
+                    Text("Semua \(visible.count) item sudah tampil").font(.caption).foregroundStyle(.tertiary).padding(.bottom, 20)
+                }
             }
+            .onChange(of: filter) { _, _ in limit = IOSFilesView.pageSize }
 
             HStack(spacing: 8) {
                 if let t = model.transfer {
