@@ -751,5 +751,19 @@
   "APLIKASI TERBESAR": "LARGEST APPS",
   "Aplikasi %@ · Data %@": "App %@ · Data %@",
   "Untuk mengosongkan “Data” sebuah aplikasi di iPhone: hapus lalu pasang ulang dari App Store. Foto & video besar bisa dihapus dari halaman File iPhone.": "To empty an app's “Data” on iPhone: delete it and reinstall from the App Store. Large photos & videos can be deleted from the iPhone Files page.",
-  "Aplikasi beserta datanya akan dihapus dari iPhone.": "The app and its data will be removed from the iPhone."
+  "Aplikasi beserta datanya akan dihapus dari iPhone.": "The app and its data will be removed from the iPhone.",
+  "Bahan · versi iOS": "Components · iOS versions",
+  "· unduh sesuai kebutuhan, langsung dari Apple": "· download what you need, straight from Apple",
+  "Pilih versi iOS untuk simulator": "Choose iOS versions for the simulator",
+  "Xcode sudah siap. Unduh minimal satu versi iOS — cukup yang kamu butuhkan, tiap versi sekitar 8 GB.": "Xcode is ready. Download at least one iOS version — only the ones you need; each is about 8 GB.",
+  "Mengunduh iOS %@…": "Downloading iOS %@…",
+  "Mengunduh iOS…": "Downloading iOS…",
+  "Terpasang · %@": "Installed · %@",
+  "dipakai %@": "used %@",
+  "Unduhan %@": "Download %@",
+  "Hapus versi ini untuk mengosongkan ruang": "Delete this version to free space",
+  "Hapus iOS %@?": "Delete iOS %@?",
+  "Simulator yang memakai versi ini ikut tidak bisa dijalankan sampai versinya diunduh lagi. Ruang %@ akan kosong.": "Simulators using this version won't run until it's downloaded again. %@ will be freed.",
+  "Daftar versi iOS dari Apple kosong.": "Apple's list of iOS versions is empty.",
+  "Tidak bisa memuat daftar versi iOS dari Apple. Periksa koneksi internet.": "Couldn't load Apple's list of iOS versions. Check your internet connection."
 }

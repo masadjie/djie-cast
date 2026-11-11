@@ -47,6 +47,16 @@ final class SimulatorModel: ObservableObject {
     /// True after the first successful read, so "download iOS" is not shown while still loading.
     @Published var loaded = false
 
+    /// iOS runtimes on this Mac (from `simctl runtime list`), with their size and last use.
+    struct InstalledRuntime: Identifiable, Hashable { let id: String; let version: String; let build: String; let bytes: Int64; let lastUsed: Date?; let deletable: Bool }
+    /// iOS versions Apple offers for download: newest release build per version (no betas).
+    struct CatalogRuntime: Identifiable, Hashable { var id: String { version }; let version: String; let build: String; let bytes: Int64 }
+    @Published var installed: [InstalledRuntime] = []
+    @Published var catalog: [CatalogRuntime] = []
+    @Published var catalogError: String?
+    @Published var downloadingVersion: String?
+    @Published var deleting: Set<String> = []
+
     var bootedCount: Int { devices.filter(\.booted).count }
     private var downloadProcess: Process?
 
@@ -191,12 +201,75 @@ final class SimulatorModel: ObservableObject {
 
     // MARK: Runtime download (xcodebuild -downloadPlatform iOS)
 
-    func downloadRuntime() {
+    func loadRuntimes() async {
+        if Demo.enabled {
+            installed = [InstalledRuntime(id: "x", version: "27.0", build: "24A5390f", bytes: 8_047_485_793, lastUsed: Date(), deletable: true)]
+            catalog = [("27.3", 8_520_000_000), ("27.2", 8_320_000_000), ("27.0", 8_050_000_000), ("26.4", 7_900_000_000), ("26.2", 7_700_000_000), ("18.6", 7_100_000_000)]
+                .map { CatalogRuntime(version: $0.0, build: "", bytes: Int64($0.1)) }
+            return
+        }
+        // installed
+        let out = await run("/usr/bin/xcrun", ["simctl", "runtime", "list", "-j"], stdoutOnly: true)
+        if let obj = try? JSONSerialization.jsonObject(with: Data((out.firstIndex(of: "{").map { String(out[$0...]) } ?? out).utf8)) as? [String: [String: Any]] {
+            let iso = ISO8601DateFormatter()
+            installed = obj.values.compactMap { r -> InstalledRuntime? in
+                guard (r["platformIdentifier"] as? String)?.contains("iphonesimulator") == true,
+                      let id = r["identifier"] as? String, let v = r["version"] as? String else { return nil }
+                return InstalledRuntime(id: id, version: v, build: (r["build"] as? String) ?? "", bytes: (r["sizeBytes"] as? NSNumber)?.int64Value ?? 0,
+                                        lastUsed: (r["lastUsedAt"] as? String).flatMap(iso.date(from:)), deletable: (r["deletable"] as? Bool) ?? true)
+            }
+            .sorted { $0.version.compare($1.version, options: .numeric) == .orderedDescending }
+        }
+        // what Apple offers
+        guard catalog.isEmpty else { return }
+        do {
+            let url = URL(string: "https://devimages-cdn.apple.com/downloads/xcode/simulators/index2.dvtdownloadableindex")!
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let root = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+            var best: [String: CatalogRuntime] = [:]
+            for d in root?["downloadables"] as? [[String: Any]] ?? [] {
+                guard (d["platform"] as? String) == "com.apple.platform.iphoneos",
+                      let sv = d["simulatorVersion"] as? [String: Any], let v = sv["version"] as? String,
+                      let build = sv["buildUpdate"] as? String else { continue }
+                // betas end in a lowercase letter (e.g. 24C5037i); keep release builds only
+                if build.last?.isLowercase == true { continue }
+                guard let major = Int(v.split(separator: ".").first ?? ""), major >= 16 else { continue }
+                let item = CatalogRuntime(version: v, build: build, bytes: (d["fileSize"] as? NSNumber)?.int64Value ?? 0)
+                if let cur = best[v], cur.build.compare(build, options: .numeric) != .orderedAscending { continue }
+                best[v] = item
+            }
+            catalog = best.values.sorted { $0.version.compare($1.version, options: .numeric) == .orderedDescending }
+            catalogError = catalog.isEmpty ? String(localized: "Daftar versi iOS dari Apple kosong.") : nil
+        } catch {
+            catalogError = String(localized: "Tidak bisa memuat daftar versi iOS dari Apple. Periksa koneksi internet.")
+        }
+    }
+
+    func isInstalled(_ version: String) -> InstalledRuntime? {
+        installed.first { $0.version == version || $0.version.hasPrefix(version + ".") }
+    }
+
+    func deleteRuntime(_ r: InstalledRuntime) async {
+        deleting.insert(r.id)
+        let out = await run("/usr/bin/xcrun", ["simctl", "runtime", "delete", r.id])
+        deleting.remove(r.id)
+        if out.localizedCaseInsensitiveContains("error") { message = out.trimmingCharacters(in: .whitespacesAndNewlines) }
+        await loadRuntimes()
+        await refresh()
+    }
+
+    /// Downloads exactly the iOS version the user picked (arm64-only on Apple Silicon: smaller).
+    func downloadRuntime(version: String? = nil) {
         guard !downloading else { return }
-        downloading = true; downloadProgress = nil; downloadLine = String(localized: "Menyiapkan unduhan…")
+        downloading = true; downloadingVersion = version; downloadProgress = nil; downloadLine = String(localized: "Menyiapkan unduhan…")
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
-        p.arguments = ["xcodebuild", "-downloadPlatform", "iOS"]
+        var args = ["xcodebuild", "-downloadPlatform", "iOS"]
+        if let version { args += ["-buildVersion", version] }
+        #if arch(arm64)
+        args += ["-architectureVariant", "arm64"]
+        #endif
+        p.arguments = args
         let pipe = Pipe(); p.standardOutput = pipe; p.standardError = pipe
         pipe.fileHandleForReading.readabilityHandler = { [weak self] h in
             let data = h.availableData
@@ -215,7 +288,9 @@ final class SimulatorModel: ObservableObject {
             Task { @MainActor in
                 guard let self else { return }
                 self.downloading = false
+                self.downloadingVersion = nil
                 self.downloadProcess = nil
+                await self.loadRuntimes()
                 self.downloadLine = proc.terminationStatus == 0 ? String(localized: "Runtime iOS terpasang.") : String(localized: "Unduhan berhenti (kode \(proc.terminationStatus)).")
                 await self.refresh()
             }
@@ -266,6 +341,8 @@ struct IOSSimulatorView: View {
     @State private var runtimeID = ""
     @State private var typeID = ""
     @State private var confirmDelete: SimDevice?
+    @State private var confirmRuntime: SimulatorModel.InstalledRuntime?
+    @State private var showAllVersions = false
     @State private var urlFor: SimDevice?
     @State private var link = "https://"
 
@@ -278,6 +355,7 @@ struct IOSSimulatorView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                if Demo.env["DJIE_FOCUS"] == "runtimes" { runtimesPanel }   // snapshot aid
                 PageHeader(icon: "iphone", colors: Theme.ios, title: "Simulator iPhone",
                            subtitle: "iPhone & iPad virtual dari Xcode, berjalan native dan cepat di Mac") {
                     if model.bootedCount > 0 {
@@ -299,9 +377,10 @@ struct IOSSimulatorView: View {
                     }
                     if !model.loaded {
                         HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Membaca simulator…").foregroundStyle(.secondary) }
-                    } else if model.runtimes.isEmpty { runtimeMissing } else {
+                    } else if model.runtimes.isEmpty { runtimesPanel } else {
                         myDevices
                         createPanel
+                        runtimesPanel
                     }
                     speedNote
                 }
@@ -318,6 +397,10 @@ struct IOSSimulatorView: View {
             Button("Hapus", role: .destructive) { if let d = confirmDelete { Task { await model.delete(d) } }; confirmDelete = nil }
             Button("Batal", role: .cancel) { confirmDelete = nil }
         } message: { Text("Aplikasi dan data di dalam simulator ini ikut terhapus.") }
+        .alert("Hapus iOS \(confirmRuntime?.version ?? "")?", isPresented: Binding(get: { confirmRuntime != nil }, set: { if !$0 { confirmRuntime = nil } })) {
+            Button("Hapus", role: .destructive) { if let r = confirmRuntime { Task { await model.deleteRuntime(r) } }; confirmRuntime = nil }
+            Button("Batal", role: .cancel) { confirmRuntime = nil }
+        } message: { Text("Simulator yang memakai versi ini ikut tidak bisa dijalankan sampai versinya diunduh lagi. Ruang \(Fmt.bytes(confirmRuntime?.bytes ?? 0)) akan kosong.") }
         .alert("Buka link di simulator", isPresented: Binding(get: { urlFor != nil }, set: { if !$0 { urlFor = nil } })) {
             TextField("https://…", text: $link)
             Button("Buka") { if let d = urlFor { model.openURL(d, link) }; urlFor = nil }
@@ -379,28 +462,106 @@ struct IOSSimulatorView: View {
         }
     }
 
-    private var runtimeMissing: some View {
-        Panel(padding: 22) {
-            HStack(alignment: .top, spacing: 16) {
-                IconBadge(icon: "square.and.arrow.down.fill", colors: Theme.ios, size: 48)
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Unduh runtime iOS").font(.title3.weight(.bold))
-                    Text("Xcode sudah siap, tinggal sistem iOS untuk simulatornya (sekitar 8 GB, langsung dari Apple).")
-                        .foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                    if model.downloading {
-                        if let p = model.downloadProgress { ProgressView(value: p).tint(Theme.ios[1]) } else { ProgressView().progressViewStyle(.linear) }
-                        HStack {
-                            Text(model.downloadLine).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
-                            Spacer()
-                            Button("Batal") { model.cancelDownload() }.buttonStyle(.borderless)
+    /// Like the Android emulator's components: the user picks which iOS versions to download.
+    private var runtimesPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionTitle(title: "Bahan · versi iOS", detail: "· unduh sesuai kebutuhan, langsung dari Apple")
+            Panel(padding: 0) {
+                VStack(spacing: 0) {
+                    if model.runtimes.isEmpty {
+                        HStack(alignment: .top, spacing: 14) {
+                            IconBadge(icon: "square.and.arrow.down.fill", colors: Theme.ios, size: 40)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Pilih versi iOS untuk simulator").font(.headline)
+                                Text("Xcode sudah siap. Unduh minimal satu versi iOS — cukup yang kamu butuhkan, tiap versi sekitar 8 GB.")
+                                    .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                            }
                         }
-                    } else {
-                        if !model.downloadLine.isEmpty { Text(L(model.downloadLine)).font(.caption).foregroundStyle(.secondary) }
-                        Button { model.downloadRuntime() } label: { Label("Unduh iOS", systemImage: "arrow.down.circle.fill") }
-                            .buttonStyle(GradientButtonStyle(colors: Theme.ios)).fixedSize()
+                        .padding(16)
+                        Divider()
+                    }
+                    if model.downloading {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text(model.downloadingVersion.map { String(localized: "Mengunduh iOS \($0)…") } ?? String(localized: "Mengunduh iOS…")).font(.callout.weight(.semibold))
+                                Spacer()
+                                Button("Batal") { model.cancelDownload() }.buttonStyle(.borderless)
+                            }
+                            if let p = model.downloadProgress { ProgressView(value: p).tint(Theme.ios[1]) } else { ProgressView().progressViewStyle(.linear) }
+                            Text(model.downloadLine).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
+                        }
+                        .padding(16)
+                        Divider()
+                    } else if !model.downloadLine.isEmpty {
+                        Text(L(model.downloadLine)).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 16).padding(.vertical, 10)
+                        Divider()
+                    }
+                    // installed versions that Apple no longer lists still show, so they can be deleted
+                    let extra = model.installed.filter { r in !model.catalog.contains { model.isInstalled($0.version)?.id == r.id } }
+                    ForEach(extra) { r in installedRow(r) }
+                    if let e = model.catalogError, model.catalog.isEmpty {
+                        Label(L(e), systemImage: "wifi.exclamationmark").font(.callout).foregroundStyle(.orange).padding(16)
+                    }
+                    ForEach(showAllVersions ? model.catalog : Array(model.catalog.prefix(6))) { c in catalogRow(c) }
+                    if model.catalog.count > 6 {
+                        Button(showAllVersions ? "Tampilkan lebih sedikit" : "Tampilkan semua versi (\(model.catalog.count))") {
+                            withAnimation { showAllVersions.toggle() }
+                        }
+                        .buttonStyle(.borderless).padding(12)
                     }
                 }
             }
+        }
+        .task { await model.loadRuntimes() }
+    }
+
+    private func catalogRow(_ c: SimulatorModel.CatalogRuntime) -> some View {
+        let inst = model.isInstalled(c.version)
+        return HStack(spacing: 12) {
+            IconBadge(icon: "iphone", colors: Theme.ios, size: 32)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: "iOS \(c.version)").font(.callout.weight(.semibold))
+                Text(inst.map { r in String(localized: "Terpasang · \(Fmt.bytes(r.bytes))") + (r.lastUsed.map { " · " + String(localized: "dipakai \($0.formatted(.relative(presentation: .named)))") } ?? "") }
+                     ?? (c.bytes > 0 ? String(localized: "Unduhan \(Fmt.bytes(c.bytes))") : ""))
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if let r = inst {
+                Label("Terpasang", systemImage: "checkmark.circle.fill").font(.caption.weight(.semibold)).foregroundStyle(Theme.live)
+                deleteButton(r)
+            } else if model.downloadingVersion == c.version {
+                ProgressView().controlSize(.small)
+            } else {
+                Button { model.downloadRuntime(version: c.version) } label: { Label("Unduh", systemImage: "arrow.down.circle") }
+                    .buttonStyle(SoftButtonStyle(tint: Theme.ios[1])).fixedSize()
+                    .disabled(model.downloading)
+            }
+        }
+        .padding(.horizontal, 16).padding(.vertical, 10)
+        .overlay(alignment: .bottom) { Divider().padding(.leading, 60) }
+    }
+
+    private func installedRow(_ r: SimulatorModel.InstalledRuntime) -> some View {
+        HStack(spacing: 12) {
+            IconBadge(icon: "iphone", colors: Theme.ios, size: 32)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: "iOS \(r.version)").font(.callout.weight(.semibold))
+                Text(String(localized: "Terpasang · \(Fmt.bytes(r.bytes))")).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            Label("Terpasang", systemImage: "checkmark.circle.fill").font(.caption.weight(.semibold)).foregroundStyle(Theme.live)
+            deleteButton(r)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 10)
+        .overlay(alignment: .bottom) { Divider().padding(.leading, 60) }
+    }
+
+    @ViewBuilder private func deleteButton(_ r: SimulatorModel.InstalledRuntime) -> some View {
+        if r.deletable {
+            Button { confirmRuntime = r } label: {
+                if model.deleting.contains(r.id) { ProgressView().controlSize(.small) } else { Image(systemName: "trash") }
+            }
+            .buttonStyle(.borderless).foregroundStyle(.red).help("Hapus versi ini untuk mengosongkan ruang")
         }
     }
 
