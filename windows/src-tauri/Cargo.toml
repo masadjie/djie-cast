@@ -1,0 +1,29 @@
+[package]
+name = "djie-cast"
+version = "1.0.0"
+description = "Djie Cast — Android mirroring untuk Windows"
+authors = ["Adjie Kurniawan"]
+edition = "2021"
+
+[lib]
+name = "djie_cast_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Djie Cast</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="side">
+    <div class="brand">
+      <img src="icon.png" alt="">
+      <div><b>Djie Cast</b><small data-t>Android Mirroring</small></div>
+    </div>
+    <a data-page="devices"><span data-icon="phone"></span><span data-t>Perangkat</span><span class="badge" id="navCount" hidden></span></a>
+    <a data-page="info"><span data-icon="info"></span><span data-t>Info HP</span></a>
+    <a data-page="apps"><span data-icon="grid"></span><span data-t>Aplikasi</span></a>
+    <a data-page="files"><span data-icon="folder"></span><span data-t>File</span></a>
+    <a data-page="cleaner"><span data-icon="sparkle"></span><span data-t>Pembersih</span></a>
+    <div class="grow"></div>
+    <a data-page="log"><span data-icon="terminal"></span><span data-t>Log</span></a>
+    <a data-page="about"><span data-icon="heart"></span><span data-t>Tentang</span></a>
+    <div class="side-foot">
+      <span id="verLine"></span><br>
+      <select id="lang">
+        <option value="id">Bahasa Indonesia</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Perangkat -->
+    <section class="page" id="page-devices">
+      <header class="ph">
+        <div class="ic" data-icon="phone"></div>
+        <div><h1 data-t>Android</h1><p data-t>Mirror & kontrol HP Android lewat USB atau Wi-Fi</p></div>
+        <div class="right"><span class="pill" id="readyPill"></span></div>
+      </header>
+      <div class="card">
+        <h2><span data-t>Perangkat</span><span class="sub" id="devHint"></span></h2>
+        <div class="devices" id="devList"></div>
+        <div id="devNote"></div>
+      </div>
+      <div class="card" id="controlCard" hidden>
+        <h2><span data-t>Kontrol cepat</span><span class="sub" id="controlFor"></span></h2>
+        <div class="keys" id="keys"></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h2 data-t>Kualitas</h2>
+          <div class="seg" id="presets"></div>
+          <p class="muted small" id="presetHint"></p>
+          <div class="row" id="custom">
+            <label class="small"><span data-t>Resolusi</span><br>
+              <select id="maxSize">
+                <option value="0">Asli</option><option value="2400">2400p</option><option value="1920">1920p</option>
+                <option value="1600">1600p</option><option value="1280">1280p</option><option value="1024">1024p</option><option value="800">800p</option>
+              </select></label>
+            <label class="small">Bitrate<br>
+              <select id="bitrate">
+                <option value="2">2 Mbps</option><option value="4">4 Mbps</option><option value="8">8 Mbps</option>
+                <option value="12">12 Mbps</option><option value="16">16 Mbps</option><option value="24">24 Mbps</option><option value="32">32 Mbps</option>
+              </select></label>
+            <label class="small">FPS<br>
+              <select id="maxFps">
+                <option value="30">30</option><option value="60">60</option><option value="90">90</option><option value="120">120</option>
+              </select></label>
+          </div>
+        </div>
+        <div class="card">
+          <h2 data-t>Opsi mirror</h2>
+          <div class="chks" id="opts"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h2><span data-icon="wifi"></span><span data-t>Sambung lewat Wi-Fi</span><span class="sub"><span class="spin" id="nearSpin" style="width:12px;height:12px"></span> <span data-t>Mencari HP di jaringan ini…</span></span></h2>
+        <div class="nearby" id="nearby"></div>
+        <p class="muted small" id="nearbyEmpty" data-t>Di HP: Opsi developer → Wireless debugging → nyalakan. HP akan muncul di sini bila satu Wi-Fi dengan PC ini.</p>
+        <hr>
+        <div class="row">
+          <input id="ipInput" placeholder="192.168.1.20:5555" style="width:220px">
+          <button class="btn" id="ipConnect" data-t>Sambungkan</button>
+          <span class="muted small" data-t>atau colok USB sekali, lalu ••• → Aktifkan Wi-Fi.</span>
+        </div>
+        <div id="wifiMsg"></div>
+      </div>
+    </section>
+
+    <!-- Info -->
+    <section class="page" id="page-info">
+      <header class="ph">
+        <div class="ic" data-icon="info"></div>
+        <div><h1 data-t>Info HP</h1><p data-t>Spesifikasi, baterai, penyimpanan, dan layar HP</p></div>
+        <div class="right"><button class="btn" id="infoReload"><span data-icon="refresh"></span><span data-t>Muat ulang</span></button></div>
+      </header>
+      <div id="infoBody"></div>
+    </section>
+
+    <!-- Aplikasi -->
+    <section class="page" id="page-apps">
+      <header class="ph">
+        <div class="ic" data-icon="grid"></div>
+        <div><h1 data-t>Aplikasi</h1><p data-t>Buka aplikasi HP di jendela sendiri, pasang APK, atau hapus aplikasi</p></div>
+        <div class="right">
+          <button class="btn" id="installApk"><span data-icon="download"></span><span data-t>Pasang APK…</span></button>
+        </div>
+      </header>
+      <div class="card">
+        <div class="row" style="margin-bottom:12px">
+          <input type="search" id="appSearch" style="width:240px">
+          <div class="seg" id="appFilter"></div>
+          <div class="spacer"></div>
+          <label class="small muted"><span data-t>Ukuran jendela</span>
+            <select id="appSize"></select></label>
+          <button class="btn icon" id="appReload" data-icon="refresh"></button>
+        </div>
+        <div id="appsBody"></div>
+      </div>
+    </section>
+
+    <!-- File -->
+    <section class="page" id="page-files">
+      <header class="ph">
+        <div class="ic" data-icon="folder"></div>
+        <div><h1 data-t>File</h1><p data-t>Jelajahi penyimpanan HP, salin file ke PC dan sebaliknya</p></div>
+      </header>
+      <div class="card">
+        <div class="quick" id="quick"></div>
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn icon" id="fUp" data-icon="up"></button>
+          <div class="crumbs" id="crumbs"></div>
+          <div class="spacer"></div>
+          <button class="btn" id="fUpload"><span data-icon="upload"></span><span data-t>Kirim ke HP</span></button>
+          <button class="btn" id="fDownload" disabled><span data-icon="download"></span><span data-t>Simpan ke PC</span></button>
+          <button class="btn icon" id="fNew" data-icon="folderplus"></button>
+          <button class="btn icon" id="fRename" data-icon="pencil" disabled></button>
+          <button class="btn icon danger" id="fDelete" data-icon="trash" disabled></button>
+          <button class="btn icon" id="fReload" data-icon="refresh"></button>
+        </div>
+        <div class="scroll" id="filesBody"></div>
+        <p class="muted small" id="fStatus"></p>
+      </div>
+    </section>
+
+    <!-- Pembersih -->
+    <section class="page" id="page-cleaner">
+      <header class="ph">
+        <div class="ic" data-icon="sparkle"></div>
+        <div><h1 data-t>Pembersih</h1><p data-t>Bersihkan cache, APK sisa, file sementara, dan folder kosong di HP</p></div>
+      </header>
+      <div id="cleanBody"></div>
+    </section>
+
+    <!-- Log -->
+    <section class="page" id="page-log">
+      <header class="ph">
+        <div class="ic" data-icon="terminal"></div>
+        <div><h1 data-t>Log</h1><p data-t>Keluaran adb & scrcpy, berguna saat ada masalah</p></div>
+        <div class="right"><button class="btn" id="logCopy" data-t>Salin</button><button class="btn" id="logClear" data-t>Bersihkan</button></div>
+      </header>
+      <div class="log selectable" id="log"></div>
+    </section>
+
+    <!-- Tentang -->
+    <section class="page" id="page-about">
+      <header class="ph">
+        <div class="ic" data-icon="heart"></div>
+        <div><h1 data-t>Tentang</h1><p data-t>Djie Cast untuk Windows</p></div>
+      </header>
+      <div class="grid2">
+        <div class="card">
+          <div class="hero"><img src="icon.png" width="64" height="64" style="border-radius:14px" alt="">
+            <div><h2>Djie Cast</h2><span class="muted" id="aboutVer"></span></div></div>
+          <hr>
+          <p data-t>Mirror, kontrol, dan kelola HP Android dari PC Windows. Gratis, tanpa iklan, tanpa akun.</p>
+          <p class="muted small" id="aboutTools"></p>
+          <p class="muted small" data-t>Dibangun di atas scrcpy (Genymobile, Apache 2.0) dan Android platform-tools (adb).</p>
+          <div class="row"><button class="btn" id="openSite"><span data-icon="globe"></span><span data-t>Situs Djie Cast</span></button></div>
+        </div>
+        <div class="card">
+          <h2 data-t>Dukung Djie Cast</h2>
+          <p class="muted" data-t>Kalau Djie Cast membantu, traktir kopi lewat QRIS. Terima kasih!</p>
+          <img src="qris.png" alt="QRIS" style="width:220px;border-radius:12px;background:#fff;padding:6px">
+          <p class="small muted" data-t>Konfirmasi donasi: 0812-6949-4591</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast"></div>
+  <script src="i18n.js"></script>
+  <script src="mock.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
