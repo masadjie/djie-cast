@@ -15,7 +15,8 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 echo "→ Unduh $NAME.zip"
 curl -fsSL -o "$TMP/s.zip" "https://github.com/Genymobile/scrcpy/releases/download/v${VERSION}/${NAME}.zip"
-echo "$SHA  $TMP/s.zip" | shasum -a 256 -c
+if command -v shasum >/dev/null; then SUM="shasum -a 256"; else SUM="sha256sum"; fi
+echo "$SHA  $TMP/s.zip" | $SUM -c
 unzip -q "$TMP/s.zip" -d "$TMP"
 rm -rf "$DEST" && mkdir -p "$DEST"
 cp "$TMP/$NAME"/*.exe "$TMP/$NAME"/*.dll "$TMP/$NAME/scrcpy-server" "$TMP/$NAME/scrcpy.png" "$DEST/"
